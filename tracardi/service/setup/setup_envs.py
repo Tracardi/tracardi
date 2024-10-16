@@ -441,6 +441,14 @@ system_settings = [
             "expose": True
         }
     ),
+
+    SystemSettings(
+        **{
+            "label": "IDENTIFICATION_POINT_TYPE",
+            "value": tracardi.identification_point_type,
+            "desc": "Default: \"restricted\". Defines how strict the Identification point should be. Default \"restricted\" requires that identification tip-hashes are generated only when there is defined event and property.",
+        }
+    ),
     SystemSettings(
         **{
             "label": "IDENTIFICATION_EVENT_TYPE",

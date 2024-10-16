@@ -17,14 +17,14 @@ def logger_guard(logs):
 
 async def save_logs():
     async with log_controller(log_handler) as logs:
-
-        if License.has_license():
-            # Runs only if there are logs (see logger_guard) and it is deferred.
-            await log_saver_worker(logs)
-        else:
-            if await installation_status.has_logs_index(get_context()):
-                return await log_db.save(logs)
+        if logs:
+            if License.has_license():
+                # Runs only if there are logs (see logger_guard) and it is deferred.
+                await log_saver_worker(logs)
             else:
-                logger.warning(
-                    "Logs index is not available. Probably system is not installed or being installed or the index went missing.")
+                if await installation_status.has_logs_index(get_context()):
+                    return await log_db.save(logs)
+                else:
+                    logger.warning(
+                        "Logs index is not available. Probably system is not installed or being installed or the index went missing.")
 

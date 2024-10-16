@@ -242,6 +242,7 @@ class TracardiConfig(metaclass=Singleton):
         self.skip_errors_on_profile_mapping = get_env_as_bool('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no')
 
         # Only this event can set hashed ID fo email, phone, etc.
+        self.identification_point_type = env.get('IDENTIFICATION_POINT_TYPE', 'restricted')
         self.identification_event_type = env.get('IDENTIFICATION_EVENT_TYPE', None)
         self.identification_event_property = env.get('IDENTIFICATION_EVENT_PROPERTY',
                                                      'data.identifier.pk,data.identifier.id,data.contact.email.business,data.contact.email.main,data.contact.email.private,data.contact.phone.business,data.contact.phone.main,data.contact.phone.mobile,data.contact.phone.whatsapp')
