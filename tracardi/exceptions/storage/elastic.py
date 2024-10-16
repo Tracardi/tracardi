@@ -17,6 +17,10 @@ class ElasticLogHandler(Handler):
 
     def emit(self, record: LogRecord):
 
+        # Skip info and debug.
+        if record.levelno <= 25:
+            return
+
         log = {  # Maps to tracardi-log index
             "date": now_in_utc(),
             "message": record.msg,
