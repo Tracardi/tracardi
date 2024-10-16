@@ -12,6 +12,9 @@ def get_env_as_int(env_key, default_value):
 
 
 def _str_to_bool(value):
+    if isinstance(value, bool):
+        return value
+
     true_values = ['yes', 'on', 'true']
     false_values = ['no', 'off', 'false']
     value_lower = value.lower()

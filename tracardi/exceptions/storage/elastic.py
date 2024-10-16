@@ -1,3 +1,7 @@
+from contextlib import asynccontextmanager
+
+from tracardi.cluster_config import is_save_logs_on
+from tracardi.config import tracardi
 from tracardi.service.utils.date import now_in_utc
 from logging import Handler, LogRecord
 from time import time
@@ -42,10 +46,21 @@ class ElasticLogHandler(Handler):
 
         self.collection.append(log)
 
-    def has_logs(self):
-        return isinstance(self.collection, list)
+    def has_logs(self, min_log_size=500):
+        if not isinstance(self.collection, list):
+            return False
+        return len(self.collection) >= min_log_size or (time() - self.last_save) > 60
 
     def reset(self):
         self.collection = []
         self.last_save = time()
 
+
+@asynccontextmanager
+async def log_controller(log_handler: ElasticLogHandler) -> list:
+    if tracardi.save_logs and log_handler.has_logs():
+        try:
+            if await is_save_logs_on():
+                yield log_handler.collection
+        finally:
+            log_handler.reset()
