@@ -344,7 +344,8 @@ class FlatProfile(FlatEntity):
                     'data.contact.email.business') and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
                 new_ids.add(hash_id(self['data.contact.email.business'], PREFIX_EMAIL_BUSINESS))
                 update_fields.add('data.contact.email.business')
-
+            print('data.contact.email.main' in allowed_piis, self.has_not_empty(
+                    'data.contact.email.main'), not self.has_hashed_email_id(PREFIX_EMAIL_MAIN))
             if 'data.contact.email.main' in allowed_piis and self.has_not_empty(
                     'data.contact.email.main') and not self.has_hashed_email_id(PREFIX_EMAIL_MAIN):
                 new_ids.add(hash_id(self['data.contact.email.main'], PREFIX_EMAIL_MAIN))

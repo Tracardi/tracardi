@@ -182,6 +182,10 @@ class FlatEntity(Dotty):
             self._changes.add(key, value, old_value, ignore=('metadata.fields', 'operation'))
         super().__setitem__(key, value)
 
+    def override(self, key, value):
+        # This one does not record changes or checks for PCP
+        super().__setitem__(key, value)
+
     def get_change_logger(self) -> FieldUpdateLogger:
         return self._changes if self._changes is not None else FieldUpdateLogger()
 
