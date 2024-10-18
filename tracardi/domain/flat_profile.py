@@ -23,7 +23,7 @@ class FlatProfile(FlatEntity):
         self.set_updated(False)
         ids = self.get('ids', None)
         if ids is None:
-            self['ids'] = []
+            self.override('ids', [])
         elif not isinstance(ids, list):
             raise ValueError("IDS value must be a list.")
 
@@ -43,7 +43,7 @@ class FlatProfile(FlatEntity):
     def ids(self) -> List[str]:
         ids = self.get('ids', None)
         if ids is None:
-            self['ids'] = []
+            self.override('ids', [])
 
         return self['ids']
 
@@ -57,13 +57,13 @@ class FlatProfile(FlatEntity):
         if not isinstance(value, list):
             raise ValueError("IDS value must be a list.")
 
-        self['ids'] = value
+        self.set('ids', value)
 
     def add_to_ids(self, id: str):
         ids = self.get('ids', [])
         ids.append(id)
         # This should register changes in change logger
-        self['ids'] = list(set(ids))
+        self.set('ids', list(set(ids)))
 
     def get_all_ids(self) -> Set[str]:
         return {self.id, *self.ids} if isinstance(self.ids, list) else {self.id}
@@ -125,7 +125,7 @@ class FlatProfile(FlatEntity):
                 value = value.strip().lower()
 
                 if 'ids' not in self or self['ids'] is None:
-                    self['ids'] = []
+                    self.set('ids', [])
 
                 # Add new
                 # Can not simply append. Must reassign
@@ -138,7 +138,7 @@ class FlatProfile(FlatEntity):
                 ids = self['ids']
                 ids.append(_hash_id)
                 # Assign to replace value
-                self['ids'] = list(set(ids))
+                self.set('ids', list(set(ids)))
 
                 return flat_field
 
@@ -172,10 +172,10 @@ class FlatProfile(FlatEntity):
                 _existing_interest_value = float(_existing_interest_value)
 
             if isinstance(_existing_interest_value, (int, float)):
-                self[interest_key] += value
+                self.set(interest_key, self[interest_key] + value)
 
         else:
-            self[interest_key] = value
+            self.set(interest_key, value)
 
     def decrease_interest(self, interest, value=1):
 
@@ -188,42 +188,46 @@ class FlatProfile(FlatEntity):
                 _existing_interest_value = float(_existing_interest_value)
 
             if isinstance(_existing_interest_value, (int, float)):
-                self[interest_key] -= value
+                self.set(interest_key, self[interest_key] - value)
 
         else:
-            self[interest_key] = -value
+            self.set(interest_key, value)
 
     def reset_interest(self, interest, value=0):
         interest_key = f'interests.{interest}'
-        self[interest_key] = value
+        self.set(interest_key, value)
 
     def mark_for_update(self):
-        self['operation.update'] = True
-        self['metadata.time.update'] = now_in_utc()
+        self.set('operation.update', True)
+        self.set('metadata.time.update', now_in_utc())
 
     def is_new(self) -> bool:
         return bool(self.get('operation.new', False))
 
     def set_new(self, flag=True):
-        self['operation.new'] = flag
+        self.set('operation.new', flag)
 
     def set_updated(self, flag=True):
-        self['operation.update'] = flag
+        self.set('operation.update', flag)
 
     def mark_as_merged(self):
-        self['metadata.system.aux.auto_merge'] = []
-        self['metadata.aux.merge_time'] = now_in_utc()
+        self.set('metadata.system.aux.auto_merge', [])
+        self.set('metadata.aux.merge_time', now_in_utc())
 
     def update_changed_fields(self, changed_fields):
-        self['metadata.fields'] = changed_fields
+        self.set('metadata.fields', changed_fields)
 
     # ToDO refactor
     def set_auto_merge_fields(self, auto_merge_ids: set):
         if 'metadata.system.aux.auto_merge' not in self or not isinstance(self['metadata.system.aux.auto_merge'], list):
-            self['metadata.system.aux.auto_merge'] = list(auto_merge_ids)
+            self.set(
+                'metadata.system.aux.auto_merge',
+                list(auto_merge_ids))
         else:
-            self['metadata.system.aux.auto_merge'] = list(
-                set(self['metadata.system.aux.auto_merge']).union(auto_merge_ids))
+            self.set(
+                'metadata.system.aux.auto_merge',
+                list(set(self['metadata.system.aux.auto_merge']).union(auto_merge_ids))
+            )
 
     def has(self, value, equal=None) -> bool:
         if equal is None:
@@ -235,16 +239,16 @@ class FlatProfile(FlatEntity):
 
     def set_if_none(self, field, value):
         if field not in self:
-            self[field] = value
+            self.set(field, value)
 
     def set_if_not_instance(self, field: str, value, instance: type):
         if field not in self or not isinstance(self[field], instance):
-            self[field] = value
+            self.set(field, value)
 
     def set_visit_time(self):
         if self.has('metadata.time.visit.current'):
-            self['metadata.time.visit.last'] = self['metadata.time.visit.current']
-        self['metadata.time.visit.current'] = now_in_utc()
+            self.set('metadata.time.visit.last', self['metadata.time.visit.current'])
+        self.set('metadata.time.visit.current', now_in_utc())
 
     def get_consent_ids(self) -> Set[str]:
         if not self.instanceof('consents', dict):
@@ -270,7 +274,7 @@ class FlatProfile(FlatEntity):
 
     # --------------- ID Hashing -----------------------
 
-    def hash_all_allowed_pii_as_ids(self, allowed:List[str]=None) -> bool:
+    def hash_all_allowed_pii_as_ids(self, allowed: List[str] = None) -> bool:
 
         """ Used for creating hashed IDS """
 
@@ -339,8 +343,7 @@ class FlatProfile(FlatEntity):
                     'data.contact.email.business') and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
                 new_ids.add(hash_id(self['data.contact.email.business'], PREFIX_EMAIL_BUSINESS))
                 update_fields.add('data.contact.email.business')
-            print('data.contact.email.main' in allowed_piis, self.has_not_empty(
-                    'data.contact.email.main'), not self.has_hashed_email_id(PREFIX_EMAIL_MAIN))
+
             if 'data.contact.email.main' in allowed_piis and self.has_not_empty(
                     'data.contact.email.main') and not self.has_hashed_email_id(PREFIX_EMAIL_MAIN):
                 new_ids.add(hash_id(self['data.contact.email.main'], PREFIX_EMAIL_MAIN))
@@ -373,10 +376,15 @@ class FlatProfile(FlatEntity):
 
             # Update if new data
             if new_ids:
-                self.ids = list(set(self.ids) | new_ids)
+                self.override('ids', list(set(self.ids) | new_ids))
                 return update_fields
 
         return None
+
+    def _set_changed_fields(self, dict_od_changed_fields):
+        fields = self['metadata.fields']
+        fields.update(dict_od_changed_fields)
+        self.override('metadata.fields', fields)
 
     def fill_changed_fields(self, custom_changes: Dict[str, List] = None):
         if not self.has_changes():
@@ -386,9 +394,7 @@ class FlatProfile(FlatEntity):
         self.set_if_not_instance('metadata.fields', {}, instance=dict)
 
         if custom_changes:
-            for flat_field, change_data in custom_changes.items():  # type: str, list
-                self['metadata.fields'][flat_field] = change_data
+            self._set_changed_fields(custom_changes)
         else:
             # Iterate and set new values. Leave old intact.
-            for flat_field, change_data in self.get_change_logger().changes():  # type: str, list
-                self['metadata.fields'][flat_field] = change_data
+            self._set_changed_fields(self.get_change_logger().get_logged_changes())
