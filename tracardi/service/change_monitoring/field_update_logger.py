@@ -34,7 +34,13 @@ class FieldUpdateLogger:
 
         return False
 
-    def add(self, field, value, old_value, ignore: Tuple[str, ...] = None):
+    def add(self,
+            field,
+            value,
+            old_value,
+            session_id: Optional[str] = None,
+            flat_event = None,
+            ignore: Tuple[str, ...] = None):
 
         if ignore and field.startswith(ignore):
             return

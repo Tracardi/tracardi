@@ -3,10 +3,10 @@ import json
 import os
 from typing import Optional, Tuple
 
-from dotty_dict import dotty
-
 from tracardi.context import ServerContext, get_context
+from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
+from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.license import License
 from tracardi.service.storage.elastic.interface.event import load_unique_field_value
@@ -107,7 +107,6 @@ def get_default_event_type_schema(event_type) -> Optional[dict]:
 
 
 def _append_value(values, value):
-
     if not isinstance(values, list):
         return [values]
 
@@ -133,8 +132,10 @@ def _append_value(values, value):
     return values
 
 
-def copy_default_event_to_profile(copy_schema: dict, flat_profile: FlatProfile, flat_event: dotty) -> FlatProfile:
-
+def copy_default_event_to_profile(copy_schema: dict,
+                                  flat_profile: FlatProfile,
+                                  flat_event: FlatEvent,
+                                  session: Session) -> FlatProfile:
     if copy_schema is not None:
 
         for profile_path, (event_path, operation) in copy_schema.items():  # type: str, Tuple[str, str]
@@ -146,24 +147,30 @@ def copy_default_event_to_profile(copy_schema: dict, flat_profile: FlatProfile, 
                     if operation == 'append':
 
                         # Make sure the value is list
-                        if isinstance(flat_event[event_path], (str, int, float)):
+                        if flat_event.instanceof(event_path, (str, int, float)):
                             value_to_be_appended = [flat_event[event_path]]
                         else:
                             value_to_be_appended = flat_event[event_path]
 
                         # Convert profile property to list if string, int, etc.
-                        if not isinstance(flat_profile[profile_path], list):
+                        if not flat_profile.instanceof(profile_path, list):
                             # Must have some value, not None, ""
                             if flat_profile[profile_path]:
-                                flat_profile[profile_path] = [flat_profile[profile_path]]
+                                flat_profile.set(profile_path,
+                                                 flat_profile[profile_path],
+                                                 flat_event=flat_event, session_id=session.id)
 
                         if profile_path not in flat_profile or flat_profile[profile_path] is None:
-                            flat_profile[profile_path] = _append_value(values=[],
-                                                                       value=value_to_be_appended)
+                            flat_profile.set(profile_path,
+                                             _append_value(values=[], value=value_to_be_appended),
+                                             flat_event=flat_event, session_id=session.id
+                                             )
 
-                        elif isinstance(flat_profile[profile_path], list):
-                            flat_profile[profile_path] = _append_value(values=flat_profile[profile_path],
-                                                                       value=value_to_be_appended)
+                        elif flat_profile.instanceof(profile_path, list):
+                            flat_profile.set(profile_path,
+                                             _append_value(values=flat_profile[profile_path],
+                                                           value=value_to_be_appended),
+                                             flat_event=flat_event, session_id=session.id)
                         else:
                             raise KeyError(
                                 f"Can not append data {flat_event[event_path]} to {flat_profile[profile_path]} "
@@ -171,16 +178,27 @@ def copy_default_event_to_profile(copy_schema: dict, flat_profile: FlatProfile, 
 
                     elif operation == 'equals_if_not_exists':
                         if profile_path not in flat_profile:
-                            flat_profile[profile_path] = flat_event[event_path]
+                            flat_profile.set(profile_path,
+                                             flat_event[event_path],
+                                             flat_event=flat_event, session_id=session.id)
                     elif operation == 'delete':
                         if profile_path in flat_profile:
-                            flat_profile[profile_path] = None
+                            flat_profile.set(profile_path,
+                                             None,
+                                             flat_event=flat_event, session_id=session.id)
                     elif operation == '+':
                         if profile_path in flat_profile:
                             try:
                                 if flat_profile[profile_path] is None:
-                                    flat_profile[profile_path] = 0
-                                flat_profile[profile_path] += float(flat_event[event_path])
+                                    flat_profile.set(
+                                        profile_path,
+                                        0,
+                                        flat_event=flat_event, session_id=session.id)
+                                flat_profile.set(
+                                    profile_path,
+                                    flat_profile[profile_path] + float(flat_event[event_path]),
+                                    flat_event=flat_event, session_id=session.id
+                                )
                             except Exception:
                                 raise AssertionError(
                                     f"Can not add data {flat_event[event_path]} to {flat_profile[profile_path]} "
@@ -189,8 +207,13 @@ def copy_default_event_to_profile(copy_schema: dict, flat_profile: FlatProfile, 
                         if profile_path in flat_profile:
                             try:
                                 if flat_profile[profile_path] is None:
-                                    flat_profile[profile_path] = 0
-                                flat_profile[profile_path] = flat_profile[profile_path] - float(flat_event[event_path])
+                                    flat_profile.set(profile_path,
+                                                     0,
+                                                     flat_event=flat_event, session_id=session.id)
+                                flat_profile.set(
+                                    profile_path,
+                                    flat_profile[profile_path] - float(flat_event[event_path]),
+                                    flat_event=flat_event, session_id=session.id)
                             except Exception:
                                 raise AssertionError(
                                     f"Can not add subtract {flat_event[event_path]} to {flat_profile[profile_path]} "
@@ -204,7 +227,11 @@ def copy_default_event_to_profile(copy_schema: dict, flat_profile: FlatProfile, 
 
                         updated_dict, conflicts = update_dict_with_conflicts(profile_data_as_dict, event_data_as_dict,
                                                                              append_lists=False)
-                        flat_profile[profile_path] = updated_dict
+                        flat_profile.set(
+                            profile_path,
+                            updated_dict,
+                            flat_event=flat_event, session_id=session.id
+                        )
                         if conflicts:
                             conflicts = {
                                 path: {
@@ -228,23 +255,32 @@ def copy_default_event_to_profile(copy_schema: dict, flat_profile: FlatProfile, 
                                 trash_conflicts = {}
 
                             trash_conflicts.update(conflicts)
-                            flat_profile['trash'] = {
-                                "conflicts": trash_conflicts
-                            }
+                            flat_profile.set('trash',
+                                             {
+                                                 "conflicts": trash_conflicts
+                                             },
+                                             flat_event=flat_event, session_id=session.id)
                     else:
                         # Equal
-                        flat_profile[profile_path] = flat_event[event_path]
+                        flat_profile.set(profile_path,
+                                         flat_event[event_path],
+                                         flat_event=flat_event, session_id=session.id)
             elif isinstance(event_path, int) or isinstance(event_path, float):
                 if profile_path in flat_profile:
                     if operation in ['increment', 'decrement']:
                         try:
                             if flat_profile[profile_path] is None:
-                                flat_profile[profile_path] = 0
+                                flat_profile.set(profile_path, 0,
+                                                 flat_event=flat_event, session_id=session.id)
 
                             if operation == 'increment':
-                                flat_profile[profile_path] = flat_profile[profile_path] + float(event_path)
+                                flat_profile.set(profile_path,
+                                                 flat_profile[profile_path] + float(event_path),
+                                                 flat_event=flat_event, session_id=session.id)
                             else:
-                                flat_profile[profile_path] = flat_profile[profile_path] - float(event_path)
+                                flat_profile.set(profile_path,
+                                                 flat_profile[profile_path] - float(event_path),
+                                                 flat_event=flat_event, session_id=session.id)
 
                         except Exception:
                             raise AssertionError(

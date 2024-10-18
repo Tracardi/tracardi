@@ -28,7 +28,9 @@ def update_profile_last_geo(session: Session, flat_profile: FlatProfile) -> Flat
     if not session.device.geo.is_empty():
         _geo = session.device.geo.model_dump(mode="json")
         if not flat_profile.has('data.devices.last.geo', equal=_geo):
-            flat_profile['data.devices.last.geo'] = _geo
+            flat_profile.set('data.devices.last.geo',
+                             _geo,
+                             session_id=session.id)
             flat_profile.set_updated()
     return flat_profile
 
@@ -39,7 +41,9 @@ def update_profile_email_type(flat_profile: FlatProfile) -> FlatProfile:
         if len(email_parts) > 1:
             email_domain = email_parts[1]
 
-            flat_profile['aux.email.free'] = email_domain in free_email_domains
+            flat_profile.set(
+                'aux.email.free',
+                email_domain in free_email_domains)
             flat_profile.set_updated()
     return flat_profile
 
@@ -50,7 +54,10 @@ def update_profile_visits(session: Session, flat_profile: FlatProfile) -> FlatPr
     if session.is_new():
         flat_profile.set_visit_time()
         flat_profile.set_if_none('metadata.time.visit.count', 0)
-        flat_profile['metadata.time.visit.count'] += 1
+        flat_profile.set('metadata.time.visit.count',
+                         flat_profile['metadata.time.visit.count'] + 1,
+                         session_id=session.id
+                         )
         flat_profile.set_updated()
 
     return flat_profile
@@ -60,7 +67,9 @@ def update_profile_time(session: Session, flat_profile: FlatProfile) -> FlatProf
     # Set time zone form session
     if session.context:
         try:
-            flat_profile['metadata.time.visit.tz'] = session.context['time']['tz']
+            flat_profile.set('metadata.time.visit.tz',
+                             session.context['time']['tz'],
+                             session_id=session.id)
         except KeyError:
             pass
     return flat_profile
@@ -71,26 +80,10 @@ async def _check_mapping_condition_if_met(if_statement, dot: DotAccessor):
     return await condition.evaluate(if_statement, dot)
 
 
-async def map_event_to_profile(
-        custom_mapping_schemas: List[EventToProfile],
-        flat_event: FlatEvent,
-        flat_profile: FlatProfile,
-        session: Session,
-) -> FlatProfile:
-    # Default event types mappings
-
-    default_mapping_schema = get_default_mappings_for(flat_event['type'], 'profile')
-
-    if default_mapping_schema is not None:
-        # Copy default
-        flat_profile = copy_default_event_to_profile(
-            default_mapping_schema,
-            flat_profile,
-            flat_event
-        )
-
-    # Custom event types mappings, filtered by event type
-
+async def _custom_event_to_profile_mapping(custom_mapping_schemas,
+                                           flat_profile: FlatProfile,
+                                           flat_event: FlatEvent,
+                                           session: Session) -> FlatProfile:
     if len(custom_mapping_schemas) > 0:
 
         for custom_mapping_schema in custom_mapping_schemas:
@@ -99,8 +92,8 @@ async def map_event_to_profile(
             if 'condition' in custom_mapping_schema.config:
                 if_statement = custom_mapping_schema.config['condition']
                 try:
-                    # Todo converting to Profile and event may be not performant, maybe extend dot accessor to take dotty
-                    dot = DotAccessor(event=flat_event, profile=flat_profile,
+                    dot = DotAccessor(event=flat_event,
+                                      profile=flat_profile,
                                       session=session)
                     result = await _check_mapping_condition_if_met(if_statement, dot)
                     if result is False:
@@ -179,29 +172,57 @@ async def map_event_to_profile(
 
                         if operation == APPEND:
                             if profile_ref not in flat_profile:
-                                flat_profile[profile_ref] = [flat_event[event_ref]]
-                            elif isinstance(flat_profile[profile_ref], list):
-                                flat_profile[profile_ref].append(flat_event[event_ref])
-                            elif not isinstance(flat_profile[profile_ref], dict):
-                                flat_profile[profile_ref] = [flat_profile[profile_ref], flat_event[event_ref]]
+                                flat_profile.set(
+                                    profile_ref,
+                                    [flat_event[event_ref]],
+                                    flat_event=flat_event,
+                                    session_id=session.id
+                                )
+                            elif flat_profile.instanceof(profile_ref, list):
+
+                                flat_profile.set(profile_ref,
+                                                 flat_profile[profile_ref] + [flat_event[event_ref]],
+                                                 flat_event=flat_event,
+                                                 session_id=session.id)
+
+                            elif not flat_profile.instanceof(profile_ref, dict):
+                                flat_profile.set(profile_ref,
+                                                 [flat_profile[profile_ref], flat_event[event_ref]],
+                                                 flat_event=flat_event,
+                                                 session_id=session.id)
                             else:
                                 raise KeyError(
                                     f"Can not append data {flat_event[event_ref]} to {flat_profile[profile_ref]} at profile@{profile_ref}")
 
                         elif operation == EQUALS_IF_NOT_EXISTS:
                             if profile_ref not in flat_profile:
-                                flat_profile[profile_ref] = flat_event[event_ref]
+                                flat_profile.set(profile_ref,
+                                                 flat_event[event_ref],
+                                                 flat_event=flat_event,
+                                                 session_id=session.id)
                             elif flat_profile[profile_ref] is None:
-                                flat_profile[profile_ref] = flat_event[event_ref]
-                            elif isinstance(flat_profile[profile_ref], str):
+                                flat_profile.set(profile_ref,
+                                                 flat_event[event_ref],
+                                                 flat_event=flat_event,
+                                                 session_id=session.id)
+                            elif flat_profile.instanceof(profile_ref, str):
                                 __value = flat_profile[profile_ref].strip()
                                 if not __value:
-                                    flat_profile[profile_ref] = flat_event[event_ref]
-                            elif isinstance(flat_profile[profile_ref], (list, dict)):
+                                    flat_profile.set(profile_ref,
+                                                     flat_event[event_ref],
+                                                     flat_event=flat_event,
+                                                     session_id=session.id)
+                            elif flat_profile.instanceof(profile_ref, (list, dict)):
                                 if not flat_profile[profile_ref]:
-                                    flat_profile[profile_ref] = flat_event[event_ref]
+                                    flat_profile.set(profile_ref,
+                                                     flat_event[event_ref],
+                                                     flat_event=flat_event,
+                                                     session_id=session.id)
                         else:
-                            flat_profile[profile_ref] = flat_event[event_ref]
+                            flat_profile.set(profile_ref,
+                                             flat_event[event_ref],
+                                             flat_event=flat_event,
+                                             session_id=session.id)
 
                     except KeyError as e:
                         if event_ref.startswith(("properties", "traits")):
@@ -226,9 +247,13 @@ async def map_event_to_profile(
                             )
                         )
 
+    return flat_profile
+
+def _computed_event_props_to_profile(flat_profile: FlatProfile, flat_event: FlatEvent, session: Session) -> FlatProfile:
+    #TODO may not be needed as flat_profile.has_changes() delivers it.
     profile_updated_flag = flat_profile.has_changes()
 
-    compute_schema = get_default_mappings_for(flat_event['type'], "compute")
+    compute_schema = get_default_mappings_for(flat_event.type, "compute")
     if compute_schema:
         compute_schema = EventCompute(**compute_schema)
 
@@ -249,11 +274,213 @@ async def map_event_to_profile(
 
             # Set property if defined
             if isinstance(profile_property, str):
-                flat_profile[profile_property] = computation_result
+                flat_profile.set(profile_property,
+                                 computation_result,
+                                 flat_event=flat_event,
+                                 session_id=session.id
+                                 )
                 profile_updated_flag = True
 
     if profile_updated_flag is True:
         flat_profile.mark_for_update()
+
+    return flat_profile
+
+async def map_event_to_profile(
+        custom_mapping_schemas: List[EventToProfile],
+        flat_event: FlatEvent,
+        flat_profile: FlatProfile,
+        session: Session,
+) -> FlatProfile:
+    # Default event types mappings
+
+    default_mapping_schema = get_default_mappings_for(flat_event['type'], 'profile')
+
+    if default_mapping_schema is not None:
+        # Copy default
+        flat_profile = copy_default_event_to_profile(
+            default_mapping_schema,
+            flat_profile,
+            flat_event,
+            session
+        )
+
+    # Custom event types mappings, filtered by event type
+    flat_profile = await _custom_event_to_profile_mapping(
+        custom_mapping_schemas,
+        flat_profile,
+        flat_event,
+        session)
+
+    # if len(custom_mapping_schemas) > 0:
+    #
+    #     for custom_mapping_schema in custom_mapping_schemas:
+    #
+    #         # Check condition
+    #         if 'condition' in custom_mapping_schema.config:
+    #             if_statement = custom_mapping_schema.config['condition']
+    #             try:
+    #                 dot = DotAccessor(event=flat_event,
+    #                                   profile=flat_profile,
+    #                                   session=session)
+    #                 result = await _check_mapping_condition_if_met(if_statement, dot)
+    #                 if result is False:
+    #                     continue
+    #             except Exception as e:
+    #                 logger.error(
+    #                     f"Routing error. "
+    #                     f"An error occurred when coping data from event to profile. "
+    #                     f"There is error in the conditional trigger settings for event "
+    #                     f"`{flat_event['type']}`."
+    #                     f"Could not parse or access data for if statement: `{if_statement}`. "
+    #                     f"Data was not copied but the event was routed to the next step. ",
+    #                     extra=ExtraInfo.exact(
+    #                         flow_id=None,
+    #                         node_id=None,
+    #                         event_id=flat_event.get('id', None),
+    #                         profile_id=flat_profile.get('id', None),
+    #                         origin='profile-computation',
+    #                         package=__name__,
+    #                         traceback=get_traceback(e)
+    #                     )
+    #                 )
+    #                 continue
+    #
+    #         # Custom Copy
+    #
+    #         if custom_mapping_schema.event_to_profile:
+    #             allowed_profile_fields = (
+    #                 "data",
+    #                 "traits",
+    #                 "ids",
+    #                 "stats",
+    #                 "segments",
+    #                 "interests",
+    #                 "consents",
+    #                 "aux",
+    #                 "misc",
+    #                 "trash")
+    #             for event_ref, profile_ref, operation in custom_mapping_schema.items():
+    #                 if not profile_ref.startswith(allowed_profile_fields):
+    #                     message = f"You are trying to copy the data to unknown field in profile. " \
+    #                               f"Your profile reference `{profile_ref}` does not start with typical " \
+    #                               f"fields that are {allowed_profile_fields}. Please check if there isn't " \
+    #                               f"an error in your copy schema. Data will not be copied if it does not " \
+    #                               f"match Profile schema."
+    #
+    #                     logger.warning(
+    #                         message,
+    #                         extra=ExtraInfo.exact(
+    #                             origin='profile-computation',
+    #                             flow_id=None,
+    #                             node_id=None,
+    #                             event_id=flat_event.get('id', None),
+    #                             profile_id=flat_profile.get('id', None),
+    #                             package=__name__
+    #                         )
+    #                     )
+    #                     continue
+    #
+    #                 try:
+    #                     if not flat_event[event_ref]:
+    #                         message = f"Value of event@{event_ref} is None or empty. " \
+    #                                   f"No data has been assigned to profile@{profile_ref}"
+    #                         logger.warning(
+    #                             message,
+    #                             extra=ExtraInfo.exact(
+    #                                 flow_id=None,
+    #                                 node_id=None,
+    #                                 event_id=flat_event.get('id', None),
+    #                                 profile_id=flat_profile.get('id', None),
+    #                                 origin='profile-computation',
+    #                                 package=__name__,
+    #                             )
+    #                         )
+    #                         continue
+    #
+    #                     if operation == APPEND:
+    #                         if profile_ref not in flat_profile:
+    #                             flat_profile[profile_ref] = [flat_event[event_ref]]
+    #                         elif isinstance(flat_profile[profile_ref], list):
+    #                             flat_profile[profile_ref].append(flat_event[event_ref])
+    #                         elif not isinstance(flat_profile[profile_ref], dict):
+    #                             flat_profile[profile_ref] = [flat_profile[profile_ref], flat_event[event_ref]]
+    #                         else:
+    #                             raise KeyError(
+    #                                 f"Can not append data {flat_event[event_ref]} to {flat_profile[profile_ref]} at profile@{profile_ref}")
+    #
+    #                     elif operation == EQUALS_IF_NOT_EXISTS:
+    #                         if profile_ref not in flat_profile:
+    #                             flat_profile[profile_ref] = flat_event[event_ref]
+    #                         elif flat_profile[profile_ref] is None:
+    #                             flat_profile[profile_ref] = flat_event[event_ref]
+    #                         elif isinstance(flat_profile[profile_ref], str):
+    #                             __value = flat_profile[profile_ref].strip()
+    #                             if not __value:
+    #                                 flat_profile[profile_ref] = flat_event[event_ref]
+    #                         elif isinstance(flat_profile[profile_ref], (list, dict)):
+    #                             if not flat_profile[profile_ref]:
+    #                                 flat_profile[profile_ref] = flat_event[event_ref]
+    #                     else:
+    #                         flat_profile[profile_ref] = flat_event[event_ref]
+    #
+    #                 except KeyError as e:
+    #                     if event_ref.startswith(("properties", "traits")):
+    #                         message = f"Can not copy data from event `{event_ref}` to profile `{profile_ref}`. " \
+    #                                   f"Data was not copied. Error message: {repr(e)} key."
+    #                     else:
+    #                         message = f"Can not copy data from event `{event_ref}` to profile `{profile_ref}`. " \
+    #                                   f"Maybe `properties.{event_ref}` or `traits.{event_ref}` could work. " \
+    #                                   f"Data was not copied. Error message: {repr(e)} key."
+    #
+    #                     logger.warning(
+    #                         message,
+    #                         extra=ExtraInfo.exact(
+    #                             flow_id=None,
+    #                             node_id=None,
+    #                             event_id=flat_event.get('id', None),
+    #                             profile_id=flat_profile.get('id', None),
+    #                             origin='event',
+    #                             class_name='map_event_to_profile',
+    #                             package=__name__,
+    #                             traceback=get_traceback(e)
+    #                         )
+    #                     )
+
+    flat_profile = _computed_event_props_to_profile(flat_profile, flat_event, session)
+
+    # profile_updated_flag = flat_profile.has_changes()
+    #
+    # compute_schema = get_default_mappings_for(flat_event.type, "compute")
+    # if compute_schema:
+    #     compute_schema = EventCompute(**compute_schema)
+    #
+    #     # Run only on change but there was no change
+    #     if compute_schema.run_on_profile_change() and profile_updated_flag is False:
+    #         # Terminate earlier
+    #         return flat_profile
+    #
+    #     # Compute values
+    #
+    #     for profile_property, compute_string in compute_schema.yield_functions():
+    #
+    #         # Compute value
+    #         computation_result = default_event_call_function(
+    #             compute_string,
+    #             event=flat_event,
+    #             profile=flat_profile)
+    #
+    #         # Set property if defined
+    #         if isinstance(profile_property, str):
+    #             flat_profile.set(profile_property,
+    #                              computation_result,
+    #                              flat_event=flat_event,
+    #                              session_id=session.id
+    #                              )
+    #             profile_updated_flag = True
+    #
+    # if profile_updated_flag is True:
+    #     flat_profile.mark_for_update()
 
     return flat_profile
 
@@ -264,12 +491,19 @@ def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session, tracker_
                                                                                     list):
 
             unique_values = set(flat_profile['data.pii.language.spoken'] + session.context['language'])
-            flat_profile['data.pii.language.spoken'] = list(unique_values)
+            flat_profile.set(
+                'data.pii.language.spoken',
+                list(unique_values),
+                session_id=session.id
+            )
         else:
-            flat_profile['data.pii.language.spoken'] = list(set(session.context['language']))
+            flat_profile.set(
+                'data.pii.language.spoken',
+                list(set(session.context['language'])),
+                session_id=session.id)
 
     if not flat_profile.has('aux.geo'):
-        flat_profile['aux.geo'] = {}
+        flat_profile.set('aux.geo', {}, session_id=session.id)
 
     # Aux markets
 
@@ -280,12 +514,14 @@ def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session, tracker_
                 markets += language_countries_dict[lang_code]
 
     if markets:
-        flat_profile['aux.geo.markets'] = markets
+        flat_profile.set('aux.geo.markets',
+                         markets,
+                         session_id=session.id)
 
     # Continent
 
     continent = get_continent(tracker_payload)
     if continent:
-        flat_profile['aux.geo.continent'] = continent
+        flat_profile.set('aux.geo.continent', continent, session_id=session.id)
 
     return flat_profile

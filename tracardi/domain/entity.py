@@ -5,7 +5,7 @@ from datetime import datetime
 import json
 
 from dotty_dict import Dotty
-from typing import Optional, TypeVar, Type, Set, List
+from typing import Optional, TypeVar, Type, Set, List, Union
 from uuid import uuid4
 from pydantic import BaseModel, PrivateAttr
 
@@ -182,6 +182,18 @@ class FlatEntity(Dotty):
             self._changes.add(key, value, old_value, ignore=('metadata.fields', 'operation'))
         super().__setitem__(key, value)
 
+    def set(self, key, value, session_id: Optional[str] = None, flat_event = None):
+        if self._changes:
+            old_value = self.get(key, None)
+            self._changes.add(key,
+                              value,
+                              old_value,
+                              session_id,
+                              flat_event,
+                              ignore=('metadata.fields', 'operation')
+                              )
+        super().__setitem__(key, value)
+
     def override(self, key, value):
         # This one does not record changes or checks for PCP
         super().__setitem__(key, value)
@@ -198,6 +210,11 @@ class FlatEntity(Dotty):
         :return str: Wrapped dictionary as json string
         """
         return json.dumps(self._data, cls=DottyEncoder)
+
+    def instanceof(self, field: str, instance: Union[type, tuple]) -> bool:
+        if field not in self:
+            return False
+        return isinstance(self.get(field, None), instance)
 
     @property
     def id(self) -> Optional[str]:

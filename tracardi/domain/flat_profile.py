@@ -106,11 +106,6 @@ class FlatProfile(FlatEntity):
             pass
         return dump
 
-    def instanceof(self, field: str, instance: type) -> bool:
-        if field not in self:
-            return False
-        return isinstance(self.get(field, None), instance)
-
     def _fill_meta_data(self, index_type: str):
         """
         Used to fill metadata with default current index and id.
