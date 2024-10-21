@@ -103,7 +103,7 @@ async def _async_exec(ttl, func, func_key, args_key, args, kwargs):
     result = func(*args, **kwargs)
     if asyncio.iscoroutine(result):
         result = await result
-    logger.warning(f"Filling cache {func_key}{args_key}: ttl: {pretty_time_format(ttl)}s: [{time() - t:.3f}]")
+    logger.warning(f"Filling cache {func_key}{args_key}: ttl: {pretty_time_format(ttl)}s: [Filled in: {time() - t:.3f}]")
     # Update cache
     cache[func_key][args_key] = CacheItem(data=result, ttl=ttl)
 
