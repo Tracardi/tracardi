@@ -30,6 +30,12 @@ async def y_locked(a):
     return a
 
 
+
+@async_cache_for(3, max_size=10, allow_null_values=False, lock=True, timeout=.1)
+async def timeout(a):
+    await asyncio.sleep(.2)
+    return a
+
 # def test_positive_path():
 #     with ServerContext(Context(production=True)):
 #         context = get_context()
@@ -177,5 +183,17 @@ def test_async_positive_path_blocking_separation():
             )
             assert result == [1, 2, 2, 1, 1, 1]
             assert run_counter == 2
+
+    asyncio.run(main())
+
+
+
+def test_async_timeout():
+    async def main():
+
+        with ServerContext(Context(production=True)):
+            with pytest.raises(asyncio.exceptions.TimeoutError):
+                await timeout(1)
+
 
     asyncio.run(main())

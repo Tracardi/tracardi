@@ -92,7 +92,7 @@ def _run_function(ttl: float, func, args, kwargs, max_size, allow_null_values, k
     return result, func_key, args_key
 
 
-async def _async_exec(ttl, func, func_key, args_key, args, kwargs):
+async def _async_exec(ttl, func, func_key, timeout: float, args_key, args, kwargs):
     # Check cache again it may be filled already
     if args_key in cache[func_key]:
         # 2nd attempt to check cache.When being locked the cache could have been filled.
@@ -100,9 +100,17 @@ async def _async_exec(ttl, func, func_key, args_key, args, kwargs):
 
     # Check lock is it is not already loading data.
     t = time()
-    result = func(*args, **kwargs)
-    if asyncio.iscoroutine(result):
-        result = await result
+
+    if timeout:
+        result = await asyncio.wait_for(
+            func(*args, **kwargs),
+            timeout=timeout  # Timeout in seconds
+        )
+    else:
+        result = func(*args, **kwargs)
+        if asyncio.iscoroutine(result):
+            result = await result
+
     logger.warning(f"Filling cache {func_key}{args_key}: ttl: {pretty_time_format(ttl)}s: [Filled in: {time() - t:.3f}]")
     # Update cache
     cache[func_key][args_key] = CacheItem(data=result, ttl=ttl)
@@ -115,6 +123,7 @@ async def _run_async_function(
         locked: bool,
         key_func: Callable = None,
         use_context: bool = True,
+        timeout: float = None
 
 ) -> Tuple[Any, str, str]:
     # Construct a unique cache key from the function's module name,
@@ -133,13 +142,13 @@ async def _run_async_function(
 
     if locked:
         async with _lock_for_loading(func_key, args_key):
-            return await _async_exec(ttl, func, func_key, args_key, args, kwargs)
+            return await _async_exec(ttl, func, func_key, timeout, args_key, args, kwargs)
 
-    return await _async_exec(ttl, func, func_key, args_key, args, kwargs)
+    return await _async_exec(ttl, func, func_key, timeout, args_key, args, kwargs)
 
 
 def async_cache_for(ttl: float, max_size=1000, allow_null_values=False, key_func: Callable = None,
-                    use_context: bool = True, lock: bool = True):
+                    use_context: bool = True, lock: bool = True, timeout: float = 0):
     def decorator(func):
         if not inspect.iscoroutinefunction(func):
             raise TypeError(f"Incorrect cache type for async function {func.__module__}.{func.__qualname__}. "
@@ -154,7 +163,8 @@ def async_cache_for(ttl: float, max_size=1000, allow_null_values=False, key_func
                 max_size, allow_null_values,
                 lock,
                 key_func,
-                use_context
+                use_context,
+                timeout
             )
 
             return result
