@@ -36,7 +36,7 @@ async def save_sessions_in_db(sessions: List[Session]) -> BulkInsertResult:
     return await session_db.save_sessions(sessions)
 
 # TODO remove after 2025-06-01, remove in version 1.1.x
-# Not used but some
+# Not used but some queue may still use it. Version 1.0.4 does not use it.
 async def store_bulk_session(sessions: List[Session], context: Context):
     with ServerContext(context):
         # Group sessions by index and iterate
