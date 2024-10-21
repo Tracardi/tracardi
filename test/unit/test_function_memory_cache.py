@@ -29,11 +29,16 @@ async def y_locked(a):
     await asyncio.sleep(.1)
     return a
 
+counter = 0
 
-
-@async_cache_for(3, max_size=10, allow_null_values=False, lock=True, timeout=.1)
+@async_cache_for(.5, max_size=10, allow_null_values=False, lock=True, timeout=.1)
 async def timeout(a):
-    await asyncio.sleep(.2)
+    global counter
+    if counter > 0:
+        await asyncio.sleep(.2)
+    else:
+        await asyncio.sleep(.02)
+    counter += 1
     return a
 
 # def test_positive_path():
@@ -194,6 +199,18 @@ def test_async_timeout():
         with ServerContext(Context(production=True)):
             with pytest.raises(asyncio.exceptions.TimeoutError):
                 await timeout(1)
+
+
+    asyncio.run(main())
+
+def test_async_timeout_last_cache_value():
+    async def main():
+
+        with ServerContext(Context(production=True)):
+            assert 1 == await timeout(1)  # No timeout
+            sleep(.6)
+            assert 1 == await timeout(1)  # This time timeouts but returns old value.
+            assert 1 == await timeout(1)  # This time timeouts but returns old value.
 
 
     asyncio.run(main())

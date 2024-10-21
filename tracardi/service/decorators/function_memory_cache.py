@@ -94,6 +94,7 @@ def _run_function(ttl: float, func, args, kwargs, max_size, allow_null_values, k
 
 async def _async_exec(ttl, func, func_key, timeout: float, args_key, args, kwargs):
     # Check cache again it may be filled already
+
     if args_key in cache[func_key]:
         # 2nd attempt to check cache.When being locked the cache could have been filled.
         return cache[func_key][args_key].data, func_key, args_key
@@ -102,10 +103,18 @@ async def _async_exec(ttl, func, func_key, timeout: float, args_key, args, kwarg
     t = time()
 
     if timeout:
-        result = await asyncio.wait_for(
-            func(*args, **kwargs),
-            timeout=timeout  # Timeout in seconds
-        )
+        try:
+            result = await asyncio.wait_for(
+                func(*args, **kwargs),
+                timeout=timeout  # Timeout in seconds
+            )
+        except asyncio.exceptions.TimeoutError as e:
+            # If no data raise error
+            _expired = cache[func_key].get_expired(args_key)
+            if _expired is None:
+                raise e
+            # Else return from cache
+            return _expired.data, func_key, args_key
     else:
         result = func(*args, **kwargs)
         if asyncio.iscoroutine(result):

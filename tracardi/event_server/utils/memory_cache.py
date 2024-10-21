@@ -2,7 +2,7 @@ from datetime import datetime
 
 import asyncio
 from time import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
@@ -54,6 +54,7 @@ class MemoryCache:
         self.counter = 0
         self.allow_null_values = allow_null_values
         self._use_context = use_context
+        self._expired: Dict[str, CacheItem] = {}
 
     def _get_contextualized_key(self, key):
 
@@ -73,6 +74,7 @@ class MemoryCache:
         key = self._get_contextualized_key(key)
         if key in self.memory_buffer:
             if self.memory_buffer[key].expired():
+                self._expired[key] = self.memory_buffer[key]
                 del self.memory_buffer[key]
 
         return key in self.memory_buffer
@@ -81,11 +83,15 @@ class MemoryCache:
         key = self._get_contextualized_key(key)
         return (key in self.memory_buffer and self.memory_buffer[key].expired()) or key not in self.memory_buffer
 
+    def get_expired(self, key) -> Optional[CacheItem]:
+        return self._expired.get(key, None)
+
     def __getitem__(self, item: str) -> [CacheItem, None]:
         item = self._get_contextualized_key(item)
         if item in self.memory_buffer:
             cache_item = self.memory_buffer[item]  # type: CacheItem
             if cache_item.expired():
+                self._expired[item] = self.memory_buffer[item]
                 del self.memory_buffer[item]
                 raise ExpiredException("MemoryCache item expired")
             return cache_item
