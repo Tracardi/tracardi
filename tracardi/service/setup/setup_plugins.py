@@ -787,6 +787,15 @@ installed_plugins: Dict[str, PluginMetadata] = {
         resource=None)
     ),
     
+    "tracardi.process_engine.action.v1.sitemap_action": PluginMetadata(
+        test=PluginTest(
+            init={
+                'sitemap_path': '',
+                
+            }, 
+            resource=None),
+    ),
+    
 }
 
 if License.has_service(SCHEDULER):
