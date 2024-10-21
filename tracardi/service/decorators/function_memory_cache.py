@@ -109,6 +109,8 @@ async def _async_exec(ttl, func, func_key, timeout: float, args_key, args, kwarg
                 timeout=timeout  # Timeout in seconds
             )
         except asyncio.exceptions.TimeoutError as e:
+            logger.warning(
+                f"TIMEOUT for cache {func_key}{args_key}: ttl: {pretty_time_format(ttl)}s: [Timeout in: {time() - t:.3f}]")
             # If no data raise error
             _expired = cache[func_key].get_expired(args_key)
             if _expired is None:
