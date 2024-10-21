@@ -73,3 +73,11 @@ def save_session_cache(session: Union[Optional[Session], List[Session]], context
                 _save_single_session(_session, context)
         else:
             raise ValueError(f"Incorrect session value. Expected Session or list of Sessions. Got {type(session)}")
+
+
+def delete_session_cache(session_id: str, context: Context):
+    key_namespace = get_session_key_namespace(session_id, context)
+    redis_cache.delete(
+        session_id,
+        key_namespace
+    )

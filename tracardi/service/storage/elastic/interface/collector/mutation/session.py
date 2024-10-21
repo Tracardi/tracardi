@@ -9,7 +9,8 @@ from tracardi.service.tracking.cache.session_cache import save_session_cache
 
 T = TypeVar("T")
 
-
+# TODO remove after 2025-06-01, remove in version 1.1.x
+# Not used.
 def _split_by_index(entities: List[T]) -> Dict[str, List[T]]:
     entities_by_index = defaultdict(list)
     for entity in entities:
@@ -34,7 +35,8 @@ async def save_session_to_db_and_cache(session: Union[Session, List[Session], Se
 async def save_sessions_in_db(sessions: List[Session]) -> BulkInsertResult:
     return await session_db.save_sessions(sessions)
 
-
+# TODO remove after 2025-06-01, remove in version 1.1.x
+# Not used but some queue may still use it. Version 1.0.4 does not use it.
 async def store_bulk_session(sessions: List[Session], context: Context):
     with ServerContext(context):
         # Group sessions by index and iterate

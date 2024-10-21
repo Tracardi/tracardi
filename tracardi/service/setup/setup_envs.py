@@ -513,14 +513,17 @@ async def list_system_envs():
             cluster_wide=True
         ))
 
-    for item in com_cluster_settings:
-        _cluster_settings.append(SystemSettings(
-            label=item["label"],
-            value=await item['value'](),
-            desc=item['desc'],
-            cluster_wide=True
-        ))
+
     if License.has_license():
+
+        for item in com_cluster_settings:
+            _cluster_settings.append(SystemSettings(
+                label=item["label"],
+                value=await item['value'](),
+                desc=item['desc'],
+                cluster_wide=True
+            ))
+
         return system_settings + com_system_settings + _cluster_settings
 
     return system_settings + _cluster_settings
