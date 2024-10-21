@@ -8,7 +8,7 @@ from tracardi.service.storage.mysql.mapping.event_data_compliance_mapping import
 from tracardi.service.storage.mysql.service.event_data_compliance_service import ConsentDataComplianceService
 
 
-@async_cache_for(memory_cache.data_compliance_cache_ttl, allow_null_values=True)
+@async_cache_for(memory_cache.data_compliance_cache_ttl, allow_null_values=True, timeout=.5)
 async def load_data_compliance(event_type_id: str) -> List[EventDataCompliance]:
     cdcs = ConsentDataComplianceService()
     records = await cdcs.load_by_event_type(event_type_id, enabled_only=True)

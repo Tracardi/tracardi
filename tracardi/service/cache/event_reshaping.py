@@ -7,7 +7,7 @@ from tracardi.service.storage.mysql.service.event_reshaping_service import Event
 from tracardi.service.decorators.function_memory_cache import async_cache_for
 
 
-@async_cache_for(memory_cache.event_reshaping_cache_ttl)
+@async_cache_for(memory_cache.event_reshaping_cache_ttl, timeout=.5)
 async def load_and_convert_reshaping(event_type) -> Optional[List[EventReshapingSchema]]:
     ers = EventReshapingService()
     reshape_schemas = await ers.load_by_event_type(event_type)
