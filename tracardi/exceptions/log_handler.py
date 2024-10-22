@@ -18,6 +18,8 @@ class StackInfoLogger(logging.Logger):
     def error(self, msg, *args, **kwargs):
         kwargs['stack_info'] = True
         kwargs['exc_info'] = True
+        if msg is None:
+            msg = "None"
         super().error(msg, *args, **kwargs)
 
     def critical(self, msg, *args, **kwargs):
