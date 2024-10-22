@@ -7,7 +7,11 @@ from tracardi.service.storage.mysql.mapping.event_validation_mapping import map_
 from tracardi.service.storage.mysql.service.event_validation_service import EventValidationService
 
 
-@AsyncCache(memory_cache.event_validation_cache_ttl, timeout=.5, max_one_cache_fill_every=.1)
+@AsyncCache(memory_cache.event_validation_cache_ttl,
+            timeout=.5,
+            max_one_cache_fill_every=.1,
+            return_cache_on_error=True
+            )
 async def load_event_validation(event_type: str) -> List[EventValidator]:
     evs = EventValidationService()
     return list((await evs.load_by_event_type(event_type, only_enabled=True)).map_to_objects(map_to_event_validation))

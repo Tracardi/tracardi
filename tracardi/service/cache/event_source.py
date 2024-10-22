@@ -6,6 +6,10 @@ from tracardi.service.decorators.async_cache import AsyncCache
 from tracardi.service.storage.mysql.interface import event_source_dao
 
 
-@AsyncCache(memory_cache.source_ttl, timeout=.5, max_one_cache_fill_every=.1)
+@AsyncCache(memory_cache.source_ttl,
+            timeout=.5,
+            max_one_cache_fill_every=.1,
+            return_cache_on_error=True
+            )
 async def load_event_source_via_cache(source_id) -> Optional[EventSource]:
     return await event_source_dao.load_event_source_by_id(source_id)

@@ -7,7 +7,12 @@ from tracardi.service.storage.mysql.mapping.event_to_event_mapping import map_to
 from tracardi.service.storage.mysql.service.event_mapping_service import EventMappingService
 
 
-@AsyncCache(memory_cache.event_mapping_cache_ttl, timeout=.5, max_one_cache_fill_every=.1, allow_null_values=True)
+@AsyncCache(memory_cache.event_mapping_cache_ttl,
+            timeout=.5,
+            max_one_cache_fill_every=.1,
+            allow_null_values=True,
+            return_cache_on_error=True
+            )
 async def load_event_mapping(event_type_id: str) -> Optional[EventTypeMetadata]:
     ems = EventMappingService()
 

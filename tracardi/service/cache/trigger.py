@@ -10,7 +10,12 @@ def _cache_param_function(wfr, event_type: str, source_id: str) -> tuple:
     return event_type, source_id
 
 
-@AsyncCache(memory_cache.trigger_rule_cache_ttl, key_func=_cache_param_function, timeout=.5, max_one_cache_fill_every=.1)
+@AsyncCache(memory_cache.trigger_rule_cache_ttl,
+            key_func=_cache_param_function,
+            timeout=.5,
+            max_one_cache_fill_every=.1,
+            return_cache_on_error=True
+            )
 async def load_trigger_rule(wts, event_type: str, source_id: str) -> List[Rule]:
     records = await wts.load_rule(event_type, source_id)
     return list(records.map_to_objects(map_to_workflow_trigger_rule))

@@ -46,9 +46,14 @@ class AsyncCache:
         try:
             return await func(*args, **kwargs)
         except Exception as e:
+            logger.warning(f"ERROR: CACHE FILL: Function `{func.__qualname__}`. Detail: {str(e)}. Previous cache returned.")
             if not self.return_cache_on_error or not self._is_result_cached(key):
                 raise e
             # Else return from cache
+
+            # Make cache longer. Mark it as it was filled.
+
+            self.cache[key]["time"]: time.time()
             return self.cache[key]["result"]
 
     async def _run_function(self, key, func: Callable, args, kwargs):
