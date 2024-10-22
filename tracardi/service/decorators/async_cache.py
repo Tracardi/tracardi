@@ -25,7 +25,7 @@ class AsyncCache:
                  max_one_cache_fill_every: float = 0,
                  max_one_func_call_every: float = 0,
                  key_func: Callable = None,
-                 allow_null_values: bool = False,
+                 allow_null_values: bool = True,
                  use_context: bool = True,
                  lock: bool = True,
                  return_cache_on_error: bool = False,
@@ -52,25 +52,30 @@ class AsyncCache:
             return self.cache[key]["result"]
 
     async def _run_function(self, key, func: Callable, args, kwargs):
-        logger.warning(
-            f"Filling for cache {func.__qualname__}({args}, {kwargs})")
+
         t = time.time()
         if self.timeout:
             try:
-                return await asyncio.wait_for(
+                result = await asyncio.wait_for(
                     self._run(key, func, args, kwargs),
                     timeout=self.timeout  # Timeout in seconds
                 )
             except asyncio.exceptions.TimeoutError as e:
                 logger.warning(
-                    f"TIMEOUT for cache {func.__qualname__} in {time.time() - t}")
+                    f"TIMEOUT for cache {func.__qualname__} in {time.time() - t:.4f}")
                 # If no data raise error
                 if not self._is_result_cached(key):
                     raise e
                 # Else return from cache
-                return self.cache[key]["result"]
+                result = self.cache[key]["result"]
         else:
-            return await self._run(key, func, args, kwargs)
+            result = await self._run(key, func, args, kwargs)
+
+        logger.warning(
+            f"Filling for cache {func.__qualname__}{key}. Filled in {time.time()-t:.4f}.")
+
+        return result
+
 
     async def _run_and_fill_cache(self, key, func, args, kwargs):
 
@@ -87,7 +92,7 @@ class AsyncCache:
     def __call__(self, func: Callable) -> Callable:
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            key = self.generate_key(func, args, kwargs)
+            key = self._generate_key(func, args, kwargs)
 
             # Check if the result is cached and not expired or if the function is throttled
             if self.is_result_cached_and_valid(key):
@@ -111,15 +116,15 @@ class AsyncCache:
 
         return wrapper
 
-    def generate_key(self, func: Callable, args, kwargs):
-        if self.key_func:
-            key = self.key_func(args, kwargs)
+    def _generate_key(self, func: Callable, args, kwargs):
+        if self.key_func is not None:
+            key = self.key_func(*args, **kwargs)
         else:
-            key = f"{func.__qualname__}{hash(args)}{hash(tuple(kwargs.items()))}"
+            key = f"{func.__qualname__}{args}{tuple(kwargs.items())}"
 
         if self.use_context:
             context = get_context()
-            return f"{context.__hash__()}:{key}"
+            key = f"{context.__hash__()}:{key}"
 
         return key
 
