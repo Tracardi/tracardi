@@ -6,7 +6,7 @@ from tracardi.service.decorators.async_cache import AsyncCache
 from tracardi.service.storage.mysql.mapping.workflow_trigger_mapping import map_to_workflow_trigger_rule
 
 
-def _cache_param_function(wfr, event_type: str, source_id: str) -> tuple:
+def _cache_param_function(wts, event_type: str, source_id: str) -> tuple:
     return event_type, source_id
 
 

@@ -47,7 +47,8 @@ class AsyncCache:
         try:
             return await func(*args, **kwargs)
         except Exception as e:
-            logger.warning(f"ERROR: CACHE FILL: Function `{func.__qualname__}` took {time.time() - t:.3f}. Detail: {str(e)}. Previous cache returned.")
+            logger.warning(
+                f"ERROR: CACHE FILL: Function `{func.__qualname__}` took {time.time() - t:.3f}. Detail: {str(e)}. Previous cache returned.")
             if not self.return_cache_on_error or not self._is_result_cached(key):
                 raise e
             # Else return from cache
@@ -57,14 +58,14 @@ class AsyncCache:
             self.cache[key]["time"] = time.time()
             return self.cache[key]["result"]
 
-    async def _run_function(self, key, func: Callable, args, kwargs):
+    async def _run_function(self, key, func: Callable, args, kwargs, timeout: float = None):
 
         t = time.time()
         if self.timeout:
             try:
                 result = await asyncio.wait_for(
                     self._run(key, func, args, kwargs),
-                    timeout=self.timeout  # Timeout in seconds
+                    timeout=timeout if timeout is not None else self.timeout  # Timeout in seconds
                 )
             except asyncio.exceptions.TimeoutError as e:
                 logger.warning(
@@ -78,15 +79,14 @@ class AsyncCache:
             result = await self._run(key, func, args, kwargs)
 
         logger.warning(
-            f"Filling for cache {func.__qualname__}{key}. Filled in {time.time()-t:.4f}.")
+            f"Filling for cache {func.__qualname__}{key}. Filled in {time.time() - t:.4f}.")
 
         return result
 
-
-    async def _run_and_fill_cache(self, key, func, args, kwargs):
+    async def _run_and_fill_cache(self, key, func, args, kwargs, timeout: float = None):
 
         # Execute the function and cache the result
-        result = await self._run_function(key, func, args, kwargs)
+        result = await self._run_function(key, func, args, kwargs, timeout)
 
         if result is None and not self.allow_null_values:
             return result
@@ -104,7 +104,6 @@ class AsyncCache:
             if self.is_result_cached_and_valid(key):
                 return self.cache[key]["result"]
 
-
             if not self.lock_for_cache_loading:
                 return await self._run_and_fill_cache(key, func, args, kwargs)
 
@@ -119,8 +118,8 @@ class AsyncCache:
                     try:
                         return self.cache[key]["result"]
                     except KeyError:
-                        # Fallback
-                        return await self._run_and_fill_cache(key, func, args, kwargs)
+                        # Fallback, make timeout longer
+                        return await self._run_and_fill_cache(key, func, args, kwargs, timeout=10)
 
                 return await self._run_and_fill_cache(key, func, args, kwargs)
 
