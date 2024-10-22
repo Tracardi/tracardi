@@ -84,7 +84,7 @@ async def _custom_event_to_profile_mapping(custom_mapping_schemas,
                                            flat_profile: FlatProfile,
                                            flat_event: FlatEvent,
                                            session: Session) -> FlatProfile:
-    if len(custom_mapping_schemas) > 0:
+    if custom_mapping_schemas is not None and len(custom_mapping_schemas) > 0:
 
         for custom_mapping_schema in custom_mapping_schemas:
 
