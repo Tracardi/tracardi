@@ -1,10 +1,10 @@
 import asyncio
 
 import pytest
-from time import time, sleep
+from time import sleep
 
-from tracardi.context import ServerContext, Context, get_context
-from tracardi.service.decorators.function_memory_cache import cache_for, cache, async_cache_for, delete_cache, has_cache
+from tracardi.context import ServerContext, Context
+from tracardi.service.decorators.function_memory_cache import cache_for, async_cache_for
 
 run_counter = 0
 

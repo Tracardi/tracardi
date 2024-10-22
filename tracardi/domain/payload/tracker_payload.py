@@ -15,15 +15,13 @@ from dotty_dict import dotty
 from pydantic import PrivateAttr, BaseModel, ConfigDict
 from user_agents import parse
 
-from tracardi.config import tracardi, memory_cache
+from tracardi.config import tracardi
 from .. import ExtraInfo
 from ..request import Request
 from ...exceptions.log_handler import get_logger
-from ...service.decorators.function_memory_cache import async_cache_for
 from ...service.license import License, LICENSE
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
-from ..identification_point import IdentificationPoint
 from ..payload.event_payload import EventPayload
 from ..session import Session
 from ..time import Time
@@ -31,8 +29,6 @@ from ..entity import Entity, PrimaryEntity, DefaultEntity
 from tracardi.domain.flat_profile import FlatProfile
 from ...service.storage.elastic.interface.collector.load.flat_profile import load_flat_profile
 
-from ...service.storage.mysql.mapping.identification_point_mapping import map_to_identification_point
-from ...service.storage.mysql.service.idetification_point_service import IdentificationPointService
 from ...service.utils.getters import get_entity_id
 from ...service.utils.hasher import get_shadow_session_id
 

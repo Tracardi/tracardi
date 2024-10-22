@@ -2,12 +2,12 @@ from typing import List
 
 from tracardi.config import memory_cache
 from tracardi.domain.event_to_profile import EventToProfile
+from tracardi.service.decorators.async_cache import AsyncCache
 from tracardi.service.storage.mysql.mapping.event_to_profile_mapping import map_to_event_to_profile
 from tracardi.service.storage.mysql.service.event_to_profile_service import EventToProfileMappingService
-from tracardi.service.decorators.function_memory_cache import async_cache_for
 
 
-@async_cache_for(memory_cache.event_to_profile_coping_ttl, timeout=.5)
+@AsyncCache(memory_cache.event_to_profile_coping_ttl, timeout=.5, max_one_cache_fill_every=.1)
 async def load_event_to_profile(event_type_id: str) -> List[EventToProfile]:
     etpms = EventToProfileMappingService()
     records = await etpms.load_by_type(event_type_id, enabled_only=True)
