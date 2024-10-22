@@ -54,7 +54,7 @@ class AsyncCache:
 
             # Make cache longer. Mark it as it was filled.
 
-            self.cache[key]["time"]: time.time()
+            self.cache[key]["time"] = time.time()
             return self.cache[key]["result"]
 
     async def _run_function(self, key, func: Callable, args, kwargs):
@@ -116,7 +116,11 @@ class AsyncCache:
                 if self.is_result_cached_and_valid(key):
                     return self.cache[key]["result"]
                 if self.is_function_throttled(func):
-                    return self.cache[key]["result"]
+                    try:
+                        return self.cache[key]["result"]
+                    except KeyError:
+                        # Fallback
+                        return await self._run_and_fill_cache(key, func, args, kwargs)
 
                 return await self._run_and_fill_cache(key, func, args, kwargs)
 
