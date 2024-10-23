@@ -1,5 +1,6 @@
 from typing import Optional
 
+from com_tracardi.service.profiler_calculator import calculate_statistics
 from tracardi.context import get_context
 from tracardi.domain.bridges.configurable_bridges import WebHookBridge, RestApiBridge, ConfigurableBridge
 from tracardi.exceptions.exception import BlockedException
@@ -17,6 +18,7 @@ else:
     from tracardi.service.tracking.tracker import os_tracker
 
 logger = get_logger(__name__)
+_measures = []
 
 
 class Tracker:
@@ -48,67 +50,84 @@ class Tracker:
     async def track_event(self, tracker_payload: TrackerPayload, tracking_start: float):
 
         context = get_context()
+        try:
 
-        context.profiler.measure('tracker-starts')
+            context.profiler.measure('tracker-starts')
 
-        if tracardi.disallow_bot_traffic and tracker_payload.is_bot():
-            raise BlockedException(f"Traffic from bot is not allowed.")
+            if tracardi.disallow_bot_traffic and tracker_payload.is_bot():
+                raise BlockedException(f"Traffic from bot is not allowed.")
 
-            # Trim ids - spaces are frequent issues
+                # Trim ids - spaces are frequent issues
 
-        if tracker_payload.source:
-            tracker_payload.source.id = str(tracker_payload.source.id).strip()
-        if tracker_payload.session:
-            tracker_payload.session.id = str(tracker_payload.session.id).strip()
-        if tracker_payload.profile:
-            tracker_payload.profile.id = str(tracker_payload.profile.id).strip()
+            if tracker_payload.source:
+                tracker_payload.source.id = str(tracker_payload.source.id).strip()
+            if tracker_payload.session:
+                tracker_payload.session.id = str(tracker_payload.session.id).strip()
+            if tracker_payload.profile:
+                tracker_payload.profile.id = str(tracker_payload.profile.id).strip()
 
-        # Validate event source
+            # Validate event source
 
-        source = await validate_source(self.tracker_config, tracker_payload)
+            source = await validate_source(self.tracker_config, tracker_payload)
 
-        logger.debug(f"Source {source.id} validated.")
+            logger.debug(f"Source {source.id} validated.")
 
-        context.profiler.measure('tracker-after-validation')
+            context.profiler.measure('tracker-validation')
 
-        # Update tracker source with full event source object
-        tracker_payload.source = source
+            # Update tracker source with full event source object
+            tracker_payload.source = source
 
-        # If there is a configurable bridge get it and set up tracker_payload and tracker_config
+            # If there is a configurable bridge get it and set up tracker_payload and tracker_config
 
-        configurable_bridge = self.get_bridge(tracker_payload)
-        if configurable_bridge:
-            tracker_payload, self.tracker_config = await configurable_bridge.configure(
-                tracker_payload,
-                self.tracker_config
-            )
+            configurable_bridge = self.get_bridge(tracker_payload)
+            if configurable_bridge:
+                tracker_payload, self.tracker_config = await configurable_bridge.configure(
+                    tracker_payload,
+                    self.tracker_config
+                )
 
-        # Is source ephemeral
-        if tracker_payload.source.transitional is True:
-            tracker_payload.set_ephemeral()
+            # Is source ephemeral
+            if tracker_payload.source.transitional is True:
+                tracker_payload.set_ephemeral()
 
-        context.profiler.measure('tracker-after-bridge')
+            context.profiler.measure('tracker-bridge')
 
-        if not License.has_license():
-            return await os_tracker(
-                source,
-                tracker_payload,
+            if not License.has_license():
+                return await os_tracker(
+                    source,
+                    tracker_payload,
+                    self.tracker_config,
+                    tracking_start
+                )
+
+            # Only commercial
+            if not tracker_payload.queue_required():
+                # Process without queue
+                return await run_com_tracker(source, tracker_payload, self.tracker_config, tracking_start)
+
+            # Queue
+            await run_com_tracker_worker(
                 self.tracker_config,
-                tracking_start
-            )
+                tracker_payload,
+                source,
+                tracking_start)
 
-        # Only commercial
-        if not tracker_payload.queue_required():
-            # Process without queue
-            return await run_com_tracker(source, tracker_payload, self.tracker_config, tracking_start)
+            context.profiler.measure('tracker-ends')
 
-        # Queue
-        await run_com_tracker_worker(
-            self.tracker_config,
-            tracker_payload,
-            source,
-            tracking_start)
+            return {}
+        finally:
+            global _measures
 
-        context.profiler.measure('tracker-after-queue')
+            if len(_measures) > 100:
 
-        return {}
+                # Calculate and print statistics
+                result = calculate_statistics(_measures)
+
+                print("\nTime Statistics:")
+                print(result)
+
+                context.profiler.reset_measures()
+                _measures = []
+
+            else:
+                _measures.append(context.profiler.get_measures())
