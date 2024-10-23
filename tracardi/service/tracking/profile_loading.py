@@ -3,7 +3,6 @@ from typing import Optional, Tuple
 from tracardi.domain.entity import PrimaryEntity
 from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.tracker_config import TrackerConfig
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.flat_profile import FlatProfile
 
@@ -12,17 +11,15 @@ logger = get_logger(__name__)
 
 async def load_profile_and_session(
         session: Session,
-        tracker_config: TrackerConfig,
+        is_static_profile_id: bool,
         tracker_payload: TrackerPayload
 ) -> Tuple[Optional[FlatProfile], Optional[Session]]:
 
     # Check if profile should have static ID
 
-    is_static = tracker_config.static_profile_id is True or tracker_payload.has_static_profile_id()
-
     flat_profile, session = await tracker_payload.get_profile_and_session(
         session,
-        is_static,
+        is_static_profile_id,
         tracker_payload.profile_less
     )
 

@@ -44,14 +44,8 @@ def test_event_payload_to_event():
         context=SessionContext({"time_zone": "UTC"})
     )
 
-    profile = PrimaryEntity(
-        id="1",
-        primary_id="profile-123",
-        ids=["id1", "id2"]
-    )
-
     # Call the function under test
-    event, is_valid = event_payload_to_event({"test": 1}, event_payload, metadata, source, session, profile, profile_less=False)
+    event, is_valid = event_payload_to_event({"test": 1}, event_payload, metadata, source, session, "1", profile_less=False)
 
     # Validate the result
     assert isinstance(event, EventDict)
@@ -60,7 +54,7 @@ def test_event_payload_to_event():
     assert event['properties'] == {"key": "value"}
     assert event['metadata']['status'] == "collected"
     assert event['session']['id'] == session.id
-    assert event['profile']['id'] == profile.id
+    assert event['profile']['id'] == "1"
     assert event['tags']['values'] == ("test", "event")
     assert event['hit']['name'] == "Test Page"
     assert event['hit']['url'] == "https://test.com"
@@ -91,14 +85,8 @@ def test_event_payload_to_event_no_session():
         timestamp=datetime.utcnow()
     )
 
-    profile = PrimaryEntity(
-        id="1",
-        primary_id="profile-123",
-        ids=["id1", "id2"]
-    )
-
     # Call the function under test
-    event, is_valid = event_payload_to_event({}, event_payload, metadata, source, None, profile, profile_less=False)
+    event, is_valid = event_payload_to_event({}, event_payload, metadata, source, None, "1", profile_less=False)
 
     # Validate the result
     assert isinstance(event, EventDict)

@@ -12,7 +12,6 @@ from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.tracking.utils.function_call import default_event_call_function
-from tracardi.service.tracking.utils.languages import get_continent
 from tracardi.service.utils.domains import free_email_domains
 from tracardi.service.events import copy_default_event_to_profile
 from tracardi.service.utils.languages import language_countries_dict
@@ -485,7 +484,7 @@ async def map_event_to_profile(
     return flat_profile
 
 
-def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session, tracker_payload) -> FlatProfile:
+def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session, continent: str) -> FlatProfile:
     if 'language' in session.context:
         if flat_profile.instanceof('data.pii.language.spoken', list) and isinstance(session.context['language'],
                                                                                     list):
@@ -520,7 +519,6 @@ def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session, tracker_
 
     # Continent
 
-    continent = get_continent(tracker_payload)
     if continent:
         flat_profile.set('aux.geo.continent', continent, session_id=session.id)
 

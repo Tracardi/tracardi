@@ -2,6 +2,7 @@ from urllib.parse import urlparse, ParseResult
 
 from user_agents.parsers import UserAgent
 
+from com_tracardi.service.tracking.domain.cross_domain import CrossDomainModel
 from tracardi.service.utils.date import now_in_utc
 
 import time
@@ -421,6 +422,43 @@ class TrackerPayload(BaseModel):
             ttl = int(self.source.config.get('device_fingerprint_ttl', 30))
             return ttl > 0
         return False
+
+    def to_cross_domain_model(self, allowed_bridges, is_static_profile_id) -> CrossDomainModel:
+        ttl = 15 * 60
+        if self.source.config:
+            ttl = int(self.source.config.get('device_fingerprint_ttl', 15 * 60))
+
+        return CrossDomainModel(
+            source_id=self.source.id,
+            profile_id=get_entity_id(self.profile),
+            profile_ids=self.profile.ids if self.profile else [],
+            session_id=get_entity_id(self.session),
+            allowed_bridges=allowed_bridges,
+            is_cde=self.is_cde(),
+            is_finder_print=self.finger_printing_enabled(),
+            is_profile_static= is_static_profile_id or self.has_static_profile_id(),
+            referer_source_id=self.get_referer_data('source'),
+            referred_profile_id=self.get_referer_data('profile'),
+            fingerprint_ttl=ttl,
+            request_ip=self.get_ip(),
+            browser_agent=self.get_browser_agent(),
+            browser_language = self.get_browser_language()
+        )
+
+    def for_session_creation(self):
+
+        session_id = get_entity_id(self.session)
+        profile_id= get_entity_id(self.profile)
+        if self.session and self.session.metadata:
+            insert = self.session.metadata.insert
+            update = self.session.metadata.update
+            create = self.session.metadata.create
+        else:
+            insert = None
+            update = None
+            create = None
+
+        return session_id, profile_id, insert, update, create
 
     # def create_session(self) -> Session:
     #     # Artificial session (Mutates tracker Payload)

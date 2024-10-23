@@ -112,12 +112,12 @@ class Tracker:
                 source,
                 tracking_start)
 
-            context.profiler.measure('tracker-ends')
+
 
             return {}
         finally:
             global _measures
-
+            context.profiler.measure('tracker-ends')
             if len(_measures) > 100:
 
                 # Calculate and print statistics

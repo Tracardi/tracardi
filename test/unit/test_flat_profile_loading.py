@@ -33,12 +33,11 @@ async def test_load_profile_and_session():
         )
 
         session = Session(id="session-101", profile=Entity(id=profile_id), metadata=SessionMetadata())
-        tracker_config = TrackerConfig(static_profile_id=True, ip="0.0.0.0", allowed_bridges=['rest'])
 
         tracker_payload._get_profile = AsyncMock(return_value=(FlatProfile(dict(id=profile_id)), session))
 
         # Act
-        flat_profile, session_result = await load_profile_and_session(session, tracker_config, tracker_payload)
+        flat_profile, session_result = await load_profile_and_session(session, True, tracker_payload)
 
         # Assert
         assert isinstance(flat_profile, FlatProfile), "Profile should be of type FlatProfile"

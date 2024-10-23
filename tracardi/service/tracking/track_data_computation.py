@@ -13,6 +13,7 @@ from tracardi.service.tracking.system_events import add_system_events
 
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.service.tracking.utils.languages import get_continent
 
 
 async def _compute(source,
@@ -27,6 +28,7 @@ async def _compute(source,
         # Profile computation
 
         # Compute Profile GEO Markets and continent
+        tracker_payload = get_continent(tracker_payload)
         flat_profile= compute_profile_aux_geo_markets(flat_profile, session, tracker_payload)
 
         # Update profile last geo with session device geo

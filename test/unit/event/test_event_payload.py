@@ -1,8 +1,5 @@
-import zoneinfo
-
 import datetime
 
-from tracardi.domain.entity import Entity, PrimaryEntity
 from tracardi.domain.event_metadata import EventPayloadMetadata
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.named_entity import NamedEntity
@@ -28,7 +25,7 @@ def test_event_payload_time_fallback():
         epm,
         source=EventSource(id="1", name="test", type=["rest"], bridge=NamedEntity(id="1", name="rest")),
         session=Session(id="1", metadata=SessionMetadata()),
-        profile_entity=PrimaryEntity(id="1"),
+        profile_id="1",
         profile_less=False
     )
 
@@ -46,13 +43,14 @@ def test_event_payload_should_have_tags():
         )
     )
     event, _ = event_payload_to_event({},
-                                   ep,
-                                   epm,
-                                   source=EventSource(id="1", name="test", type=["rest"], bridge=NamedEntity(id="1", name="rest")),
-                                   session=Session(id="1", metadata=SessionMetadata()),
-                                   profile_entity=PrimaryEntity(id="1"),
-                                   profile_less=False
-                                   )
+                                      ep,
+                                      epm,
+                                      source=EventSource(id="1", name="test", type=["rest"],
+                                                         bridge=NamedEntity(id="1", name="rest")),
+                                      session=Session(id="1", metadata=SessionMetadata()),
+                                      profile_id="1",
+                                      profile_less=False
+                                      )
 
     assert event['tags']['values'] == ('tag1', 'tag2', 'tag3')
     assert event['tags']['count'] == 3

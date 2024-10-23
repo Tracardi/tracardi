@@ -29,7 +29,7 @@ def _remove_empty_dicts(dictionary):
         del dictionary[key]
 
 
-def _auto_index_default_event_type(flat_event: FlatEvent, flat_profile: Optional[FlatProfile]) -> FlatEvent:
+def _auto_default_event_mapping(flat_event: FlatEvent) -> FlatEvent:
     event_mapping_schema = get_default_mappings_for(flat_event['type'], 'copy')
 
     if event_mapping_schema is not None:
@@ -43,19 +43,48 @@ def _auto_index_default_event_type(flat_event: FlatEvent, flat_profile: Optional
             except KeyError:
                 pass
 
+    return flat_event
+
+
+def _auto_default_event_state(flat_event: FlatEvent) -> FlatEvent:
     state = get_default_mappings_for(flat_event['type'], 'state')
 
-    if state:
-        if isinstance(state, str):
+    if isinstance(state, str):
+        flat_event['journey.state'] = state
+
+    return flat_event
+
+
+def _auto_tag_events(flat_event: FlatEvent) -> FlatEvent:
+    tags = get_default_mappings_for(flat_event['type'], 'tags')
+    if tags:
+        flat_event['tags.values'] = tuple(tags)
+        flat_event['tags.count'] = len(tags)
+
+    return flat_event
+
+# TODO to be used when computing profile
+def _auto_run_profile_function_updates(flat_event: FlatEvent, flat_profile: Optional[FlatProfile]):
+    state = get_default_mappings_for(flat_event['type'], 'state')
+
+    if isinstance(state, str):
             if state.startswith("call:"):
                 state = default_event_call_function(call_string=state, event=flat_event, profile=flat_profile)
             if state:
                 flat_event['journey.state'] = state
 
-    tags = get_default_mappings_for(flat_event['type'], 'tags')
-    if tags:
-        flat_event['tags.values'] = tuple(tags)
-        flat_event['tags.count'] = len(tags)
+    return flat_event, flat_profile
+
+
+def _auto_index_default_event_type(flat_event: FlatEvent) -> FlatEvent:
+    # Copies event props to event data
+    flat_event = _auto_default_event_mapping(flat_event)
+
+    # Sets journey state to event
+    flat_event = _auto_default_event_state(flat_event)
+
+    # Tags events
+    flat_event = _auto_tag_events(flat_event)
 
     return flat_event
 
@@ -75,13 +104,11 @@ async def event_properties_to_profile(flat_event: FlatEvent,
     )
 
 
-async def event_to_traits(flat_event: FlatEvent,
-                          flat_profile: Optional[FlatProfile],
-                          ) -> FlatEvent:
+async def event_to_traits(flat_event: FlatEvent) -> FlatEvent:
     # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
 
     # Default event mapping form predefined file
-    return _auto_index_default_event_type(flat_event, flat_profile)
+    return _auto_index_default_event_type(flat_event)
 
 
 # async def event_to_traits_and_profile_mapping(flat_event: Dotty,
@@ -154,7 +181,7 @@ async def make_event_from_event_payload(
         metadata,
         source,
         session,
-        profile_entity,
+        profile_entity.id,
         profile_less)
 
     if not even_valid:
@@ -205,11 +232,10 @@ async def compute_events(events: List[EventPayload],
 
         if flat_event.is_valid():
             # Run mappings for valid event. Maps properties to traits, and adds traits
-            flat_event = await event_to_traits(flat_event, flat_profile)
+            flat_event = await event_to_traits(flat_event)
 
             # Skip mapping to profile if none
             if flat_profile:
-
                 flat_profile = await event_properties_to_profile(
                     flat_event,
                     flat_profile,

@@ -9,7 +9,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.domain.time import Time
-from tracardi.service.tracking.session_loading import load_or_create_session
+from tracardi.service.tracking.session_loading import load_or_create_session_1
 
 
 async def _check_loading(session, tracker_payload, expected_loads_no):
@@ -20,7 +20,8 @@ async def _check_loading(session, tracker_payload, expected_loads_no):
                return_value=session) as mock_load_session:
 
         # Call your async function
-        result = await load_or_create_session(tracker_payload)
+
+        result = await load_or_create_session_1(*tracker_payload.for_session_creation())
         assert mock_load_session.call_count == expected_loads_no
 
         return result
@@ -54,7 +55,7 @@ async def test_load_or_create_session_all_data():
 
         # Expecting to load the profile and session as defined in tracker payload
 
-        session, payload = await _check_loading(session_from_db, tracker_payload, 1)
+        session = await _check_loading(session_from_db, tracker_payload, 1)
 
         assert session.id == session_id
         assert session.profile.id == profile.id
@@ -87,7 +88,7 @@ async def test_load_or_create_session__only_session():
 
         # Expecting to load the profile and session as defined in tracker payload
 
-        session, payload = await _check_loading(session_from_db, tracker_payload, 1)
+        session = await _check_loading(session_from_db, tracker_payload, 1)
 
         assert session.id == session_id
         assert session.profile.id == session_from_db.profile.id
@@ -117,7 +118,7 @@ async def test_load_or_create_session_no_session():
 
         # Expecting to load the profile and session as defined in tracker payload
 
-        session, payload = await _check_loading(session_from_db, tracker_payload, 0)
+        session = await _check_loading(session_from_db, tracker_payload, 0)
 
         assert session.id is not None
         assert session.profile is None
@@ -151,7 +152,7 @@ async def test_load_or_create_session_with_session_but_on_session_in_db():
 
         # Expecting to load the profile and session as defined in tracker payload
 
-        session, payload = await _check_loading(session_from_db, tracker_payload, 1)
+        session = await _check_loading(session_from_db, tracker_payload, 1)
 
         # Nie ma sesji to przyjmij jaką podano, nie generuj
 
@@ -185,7 +186,7 @@ async def test_load_or_create_session_profile_conflict():
         session_from_db = Session.new(id='s123')
         session_from_db.profile = Profile.new(id="incorrect-pid")
 
-        session, payload = await _check_loading(session_from_db, tracker_payload, 1)
+        session = await _check_loading(session_from_db, tracker_payload, 1)
 
         # New session must be created
         assert session.id == 's123'

@@ -11,7 +11,6 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
 from tracardi.domain.time import Time
-from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.tracking.profile_loading import load_profile_and_session
 
 
@@ -24,11 +23,9 @@ async def _check_loading(loaded_session, profile_from_db, tracker_payload, expec
         if isinstance(profile_from_db, Callable):
             mock_load_session.side_effect = profile_from_db
 
-        tracker_config = TrackerConfig(ip='0.0.0.0', allowed_bridges=['rest'])
-
         result = await load_profile_and_session(
             loaded_session,
-            tracker_config,
+            False,
             tracker_payload
         )
         assert mock_load_session.call_count == expected_loads_no

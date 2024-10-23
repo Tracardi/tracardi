@@ -90,7 +90,7 @@ def event_payload_to_event(
         metadata: EventPayloadMetadata,
         source: EventSource,
         session: Union[Optional[Entity], Optional[Session]],
-        profile_entity: Optional[PrimaryEntity],
+        profile_id: Optional[str],
         profile_less: bool) -> Tuple[EventDict, bool]:
 
     id = str(uuid4()) if not event_payload.id else event_payload.id
@@ -100,7 +100,7 @@ def event_payload_to_event(
     meta = _get_metadata(event_payload, metadata, source, profile_less)
     meta_dict = meta.model_dump(mode="json")
     source_dict = {"id": source.id} if not event_payload.has_source_id() else dict(id=event_payload.get_source_id())
-    profile_entity_dict = {"id": profile_entity.id} if profile_entity else None
+    profile_entity_dict = {"id": profile_id} if profile_id else None
 
     if isinstance(session, Session):
 
