@@ -230,6 +230,7 @@ class TracardiConfig(metaclass=Singleton):
         self.enable_workflow = get_env_as_bool('ENABLE_WORKFLOW', 'yes')
         self.enable_event_validation = get_env_as_bool('ENABLE_EVENT_VALIDATION', 'yes')
         self.enable_event_reshaping = get_env_as_bool('ENABLE_EVENT_RESHAPING', 'yes')
+        self.enable_data_compliance = get_env_as_bool('ENABLE_DATA_COMPLIANCE', 'yes')
         self.enable_event_source_check = get_env_as_bool('ENABLE_EVENT_SOURCE_CHECK', 'yes')
         self.enable_identification_point = get_env_as_bool('ENABLE_IDENTIFICATION_POINT', 'yes')
         self.system_events = get_env_as_bool('SYSTEM_EVENTS', 'no')

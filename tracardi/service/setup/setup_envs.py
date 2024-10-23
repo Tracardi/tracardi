@@ -413,6 +413,14 @@ system_settings = [
     ),
     SystemSettings(
         **{
+            "label": "ENABLE_DATA_COMPLIANCE",
+            "value": tracardi.enable_data_compliance,
+            "desc": "Default: yes. Enables data compliance.",
+            "expose": True
+        }
+    ),
+    SystemSettings(
+        **{
             "label": "ENABLE_EVENT_VALIDATION",
             "value": tracardi.enable_event_validation,
             "desc": "Default: yes. Enables event validation.",

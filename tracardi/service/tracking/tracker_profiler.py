@@ -21,3 +21,11 @@ class TrackerProfiler:
 
     def total(self):
         print(self._measures[-1])
+
+
+    def get_measures(self):
+        return self._measures
+
+
+    def reset_measures(self):
+        self._measures = []
