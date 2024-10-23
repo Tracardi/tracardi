@@ -185,15 +185,6 @@
         "increment"
       ]
     },
-    "compute": {
-      "run": "on-profile-change",
-      "func": [
-        [
-          "data.metrics.ltcop",
-          "call:tracardi.service.setup.events.computations.checkout,compute_ltcop"
-        ]
-      ]
-    },
     "tags": [
       "event:behavioural"
     ],
@@ -224,15 +215,6 @@
       "data.metrics.ltcocc": [
         1,
         "increment"
-      ]
-    },
-    "compute": {
-      "run": "on-profile-change",
-      "func": [
-        [
-          "data.metrics.ltcop",
-          "call:tracardi.service.setup.events.computations.checkout,compute_ltcop"
-        ]
       ]
     },
     "tags": [
