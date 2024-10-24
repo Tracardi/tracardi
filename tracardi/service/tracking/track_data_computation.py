@@ -1,7 +1,10 @@
 from typing import Tuple, List, Optional
 
+from future.backports.email.generator import Generator
+
 from tracardi.config import tracardi
 from tracardi.context import get_context
+from tracardi.domain.field_change import FieldChange
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
@@ -13,7 +16,22 @@ from tracardi.service.tracking.system_events import add_system_events
 
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.service.tracking.utils.languages import get_continent
+
+def _compute_profile_properties(flat_profile, session):
+    # Compute Profile GEO Markets and continent
+    yield from compute_profile_aux_geo_markets(flat_profile, session.context)
+
+    # Update profile last geo with session device geo
+    yield from update_profile_last_geo(session, flat_profile)
+
+    # Update email type
+    yield from update_profile_email_type(flat_profile)
+
+    # Update visits
+    yield from update_profile_visits(session.is_new(), flat_profile)
+
+    # Update profile time zone
+    yield from update_profile_time(session.context)
 
 
 async def _compute(source,
@@ -27,21 +45,8 @@ async def _compute(source,
     if flat_profile is not None:
         # Profile computation
 
-        # Compute Profile GEO Markets and continent
-        tracker_payload = get_continent(tracker_payload)
-        flat_profile= compute_profile_aux_geo_markets(flat_profile, session, tracker_payload)
-
-        # Update profile last geo with session device geo
-        flat_profile = update_profile_last_geo(session, flat_profile)
-
-        # Update email type
-        flat_profile = update_profile_email_type(flat_profile)
-
-        # Update visits
-        flat_profile = update_profile_visits(session, flat_profile)
-
-        # Update profile time zone
-        flat_profile = update_profile_time(session, flat_profile)
+        for field_change in _compute_profile_properties(flat_profile, session):
+            flat_profile.set(field_change.field, field_change.value, session_id=session.id)
 
         context.profiler.measure('after-profile-computation')
 

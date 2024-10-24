@@ -1,7 +1,10 @@
+from collections.abc import AsyncGenerator
 from typing import List, Tuple, Optional, Set
 
 from tracardi.domain import ExtraInfo
 from tracardi.domain.entity import PrimaryEntity
+from tracardi.domain.event_to_profile import EventToProfile
+from tracardi.domain.field_change import FieldChange
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.cache.event_to_profile_mapping import load_event_to_profile
 from tracardi.service.tracking.compute.event.event_construction import event_payload_to_event
@@ -89,19 +92,20 @@ def _auto_index_default_event_type(flat_event: FlatEvent) -> FlatEvent:
     return flat_event
 
 
-async def event_properties_to_profile(flat_event: FlatEvent,
+async def event_properties_to_profile(custom_event_to_profile_mapping_schemas: List[EventToProfile],
+                                      flat_event: FlatEvent,
                                       flat_profile: FlatProfile,
-                                      session: Session) -> FlatProfile:
+                                      session: Session) -> AsyncGenerator[FieldChange, None, None]:
     # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
 
     # Map event data to profile
-    custom_event_to_profile_mapping_schemas = await load_event_to_profile(event_type_id=flat_event['type'])
-    return await map_event_to_profile(
+    async for item in map_event_to_profile(
         custom_event_to_profile_mapping_schemas,
         flat_event,
         flat_profile,
         session
-    )
+    ):
+        yield item
 
 
 async def event_to_traits(flat_event: FlatEvent) -> FlatEvent:
@@ -236,11 +240,17 @@ async def compute_events(events: List[EventPayload],
 
             # Skip mapping to profile if none
             if flat_profile:
-                flat_profile = await event_properties_to_profile(
+                custom_event_to_profile_mapping_schemas = await load_event_to_profile(event_type_id=flat_event['type'])
+                async for field_change in event_properties_to_profile(
+                    custom_event_to_profile_mapping_schemas,
                     flat_event,
                     flat_profile,
                     session
-                )
+                ):
+                    flat_profile.set(field_change.field,
+                                     field_change.value,
+                                     session_id=session.id,
+                                     flat_event=flat_event)
 
         # Convert to event
 

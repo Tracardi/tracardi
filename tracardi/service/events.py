@@ -1,12 +1,13 @@
 import glob
 import json
 import os
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Generator
+
 
 from tracardi.context import ServerContext, get_context
+from tracardi.domain.field_change import FieldChange
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.license import License
 from tracardi.service.storage.elastic.interface.event import load_unique_field_value
@@ -131,11 +132,9 @@ def _append_value(values, value):
 
     return values
 
-
 def copy_default_event_to_profile(copy_schema: dict,
                                   flat_profile: FlatProfile,
-                                  flat_event: FlatEvent,
-                                  session: Session) -> FlatProfile:
+                                  flat_event: FlatEvent) -> Generator[FieldChange, None, None]:
     if copy_schema is not None:
 
         for profile_path, (event_path, operation) in copy_schema.items():  # type: str, Tuple[str, str]
@@ -156,21 +155,23 @@ def copy_default_event_to_profile(copy_schema: dict,
                         if not flat_profile.instanceof(profile_path, list):
                             # Must have some value, not None, ""
                             if flat_profile.has(profile_path):
-                                flat_profile.set(profile_path,
-                                                 flat_profile[profile_path],
-                                                 flat_event=flat_event, session_id=session.id)
+                                yield FieldChange(
+                                    field=profile_path,
+                                    value=flat_profile[profile_path]
+                                )
 
                         if profile_path not in flat_profile or flat_profile[profile_path] is None:
-                            flat_profile.set(profile_path,
-                                             _append_value(values=[], value=value_to_be_appended),
-                                             flat_event=flat_event, session_id=session.id
-                                             )
+                            yield FieldChange(
+                                field=profile_path,
+                                value=_append_value(values=[], value=value_to_be_appended)
+                            )
 
                         elif flat_profile.instanceof(profile_path, list):
-                            flat_profile.set(profile_path,
-                                             _append_value(values=flat_profile[profile_path],
-                                                           value=value_to_be_appended),
-                                             flat_event=flat_event, session_id=session.id)
+                            yield FieldChange(
+                                field=profile_path,
+                                value=_append_value(values=flat_profile[profile_path],
+                                                           value=value_to_be_appended)
+                            )
                         else:
                             raise KeyError(
                                 f"Can not append data {flat_event[event_path]} to {flat_profile[profile_path]} "
@@ -178,26 +179,26 @@ def copy_default_event_to_profile(copy_schema: dict,
 
                     elif operation == 'equals_if_not_exists':
                         if profile_path not in flat_profile:
-                            flat_profile.set(profile_path,
-                                             flat_event[event_path],
-                                             flat_event=flat_event, session_id=session.id)
+                            yield FieldChange(
+                                field=profile_path,
+                                value=flat_event[event_path])
                     elif operation == 'delete':
                         if profile_path in flat_profile:
-                            flat_profile.set(profile_path,
-                                             None,
-                                             flat_event=flat_event, session_id=session.id)
+                            yield FieldChange(
+                                field=profile_path,
+                                value=None)
                     elif operation == '+':
                         if profile_path in flat_profile:
                             try:
                                 if flat_profile[profile_path] is None:
-                                    flat_profile.set(
+                                    yield FieldChange(
+                                        field=
                                         profile_path,
-                                        0,
-                                        flat_event=flat_event, session_id=session.id)
-                                flat_profile.set(
-                                    profile_path,
-                                    flat_profile[profile_path] + float(flat_event[event_path]),
-                                    flat_event=flat_event, session_id=session.id
+                                        value=0
+                                    )
+                                yield FieldChange(
+                                    field=profile_path,
+                                    value=flat_profile[profile_path] + float(flat_event[event_path])
                                 )
                             except Exception:
                                 raise AssertionError(
@@ -207,13 +208,14 @@ def copy_default_event_to_profile(copy_schema: dict,
                         if profile_path in flat_profile:
                             try:
                                 if flat_profile[profile_path] is None:
-                                    flat_profile.set(profile_path,
-                                                     0,
-                                                     flat_event=flat_event, session_id=session.id)
-                                flat_profile.set(
-                                    profile_path,
-                                    flat_profile[profile_path] - float(flat_event[event_path]),
-                                    flat_event=flat_event, session_id=session.id)
+                                    yield FieldChange(
+                                        field=profile_path,
+                                        value=0
+                                    )
+                                yield FieldChange(
+                                    field=profile_path,
+                                    value=flat_profile[profile_path] - float(flat_event[event_path])
+                                )
                             except Exception:
                                 raise AssertionError(
                                     f"Can not add subtract {flat_event[event_path]} to {flat_profile[profile_path]} "
@@ -227,10 +229,9 @@ def copy_default_event_to_profile(copy_schema: dict,
 
                         updated_dict, conflicts = update_dict_with_conflicts(profile_data_as_dict, event_data_as_dict,
                                                                              append_lists=False)
-                        flat_profile.set(
-                            profile_path,
-                            updated_dict,
-                            flat_event=flat_event, session_id=session.id
+                        yield FieldChange(
+                            field=profile_path,
+                            value=updated_dict
                         )
                         if conflicts:
                             conflicts = {
@@ -255,36 +256,40 @@ def copy_default_event_to_profile(copy_schema: dict,
                                 trash_conflicts = {}
 
                             trash_conflicts.update(conflicts)
-                            flat_profile.set('trash',
-                                             {
-                                                 "conflicts": trash_conflicts
-                                             },
-                                             flat_event=flat_event, session_id=session.id)
+                            yield FieldChange(
+                                field='trash',
+                                value={
+                                    "conflicts": trash_conflicts
+                                }
+                            )
                     else:
                         # Equal
-                        flat_profile.set(profile_path,
-                                         flat_event[event_path],
-                                         flat_event=flat_event, session_id=session.id)
+                        yield FieldChange(
+                            field=profile_path,
+                            value=flat_event[event_path]
+                        )
             elif isinstance(event_path, int) or isinstance(event_path, float):
                 if profile_path in flat_profile:
                     if operation in ['increment', 'decrement']:
                         try:
                             if flat_profile[profile_path] is None:
-                                flat_profile.set(profile_path, 0,
-                                                 flat_event=flat_event, session_id=session.id)
+                                yield FieldChange(
+                                    field=profile_path,
+                                    value=0)
 
                             if operation == 'increment':
-                                flat_profile.set(profile_path,
-                                                 flat_profile[profile_path] + float(event_path),
-                                                 flat_event=flat_event, session_id=session.id)
+                                yield FieldChange(
+                                    field=profile_path,
+                                    value=flat_profile[profile_path] + float(event_path)
+                                )
                             else:
-                                flat_profile.set(profile_path,
-                                                 flat_profile[profile_path] - float(event_path),
-                                                 flat_event=flat_event, session_id=session.id)
+                                yield FieldChange(
+                                    field=profile_path,
+                                    value=flat_profile[profile_path] - float(event_path)
+                                )
 
                         except Exception:
                             raise AssertionError(
                                 f"Can not add increment/decrement {flat_event[event_path]} "
                                 f"to {flat_profile[profile_path]} at profile@{profile_path}")
 
-    return flat_profile

@@ -182,14 +182,14 @@ class FlatEntity(Dotty):
             self._changes.add(key, value, old_value, ignore=('metadata.fields', 'operation'))
         super().__setitem__(key, value)
 
-    def set(self, key, value, session_id: Optional[str] = None, flat_event = None):
+    def set(self, key, value, session_id: Optional[str] = None, event_type: Optional[str] = None):
         if self._changes:
             old_value = self.get(key, None)
             self._changes.add(key,
                               value,
                               old_value,
                               session_id,
-                              flat_event,
+                              event_type,
                               ignore=('metadata.fields', 'operation')
                               )
         super().__setitem__(key, value)

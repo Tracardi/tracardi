@@ -39,7 +39,7 @@ class FieldUpdateLogger:
             value,
             old_value,
             session_id: Optional[str] = None,
-            flat_event = None,
+            event_type: Optional[str] = None,
             ignore: Tuple[str, ...] = None):
 
         if ignore and field.startswith(ignore):

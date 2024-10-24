@@ -2,11 +2,9 @@ from collections import defaultdict
 
 import json
 
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Generator
 
 from .entity import Entity, FlatEntity
-
-
 
 
 class FlatEvent(FlatEntity):
@@ -54,6 +52,10 @@ class FlatEvents(list):
         for flat_event in self:
             _indexed_flat_events[flat_event.type].append(flat_event)
         return _indexed_flat_events
+
+    def get_event_types(self) -> Generator[str, None, None]:
+        for flat_event in self:
+            yield flat_event.type
 
 
 class EventDict(dict):
