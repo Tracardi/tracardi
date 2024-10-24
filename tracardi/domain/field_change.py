@@ -6,7 +6,6 @@ class FieldChange(BaseModel):
     field: str
     value: Optional[Any] = None
 
-
 class ProfileFieldChanges(BaseModel):
     entity: str
     session_id: Optional[str] = None
