@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import json
 
-from typing import Optional, List, Dict, Generator
+from typing import Optional, List, Dict, Generator, Tuple
 
 from .entity import Entity, FlatEntity
 
@@ -56,6 +56,10 @@ class FlatEvents(list):
     def get_event_types(self) -> Generator[str, None, None]:
         for flat_event in self:
             yield flat_event.type
+
+    def get_id_type_and_properties(self) -> Generator[Tuple[str, str, dict], None, None]:
+        for flat_event in self:
+            yield flat_event.id, flat_event.type, flat_event.properties
 
 
 class EventDict(dict):

@@ -8,6 +8,7 @@ class FieldChange(BaseModel):
 
 
 class ProfileFieldChanges(BaseModel):
+    entity: str
     session_id: Optional[str] = None
     event_type: Optional[str] = None
     changes: List[FieldChange]
