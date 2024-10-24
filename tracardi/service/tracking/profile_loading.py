@@ -17,11 +17,13 @@ async def load_profile_and_session(
 
     # Check if profile should have static ID
 
-    flat_profile, session = await tracker_payload.get_profile_and_session(
-        session,
-        is_static_profile_id,
-        tracker_payload.profile_less
-    )
+    if tracker_payload.profile_less is True:
+        flat_profile = None
+    else:
+        flat_profile, session = await tracker_payload.get_profile_and_session(
+            session,
+            is_static_profile_id
+        )
 
     # AT THIS POINT Profile is None only if is profile-less
 

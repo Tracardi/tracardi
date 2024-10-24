@@ -3,13 +3,14 @@ from urllib.parse import urlparse, ParseResult
 from user_agents.parsers import UserAgent
 
 from com_tracardi.service.tracking.domain.cross_domain import CrossDomainModel
+from com_tracardi.service.tracking.domain.profile_loader import ProfileLoaderConfig
 from tracardi.service.utils.date import now_in_utc
 
 import time
 
 import json
 from hashlib import sha1
-from typing import Union, Optional, List, Any, Tuple, Generator
+from typing import Union, Optional, List, Any, Tuple, Generator, Set
 from uuid import uuid4
 
 from dotty_dict import dotty
@@ -423,6 +424,29 @@ class TrackerPayload(BaseModel):
             return ttl > 0
         return False
 
+    def to_profile_loading_settings(self, session, is_static) -> ProfileLoaderConfig:
+        insert, update, create = self._get_times()
+        return ProfileLoaderConfig(
+            session=session,
+            profile_id = get_entity_id(self.profile),
+            is_static = is_static,
+            insert=insert,
+            update=update,
+            create=create
+        )
+
+    def _get_times(self):
+        if self.session and self.session.metadata:
+            insert = self.session.metadata.insert
+            update = self.session.metadata.update
+            create = self.session.metadata.create
+        else:
+            insert = None
+            update = None
+            create = None
+
+        return insert, update, create
+
     def to_cross_domain_model(self, allowed_bridges, is_static_profile_id) -> CrossDomainModel:
         ttl = 15 * 60
         if self.source.config:
@@ -449,14 +473,7 @@ class TrackerPayload(BaseModel):
 
         session_id = get_entity_id(self.session)
         profile_id= get_entity_id(self.profile)
-        if self.session and self.session.metadata:
-            insert = self.session.metadata.insert
-            update = self.session.metadata.update
-            create = self.session.metadata.create
-        else:
-            insert = None
-            update = None
-            create = None
+        insert, update, create = self._get_times()
 
         return session_id, profile_id, insert, update, create
 
@@ -642,11 +659,15 @@ class TrackerPayload(BaseModel):
 
         return flat_profile, session
 
+    def get_profile_ids(self) -> Set[str]:
+        if isinstance(self.profile, PrimaryEntity) and self.profile.ids:
+            return set(self.profile.ids)
+        return set()
+
     async def get_profile_and_session(
             self,
             session: Session,
-            static: bool,
-            profile_less
+            static: bool
     ) -> Tuple[Optional[FlatProfile], Session]:
 
         """
@@ -655,9 +676,6 @@ class TrackerPayload(BaseModel):
 
         if session is None:  # loaded session is empty
             raise ValueError("Session must exist at this point")
-
-        if profile_less is True:
-            return None, session
 
         # There is profile
 

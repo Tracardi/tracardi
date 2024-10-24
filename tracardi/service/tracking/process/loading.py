@@ -14,7 +14,7 @@ async def tracker_loading(tracker_payload: TrackerPayload,
 
     # We need profile and session before async
 
-    session, tracker_payload = await load_or_create_session_1(*tracker_payload.for_session_creation())
+    session = await load_or_create_session_1(*tracker_payload.for_session_creation())
 
     # -----------------------------------
     # Profile Loading

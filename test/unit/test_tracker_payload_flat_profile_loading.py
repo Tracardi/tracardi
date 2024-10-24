@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
+from tracardi.context import ServerContext, Context
 from tracardi.domain.entity import Entity, PrimaryEntity
 from tracardi.domain.event_metadata import EventPayloadMetadata
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -29,13 +30,12 @@ async def test_get_profile_and_session():
     # Mock session and profile
     session = Session(id="session-123", profile=Entity(id=profile_id), metadata=SessionMetadata())
     static = False
-    profile_less = False
 
     tracker_payload._get_profile = AsyncMock(return_value=(FlatProfile(dict(id="2")), session))
     tracker_payload._has_profile_id_in_session = MagicMock(return_value=True)
 
     # Act
-    flat_profile, session_result = await tracker_payload.get_profile_and_session(session, static, profile_less)
+    flat_profile, session_result = await tracker_payload.get_profile_and_session(session, static)
 
     # Assert
     assert isinstance(flat_profile, FlatProfile), "Profile should be of type FlatProfile"
@@ -46,31 +46,33 @@ async def test_get_profile_and_session():
 
 @pytest.mark.asyncio
 async def test_get_profile_and_session_with_profile_less():
-    # Arrange
-    profile_id = "2"
-    tracker_payload = TrackerPayload(
-        source=Entity(id="1"),
-        session=None,
-        metadata=EventPayloadMetadata(time=Time()),
-        profile=None,
-        context={},
-        request={},
-        properties={},
-        events=[],
-        options={},
-        profile_less=True
-    )
 
-    session = Session(id="session-456", profile=Entity(id=profile_id), metadata=SessionMetadata())
-    static = False
-    profile_less = True
+    with ServerContext(Context(production=True)):
 
-    # Act
-    profile, session_result = await tracker_payload.get_profile_and_session(session, static, profile_less)
+        # Arrange
+        profile_id = "2"
+        tracker_payload = TrackerPayload(
+            source=Entity(id="1"),
+            session=None,
+            metadata=EventPayloadMetadata(time=Time()),
+            profile=None,
+            context={},
+            request={},
+            properties={},
+            events=[],
+            options={},
+            profile_less=True
+        )
 
-    # Assert
-    assert profile is None, "Profile should be None when profile_less is True"
-    assert session_result.id == "session-456", "Session ID should match the expected value"
+        session = Session(id="session-456", profile=Entity(id=profile_id), metadata=SessionMetadata())
+        static = False
+
+        # Act
+        profile, session_result = await tracker_payload.get_profile_and_session(session, static)
+
+        # Assert
+        assert profile is None, "Profile should be None when profile_less is True"
+        assert session_result.id == "session-456", "Session ID should match the expected value"
 
 
 @pytest.mark.asyncio
@@ -93,13 +95,12 @@ async def test_get_profile_and_session_with_static():
     # Mock session and profile
     session = Session(id="session-789", profile=Entity(id=profile_id), metadata=SessionMetadata())
     static = True
-    profile_less = False
 
     tracker_payload._get_profile = AsyncMock(return_value=(FlatProfile(dict(id=profile_id)), session))
     tracker_payload._has_profile_id_in_session = MagicMock(return_value=True)
 
     # Act
-    flat_profile, session_result = await tracker_payload.get_profile_and_session(session, static, profile_less)
+    flat_profile, session_result = await tracker_payload.get_profile_and_session(session, static)
 
     # Assert
     assert isinstance(flat_profile, FlatProfile), "Profile should be of type FlatProfile"
