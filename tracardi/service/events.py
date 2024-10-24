@@ -155,7 +155,7 @@ def copy_default_event_to_profile(copy_schema: dict,
                         # Convert profile property to list if string, int, etc.
                         if not flat_profile.instanceof(profile_path, list):
                             # Must have some value, not None, ""
-                            if flat_profile[profile_path]:
+                            if flat_profile.has(profile_path):
                                 flat_profile.set(profile_path,
                                                  flat_profile[profile_path],
                                                  flat_event=flat_event, session_id=session.id)

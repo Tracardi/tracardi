@@ -20,12 +20,12 @@ def get_continent(tracker_payload) -> Optional[str]:
     return None
 
 
-def get_spoken_languages(session: Session, tracker_payload: TrackerPayload) -> Tuple[list, list]:
+def get_spoken_languages(session: Session, request: dict) -> Tuple[list, list]:
     spoken_languages = []
     language_codes = []
     try:
-        if 'headers' in tracker_payload.request and 'accept-language' in tracker_payload.request['headers']:
-            languages = parse_accept_language(tracker_payload.request['headers']['accept-language'])
+        if 'headers' in request and 'accept-language' in request['headers']:
+            languages = parse_accept_language(request['headers']['accept-language'])
             if languages:
                 spoken_lang_codes = [language for (language, _) in languages if len(language) == 2]
                 for lang_code in spoken_lang_codes:

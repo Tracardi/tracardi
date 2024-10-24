@@ -4,6 +4,7 @@ from user_agents.parsers import UserAgent
 
 from com_tracardi.service.tracking.domain.cross_domain import CrossDomainModel
 from com_tracardi.service.tracking.domain.profile_loader import ProfileLoaderConfig
+from com_tracardi.service.tracking.domain.session_compute_data import SessionComputeData
 from tracardi.service.utils.date import now_in_utc
 
 import time
@@ -295,6 +296,11 @@ class TrackerPayload(BaseModel):
 
         return self.options[key]
 
+    def get_channel(self) -> Optional[str]:
+        if isinstance(self.source, EventSource):
+            return self.source.channel
+        return None
+
     def is_debugging_on(self) -> bool:
         return tracardi.track_debug and self.is_on('debugger', default=False)
 
@@ -423,6 +429,14 @@ class TrackerPayload(BaseModel):
             ttl = int(self.source.config.get('device_fingerprint_ttl', 30))
             return ttl > 0
         return False
+
+    def to_session_compute_data(self) -> SessionComputeData:
+        return SessionComputeData(
+            channel=self.get_channel(),
+            context=self.context,
+            request=self.request,
+            properties=self.properties
+        )
 
     def to_profile_loading_settings(self, session, is_static) -> ProfileLoaderConfig:
         insert, update, create = self._get_times()

@@ -12,6 +12,7 @@ from tracardi.service.utils.getters import get_entity_id
 logger = get_logger(__name__)
 
 
+# TODO Remove after 2024-12-01
 def _copy_tracker_payload_session_metadata(tracker_payload: TrackerPayload, session: Session) -> Session:
     if tracker_payload.session and tracker_payload.session.metadata:
         if tracker_payload.session.metadata.insert:
@@ -23,7 +24,7 @@ def _copy_tracker_payload_session_metadata(tracker_payload: TrackerPayload, sess
     return session
 
 
-
+# TODO Remove after 2024-12-01
 def _create_session(tracker_payload: TrackerPayload) -> Session:
     # Artificial session (Mutates tracker Payload)
 
@@ -48,6 +49,8 @@ def _create_session(tracker_payload: TrackerPayload) -> Session:
 
     return session
 
+
+# TODO Remove after 2024-12-01
 async def load_or_create_session(tracker_payload: TrackerPayload) -> Tuple[Session, TrackerPayload]:
     session_id = get_entity_id(tracker_payload.session)
 
@@ -137,8 +140,8 @@ def _create_session_1(session_id: Optional[str], profile_id: Optional[str], inse
     return session
 
 
-async def load_or_create_session_1(session_id: Optional[str], profile_id: Optional[str], insert, update, create) -> Session:
-
+async def load_or_create_session_1(session_id: Optional[str], profile_id: Optional[str], insert, update,
+                                   create) -> Session:
     if session_id is None or session_id.strip() == "":
         return _create_session_1(session_id, profile_id, insert, update, create)
 

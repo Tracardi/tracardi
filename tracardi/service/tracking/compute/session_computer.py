@@ -197,7 +197,7 @@ def _compute_languages(session, tracker_payload):
     except Exception:
         pass
 
-    spoken_languages, language_codes = get_spoken_languages(session, tracker_payload)
+    spoken_languages, language_codes = get_spoken_languages(session, tracker_payload.request)
     if spoken_languages:
         session.context['language'] = list(set(spoken_languages))
     if language_codes:
