@@ -1,10 +1,7 @@
 from typing import Tuple, List, Optional
 
-from future.backports.email.generator import Generator
-
 from tracardi.config import tracardi
 from tracardi.context import get_context
-from tracardi.domain.field_change import FieldChange
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
@@ -22,7 +19,7 @@ def _compute_profile_properties(flat_profile, session):
     yield from compute_profile_aux_geo_markets(flat_profile, session.context)
 
     # Update profile last geo with session device geo
-    yield from update_profile_last_geo(session, flat_profile)
+    yield from update_profile_last_geo(flat_profile, session.context)
 
     # Update email type
     yield from update_profile_email_type(flat_profile)
@@ -31,7 +28,7 @@ def _compute_profile_properties(flat_profile, session):
     yield from update_profile_visits(session.is_new(), flat_profile)
 
     # Update profile time zone
-    yield from update_profile_time(session.context)
+    yield from update_profile_time(flat_profile, session.context)
 
 
 async def _compute(source,

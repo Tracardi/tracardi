@@ -1,11 +1,13 @@
 from typing import List, Generator, AsyncGenerator
 
+from com_tracardi.service.tracking.compute.geo_location_computer import get_geo_location
 from tracardi.domain import ExtraInfo
 from tracardi.domain.event_compute import EventCompute
 from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.field_change import FieldChange
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
+from tracardi.domain.geo import Geo
 from tracardi.domain.session import Session
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import get_logger
@@ -25,9 +27,11 @@ APPEND = 2
 logger = get_logger(__name__)
 
 
-def update_profile_last_geo(session: Session, flat_profile: FlatProfile) -> Generator[FieldChange, None, None]:
-    if not session.device.geo.is_empty():
-        _geo = session.device.geo.model_dump(mode="json")
+def update_profile_last_geo(flat_profile: FlatProfile, context: dict) -> Generator[FieldChange, None, None]:
+    geo = get_geo_location(context)
+
+    if isinstance(geo, Geo) and  not geo.is_empty():
+        _geo = geo.model_dump(mode="json")
         if not flat_profile.has('data.devices.last.geo', equal=_geo):
             yield FieldChange(
                 field='data.devices.last.geo',
@@ -71,14 +75,16 @@ def update_profile_visits(is_new_session: bool, flat_profile: FlatProfile) -> Ge
             )
 
 
-def update_profile_time(session_context: dict) -> Generator[FieldChange, None, None]:
+def update_profile_time(flat_profile: FlatProfile, session_context: dict) -> Generator[FieldChange, None, None]:
     # Set time zone form session
     if session_context:
         try:
-            yield FieldChange(
-                field='metadata.time.visit.tz',
-                value=session_context['time']['tz']
-            )
+            tz = session_context['time']['tz']
+            if flat_profile.get('metadata.time.visit.tz', None) != tz:
+                yield FieldChange(
+                    field='metadata.time.visit.tz',
+                    value=session_context['time']['tz']
+                )
         except KeyError:
             pass
 
@@ -318,12 +324,13 @@ def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session_context: 
     if 'language' in session_context:
         if flat_profile.instanceof('data.pii.language.spoken', list) and isinstance(session_context['language'],
                                                                                     list):
-
-            unique_values = set(flat_profile['data.pii.language.spoken'] + session_context['language'])
-            yield FieldChange(
-                field='data.pii.language.spoken',
-                value=list(unique_values)
-            )
+            old_values = set(flat_profile.get('data.pii.language.spoken', []))
+            new_values = old_values | set(session_context['language'])
+            if new_values != old_values:
+                yield FieldChange(
+                    field='data.pii.language.spoken',
+                    value=list(new_values)
+                )
         else:
             yield FieldChange(
                 field='data.pii.language.spoken',
@@ -344,7 +351,7 @@ def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session_context: 
             if lang_code in language_countries_dict:
                 markets += language_countries_dict[lang_code]
 
-    if markets:
+    if markets != flat_profile.get('aux.geo.markets', None):
         yield FieldChange(
             field='aux.geo.markets',
             value=markets

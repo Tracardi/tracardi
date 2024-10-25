@@ -447,9 +447,12 @@ class TrackerPayload(BaseModel):
     def to_profile_loading_settings(self, session, is_static) -> ProfileLoaderConfig:
         insert, update, create = self.get_times()
         return ProfileLoaderConfig(
-            session=session,
+            session_id=session.id,
+            session_profile_id=get_entity_id(session.profile),
+            session_context=session.context,
+            is_session_new=session.is_new(),
             profile_id = get_entity_id(self.profile),
-            is_static = is_static,
+            is_profile_static = is_static,
             insert=insert,
             update=update,
             create=create

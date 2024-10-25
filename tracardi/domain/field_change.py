@@ -11,3 +11,6 @@ class ProfileFieldChanges(BaseModel):
     session_id: Optional[str] = None
     event_type: Optional[str] = None
     changes: List[FieldChange]
+
+    def has_changes(self) -> bool:
+        return bool(self.changes)
