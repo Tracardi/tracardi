@@ -19,6 +19,8 @@ from pydantic import PrivateAttr, BaseModel, ConfigDict
 from user_agents import parse
 
 from tracardi.config import tracardi
+from .application import Application
+from .device import Device
 from .. import ExtraInfo
 from ..request import Request
 from ...exceptions.log_handler import get_logger
@@ -72,6 +74,8 @@ class TrackerPayload(BaseModel):
 
     metadata: Optional[EventPayloadMetadata] = None
     profile: Optional[PrimaryEntity] = None
+    app: Optional[Application] = None
+    device: Optional[Device] = None
     context: Optional[dict] = {}
     properties: Optional[dict] = {}
     request: Optional[dict] = {}
@@ -86,6 +90,8 @@ class TrackerPayload(BaseModel):
 
         if data.get('context', None) is None:
             data['context'] = {}
+
+        # TODO Rewrite context to device and app
 
         data['metadata'] = EventPayloadMetadata(
             time=Time(
@@ -233,7 +239,7 @@ class TrackerPayload(BaseModel):
         return len([event.type for event in self.events if event.type == event_type]) > 0
 
     def has_profile(self) -> bool:
-        return isinstance(self.profile, Entity)
+        return isinstance(self.profile, Entity) and bool(self.profile.id)
 
     def set_ephemeral(self, flag=True):
         self.options.update({
@@ -439,7 +445,7 @@ class TrackerPayload(BaseModel):
         )
 
     def to_profile_loading_settings(self, session, is_static) -> ProfileLoaderConfig:
-        insert, update, create = self._get_times()
+        insert, update, create = self.get_times()
         return ProfileLoaderConfig(
             session=session,
             profile_id = get_entity_id(self.profile),
@@ -449,7 +455,7 @@ class TrackerPayload(BaseModel):
             create=create
         )
 
-    def _get_times(self):
+    def get_times(self):
         if self.session and self.session.metadata:
             insert = self.session.metadata.insert
             update = self.session.metadata.update
@@ -487,7 +493,7 @@ class TrackerPayload(BaseModel):
 
         session_id = get_entity_id(self.session)
         profile_id= get_entity_id(self.profile)
-        insert, update, create = self._get_times()
+        insert, update, create = self.get_times()
 
         return session_id, profile_id, insert, update, create
 
