@@ -1,3 +1,4 @@
+import time
 from typing import Optional, Any, List
 from pydantic import BaseModel
 
@@ -5,12 +6,17 @@ from pydantic import BaseModel
 class FieldChange(BaseModel):
     field: str
     value: Optional[Any] = None
+    ts: Optional[float] = None
+
+    def __init__(self, /, **data: Any):
+        super().__init__(**data)
+        self.ts = time.time()
 
 class ProfileFieldChanges(BaseModel):
     entity: str
     session_id: Optional[str] = None
     event_type: Optional[str] = None
-    changes: List[FieldChange]
+    changes: Optional[List[FieldChange]] = []
 
     def has_changes(self) -> bool:
         return bool(self.changes)
