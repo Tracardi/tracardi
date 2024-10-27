@@ -405,6 +405,14 @@ system_settings = [
     ),
     SystemSettings(
         **{
+            "label": "ENABLE_AUDIENCES",
+            "value": tracardi.enable_event_audiences,
+            "desc": "Default: yes. Enables audiences    .",
+            "expose": True
+        }
+    ),
+    SystemSettings(
+        **{
             "label": "ENABLE_EVENT_RESHAPING",
             "value": tracardi.enable_event_reshaping,
             "desc": "Default: yes. Enables event reshaping.",
@@ -429,9 +437,49 @@ system_settings = [
     ),
     SystemSettings(
         **{
+            "label": "ENABLE_EVENT_MAPPING",
+            "value": tracardi.enable_event_mapping,
+            "desc": "Default: yes. Enables event mapping.",
+            "expose": True
+        }
+    ),
+    SystemSettings(
+        **{
+            "label": "ENABLE_EVENT_TO_PROFILE_MAPPING",
+            "value": tracardi.enable_event_to_profile_mapping,
+            "desc": "Default: yes. Enables event to profile mapping.",
+            "expose": True
+        }
+    ),
+    SystemSettings(
+        **{
+            "label": "ENABLE_IDENTIFICATION_POINTS",
+            "value": tracardi.enable_identification_points,
+            "desc": "Default: Yes. Enable identification points.",
+            "expose": True
+        }
+    ),
+    SystemSettings(
+        **{
             "label": "ENABLE_FIELD_UPDATE_LOG",
             "value": tracardi.enable_field_update_log,
             "desc": "Default: Yes. Save timestamps of updated fields."
+        }
+    ),
+    SystemSettings(
+        **{
+            "label": "ENABLE_AUDIENCES",
+            "value": tracardi.enable_audiences,
+            "desc": "Default: Yes. Enable audiences.",
+            "expose": True
+        }
+    ),
+    SystemSettings(
+        **{
+            "label": "ENABLE_DATA_COMPLIANCE",
+            "value": tracardi.enable_data_compliance,
+            "desc": "Default: Yes. Enable consents and data compliance.",
+            "expose": True
         }
     ),
     SystemSettings(
