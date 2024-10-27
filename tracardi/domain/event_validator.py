@@ -41,3 +41,4 @@ class EventValidator(NamedEntityInContext):
     tags: List[str] = []
     validation: ValidationSchema
     enabled: bool = False
+    locked: Optional[bool] = False
