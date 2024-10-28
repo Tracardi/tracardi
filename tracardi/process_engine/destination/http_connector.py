@@ -76,7 +76,7 @@ class HttpConnector(DestinationInterface):
                     "{} values must be strings, `{}` given for {} `{}`".format(label, type(value), label.lower(),
                                                                                name))
 
-    async def _dispatch(self, data, changed_fields: List[dict]):
+    async def _dispatch(self, type: str, data, changed_fields: List[dict]):
         try:
             credentials = self.resource.credentials.test if self.debug is True else self.resource.credentials.production
             credentials = HttpCredentials(**credentials)
@@ -97,12 +97,13 @@ class HttpConnector(DestinationInterface):
                     "changes": changed_fields
                 })
 
-                print(params)
+                headers = dict(config.headers)
+                headers['x-dispatch-type'] = type
 
                 async with session.request(
                         method=config.method,
                         url=url,
-                        headers=config.headers,
+                        headers=headers,
                         cookies=config.cookies,
                         ssl=config.ssl_check,
                         auth=BasicAuth(credentials.username,
@@ -139,8 +140,8 @@ class HttpConnector(DestinationInterface):
 
     async def dispatch_profile(self, data, flat_profile: FlatProfile, session: Optional[Session],
                                changed_fields: List[dict] = None, metadata=None):
-        await self._dispatch(data, changed_fields)
+        await self._dispatch("profile", data, changed_fields)
 
     async def dispatch_event(self, data, flat_profile: Optional[FlatProfile], session: Optional[Session], flat_event: FlatEvent,
                              metadata=None):
-        await self._dispatch(data, [])
+        await self._dispatch("event", data, [])

@@ -24,15 +24,15 @@ async def event_destination_dispatch(flat_profile: Optional[FlatProfile],
     dot = DotAccessor(flat_profile, session)
     for flat_event in flat_events:
 
-        # Convert to Event destination needs it
-        # event = Event(**flat_event.to_dict())
-
         try:
             # Reads from cache
             destinations: List[Destination] = await load_event_destinations(
                 flat_event.type,
                 flat_event.get('source.id')
             )
+
+            if not destinations:
+                continue
 
             dot.set_storage("event", flat_event)
 

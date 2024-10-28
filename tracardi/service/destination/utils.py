@@ -27,8 +27,15 @@ def _get_destination_class(destination: Destination):
     module = import_package(module)
     return load_callable(module, class_name)
 
+async def _check_condition(condition, dot) ->bool:
+    if condition:
+        condition = Condition()
+        return await condition.evaluate(condition, dot)
+    # Return always true is not condition
+    return True
 
-async def _get_destination_dispatchers(destinations: List[Destination], dot, template):
+async def _get_destination_and_resource(destinations: List[Destination], dot: DotAccessor):
+
     for destination in destinations:
 
         if not destination.enabled:
@@ -37,7 +44,6 @@ async def _get_destination_dispatchers(destinations: List[Destination], dot, tem
         # Load resource from cache
         try:
             resource = await load_resource_via_cache(destination.resource.id)
-
             if resource.enabled is False:
                 raise ConnectionError(f"Can't connect to disabled resource: {resource.name}.")
 
@@ -45,15 +51,7 @@ async def _get_destination_dispatchers(destinations: List[Destination], dot, tem
             logger.error(f"Destination `{destination.name}` not triggered. Reason: {str(e)}", exc_info=ExtraInfo.exact('resource-loading', package=__name__))
             continue
 
-        data = template.reshape(reshape_template=destination.mapping)
-
-        if destination.condition:
-            condition = Condition()
-            condition_result = await condition.evaluate(destination.condition, dot)
-            if condition_result:
-                yield destination, resource, data
-        else:
-            yield destination, resource, data
+        yield destination, resource
 
 
 async def get_dispatch_destination_and_data(
@@ -61,16 +59,17 @@ async def get_dispatch_destination_and_data(
         destinations: List[Destination],
         debug: bool):
 
-    template = DictTraverser(dot, default=None)
+    if not destinations:
+        return
 
-    async for destination, resource, data in _get_destination_dispatchers(destinations,
-                                                                          dot,
-                                                                          template):  # type: Destination, Resource, Any
-        destination_class = _get_destination_class(destination)
-        destination_instance = destination_class(debug, resource, destination)  # type: DestinationInterface
-        reshaped_data = template.reshape(reshape_template=destination.mapping)
+    dict_traverser = DictTraverser(dot, default=None)
 
-        yield destination_instance, reshaped_data
+    async for destination, resource in _get_destination_and_resource(destinations,
+                                                                          dot):  # type: Destination, Resource, Any
+        if await _check_condition(destination.condition, dot):
+            destination_class = _get_destination_class(destination)
+            destination_instance = destination_class(debug, resource, destination)  # type: DestinationInterface
+            yield destination_instance, dict_traverser.reshape(reshape_template=destination.mapping)
 
 
 def get_destination_types():
