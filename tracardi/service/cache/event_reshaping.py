@@ -3,8 +3,7 @@ from typing import List, Optional
 from tracardi.config import memory_cache
 from tracardi.domain.event_reshaping_schema import EventReshapingSchema
 from tracardi.service.decorators.async_cache import AsyncCache
-from tracardi.service.storage.mysql.mapping.event_reshaping_mapping import map_to_event_reshaping
-from tracardi.service.storage.mysql.service.event_reshaping_service import EventReshapingService
+from tracardi.service.storage.mysql.interface import event_reshaping_dao
 
 
 @AsyncCache(memory_cache.event_reshaping_cache_ttl,
@@ -14,8 +13,7 @@ from tracardi.service.storage.mysql.service.event_reshaping_service import Event
             return_cache_on_error=True
             )
 async def load_and_convert_reshaping(event_type) -> Optional[List[EventReshapingSchema]]:
-    ers = EventReshapingService()
-    reshape_schemas = await ers.load_by_event_type(event_type)
-    if reshape_schemas.exists():
-        return list(reshape_schemas.map_to_objects(map_to_event_reshaping))
+    reshape_schemas, total = await event_reshaping_dao.load_event_reshaping_by_event_type(event_type)
+    if reshape_schemas:
+        return reshape_schemas
     return None

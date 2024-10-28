@@ -24,7 +24,7 @@ class EventReshapingService(TableService):
     async def insert(self, event_reshaping: EventReshapingSchema):
         return await self._replace(EventReshapingTable, map_to_event_reshaping_table(event_reshaping))
 
-    async def load_by_event_type(self, event_type: str, only_enabled: bool = True):
+    async def load_by_event_type(self, event_type: str, only_enabled: bool = True) -> SelectResult:
         if only_enabled:
             where = where_tenant_and_mode_context(
                 EventReshapingTable,
