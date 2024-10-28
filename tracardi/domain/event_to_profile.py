@@ -42,6 +42,7 @@ class EventToProfile(NamedEntityInContext):
     event_to_profile: Optional[List[EventToProfileMap]] = []
     tags: List[str] = []
     build_in: Optional[bool] = False
+    locked: Optional[bool] = False
 
 
     def items(self):

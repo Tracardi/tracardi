@@ -3,11 +3,12 @@ from typing import List, Tuple, Optional
 from tracardi.domain.destination import Destination
 from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination
 from tracardi.service.storage.mysql.service.destination_service import DestinationService
+from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
 ds = DestinationService()
 
 
-def _records(records) -> Tuple[List[Destination], int]:
+def _records(records: SelectResult) -> Tuple[List[Destination], int]:
     if not records.exists():
         return [], 0
 
