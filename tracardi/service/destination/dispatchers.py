@@ -43,7 +43,7 @@ async def event_destination_dispatch(flat_profile: Optional[FlatProfile],
                 await destination_instance.dispatch_event(reshaped_data,
                                                           flat_profile=flat_profile,
                                                           session=session,
-                                                          event=flat_event,
+                                                          flat_event=flat_event,
                                                           metadata=metadata)
         except Exception as e:
             logger.error(
