@@ -3,9 +3,7 @@ from typing import List
 from tracardi.config import memory_cache
 from tracardi.domain.event_validator import EventValidator
 from tracardi.service.decorators.async_cache import AsyncCache
-from tracardi.service.storage.mysql.mapping.event_validation_mapping import map_to_event_validation
-from tracardi.service.storage.mysql.service.event_validation_service import EventValidationService
-
+from tracardi.service.storage.mysql.interface import event_validation_dao
 
 @AsyncCache(memory_cache.event_validation_cache_ttl,
             timeout=.5,
@@ -13,5 +11,5 @@ from tracardi.service.storage.mysql.service.event_validation_service import Even
             return_cache_on_error=True
             )
 async def load_event_validation(event_type: str) -> List[EventValidator]:
-    evs = EventValidationService()
-    return list((await evs.load_by_event_type(event_type, only_enabled=True)).map_to_objects(map_to_event_validation))
+    records, _ = await event_validation_dao.load_by_event_type(event_type, only_enabled=True)
+    return records

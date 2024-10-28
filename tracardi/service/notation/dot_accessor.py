@@ -62,16 +62,11 @@ class DotAccessor:
                     if value in self.storage[prefix]:
                         return self.storage[prefix][value]
                     else:
-                        raise KeyError(f"No key {value} in {prefix}")
+                        raise KeyError(f"Invalid data reference. Dot notation `{prefix}{value}` could not find data. ")
                 return value
-            except KeyError as e:
-                raise KeyError(
-                    f"Invalid data reference. Dot notation `{prefix}{value}` could not access data. "
-                    f"The reason for this may be that there is no data in {value} in `{prefix.strip('@')}. "
-                    f"Error details: {str(e)}")
             except TypeError as e:
-                raise KeyError("Invalid dot notation. You are trying to access {} "
-                               "when it its value is not a dictionary `{}`.".format(value, str(e)))
+                raise KeyError(f"Invalid dot notation. You are trying to access {value} "
+                               f"when it its value is not a dictionary. Details: `{str(e)}`.")
 
         return NotDotNotation()
 
@@ -169,7 +164,7 @@ class DotAccessor:
                 _value = 'unknown'
             raise ValueError(
                 f"Invalid data reference. Dot notation `{key}` could not access data. The reason for this may be that "
-                f"there is no data in {_source} at `{_value}. " +
+                f"there is no data in {_source} at `{_value}`. " +
                 "Please start dotted path with one of the accessors: [profile@, session@, payload@, event@] ")
 
     def __setitem__(self, key, value):

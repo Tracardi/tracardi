@@ -13,7 +13,7 @@ from tracardi.service.storage.mysql.interface import event_mapping_dao
             return_cache_on_error=True
             )
 async def load_event_mapping(event_type_id: str) -> Optional[EventTypeMetadata]:
-    mappings, _ = await event_mapping_dao.load_by_event_type_id(event_type_id, only_enabled=True)
+    mappings = await event_mapping_dao.load_by_event_type_id(event_type_id, only_enabled=True)
     if not mappings:
         return None
     return mappings

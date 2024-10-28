@@ -108,3 +108,36 @@ def test_if_dict_assigned_can_be_accessed():
         }
     })
     assert a['A.B.C.D'] == 1
+
+
+def test_del1_data():
+    a = {
+        "A": {
+            "B": {
+                "C": {
+                    "D": 1,
+                    "E": 2
+                }
+            }
+        }
+    }
+    a = dotty(a)
+    del a['A.B.C.D']
+    assert a.to_dict() == {'A': {'B': {'C': {"E": 2}}}}
+    del a['A.B.C.E']
+    assert a.to_dict() == {}
+
+
+def test_del2_data():
+    a = {
+        "A": {
+            "B": {
+                "C": {
+                    "D": 1
+                }
+            }
+        }
+    }
+    a = dotty(a)
+    del a['A.B.C.D']
+    assert a.to_dict() == {}
