@@ -17,5 +17,5 @@ async def load_and_convert_reshaping(event_type) -> Optional[List[EventReshaping
     ers = EventReshapingService()
     reshape_schemas = await ers.load_by_event_type(event_type)
     if reshape_schemas.exists():
-        return reshape_schemas.map_to_objects(map_to_event_reshaping)
+        return list(reshape_schemas.map_to_objects(map_to_event_reshaping))
     return None
