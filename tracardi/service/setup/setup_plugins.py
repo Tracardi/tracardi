@@ -776,7 +776,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
 
     "tracardi.process_engine.action.v1.connectors.elasticsearch.write_local.plugin": PluginMetadata(
         test=PluginTest(
-            init={'index': '', 'documents':''},
+            init={'index': '', 'documents':'', 'identifier':''},
             resource=None)
     ),
 

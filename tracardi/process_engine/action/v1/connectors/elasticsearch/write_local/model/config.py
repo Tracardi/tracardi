@@ -9,6 +9,7 @@ class Config(PluginConfig):
     index: str
     documents: str
     source: NamedEntity
+    identifier: str
     log: Optional[bool] = False
 
     @field_validator("index")

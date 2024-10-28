@@ -30,10 +30,19 @@ class WriteLocalDatabase(ActionRunner):
             
             index=dot[self.config.index]
             documents=dot[self.config.documents]
+            identifier=dot[self.config.identifier]
             
             if isinstance(documents, str):
                 documents = json.loads(documents)
             
+            if isinstance(documents, list) and identifier:
+                documents = [{identifier: item} for item in documents]          
+                
+            if identifier:
+                for item in documents:
+                    if identifier in item:
+                        item["_id"] = item[identifier]
+
             result = await raw_db.bulk_upsert(
                     index=index,
                     data=documents   
@@ -89,7 +98,15 @@ def register() -> Plugin:
                             FormField(
                                 id="documents",
                                 name="Documents",
-                                description="The documents to be upserted.",
+                                description="The documents to be upserted/inserted.",
+                                component=FormComponent(type="dotPath", props={
+                                    "label": "Documents"
+                                })
+                            ),
+                            FormField(
+                                id="identifier",
+                                name="Identifier",
+                                description="The primary key to be used if documents are to be upserted.",
                                 component=FormComponent(type="dotPath", props={
                                     "label": "Documents"
                                 })
