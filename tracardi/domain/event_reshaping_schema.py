@@ -26,3 +26,4 @@ class EventReshapingSchema(NamedEntityInContext):
     tags: List[str] = []
     reshaping: ReshapeSchema
     enabled: bool = False
+    locked: Optional[bool] = False
