@@ -1,5 +1,6 @@
 import asyncio
 import json
+from datetime import datetime
 from json import JSONDecodeError
 
 import aiohttp
@@ -39,6 +40,8 @@ class HttpConfiguration(BaseModel):
     def _convert_params(param):
         if isinstance(param, bool):
             return 1 if param else 0
+        elif isinstance(param, datetime):
+            return str(datetime)
         return param
 
     def get_params(self, body: dict) -> dict:
@@ -57,10 +60,10 @@ class HttpConfiguration(BaseModel):
                 }
 
             return {
-                "json": body
+                "json": json.loads(json.dumps(body, default=str))
             }
         else:
-            return {"data": json.dumps(body)}
+            return {"data": json.dumps(body, default=str)}
 
 
 class HttpConnector(DestinationInterface):
@@ -93,6 +96,8 @@ class HttpConnector(DestinationInterface):
                     "data": data,
                     "changes": changed_fields
                 })
+
+                print(params)
 
                 async with session.request(
                         method=config.method,
