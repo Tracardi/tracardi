@@ -105,6 +105,8 @@ async def event_properties_to_profile(custom_event_to_profile_mapping_schemas: L
         flat_profile,
         session
     ):
+        # Add what event changed it
+        item.event_type = flat_event.type
         yield item
 
 

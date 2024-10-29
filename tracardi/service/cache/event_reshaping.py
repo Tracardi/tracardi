@@ -12,7 +12,7 @@ from tracardi.service.storage.mysql.interface import event_reshaping_dao
             allow_null_values=True,
             return_cache_on_error=True
             )
-async def load_and_convert_reshaping(event_type) -> Optional[List[EventReshapingSchema]]:
+async def load_and_convert_reshaping(event_type: str) -> Optional[List[EventReshapingSchema]]:
     reshape_schemas, total = await event_reshaping_dao.load_event_reshaping_by_event_type(event_type)
     if reshape_schemas:
         return reshape_schemas

@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class FieldChange(BaseModel):
     field: str
     value: Optional[Any] = None
+    event_type: Optional[str] = None
     ts: Optional[float] = None
 
     def __init__(self, /, **data: Any):
@@ -15,7 +16,6 @@ class FieldChange(BaseModel):
 class ProfileFieldChanges(BaseModel):
     entity: str
     session_id: Optional[str] = None
-    event_type: Optional[str] = None
     changes: Optional[List[FieldChange]] = []
 
     def has_changes(self) -> bool:
