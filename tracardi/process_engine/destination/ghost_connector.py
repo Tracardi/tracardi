@@ -31,9 +31,9 @@ class GhostConnector(DestinationInterface):
             logger.error(str(e))
             raise e
 
-    async def dispatch_profile(self, mapped_data, flat_profile: Optional[FlatProfile],  session: Session, changed_fields: List[dict] = None,
+    async def dispatch_profile(self, data, flat_profile: Optional[FlatProfile], changed_fields: List[dict] = None,
                                metadata=None):
-        self._dispatch(payload=mapped_data)
+        self._dispatch(payload=data)
 
-    async def dispatch_event(self, mapped_data, flat_profile: Optional[FlatProfile],  session: Session, flat_event: FlatEvent, metadata=None):
-        self._dispatch(payload=mapped_data)
+    async def dispatch_event(self, data, flat_event: FlatEvent, metadata=None, profile_id: Optional[str] = None, session_id: Optional[str] = None):
+        self._dispatch(payload=data)

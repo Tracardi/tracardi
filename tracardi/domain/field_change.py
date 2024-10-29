@@ -20,3 +20,6 @@ class ProfileFieldChanges(BaseModel):
 
     def has_changes(self) -> bool:
         return bool(self.changes)
+
+    def get_as_list(self) -> List[dict]:
+        return [item.model_dump() for item in self.changes]

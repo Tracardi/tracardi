@@ -1,18 +1,59 @@
-from typing import Optional, List
+from typing import Optional, List, AsyncGenerator, Dict, Tuple
 
 from tracardi.domain import ExtraInfo
+from tracardi.domain.destination_work_package import DestinationWorkPackage
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.session import Session
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import get_logger
+from tracardi.process_engine.destination.destination_interface import DestinationInterface
 from tracardi.service.cache.destinations import load_profile_destinations, load_event_destinations
 from tracardi.domain.destination import Destination
-from tracardi.service.destination.utils import get_dispatch_destination_and_data
+from tracardi.service.destination.utils import get_destination_data
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.utils.getters import get_entity_id
 
 logger = get_logger(__name__)
+
+
+async def yield_event_destination_work_package(flat_events: List[FlatEvent],
+                                               flat_profile: Optional[FlatProfile] = None,
+                                               session: Optional[Session] = None,
+                                               ) -> AsyncGenerator[Tuple[FlatEvent, DestinationWorkPackage], None]:
+
+    dot = DotAccessor(flat_profile, session)
+    for flat_event in flat_events:
+
+        try:
+            # Reads from cache
+            destinations: List[Destination] = await load_event_destinations(
+                flat_event.type,
+                flat_event.get('source.id')
+            )
+
+            if not destinations:
+                continue
+
+            dot.set_storage("event", flat_event)
+
+            async for destination_work_package in get_destination_data(destinations, dot):
+                yield flat_event, destination_work_package
+
+
+        except Exception as e:
+            logger.error(
+                str(e),
+                extra=ExtraInfo.exact(
+                    flow_id=None,
+                    node_id=None,
+                    event_id=get_entity_id(flat_event),
+                    profile_id=get_entity_id(flat_profile),
+                    origin='profile-destination',
+                    package=__name__,
+                    traceback=get_traceback(e)
+                )
+            )
 
 
 async def event_destination_dispatch(flat_profile: Optional[FlatProfile],
@@ -36,11 +77,11 @@ async def event_destination_dispatch(flat_profile: Optional[FlatProfile],
 
             dot.set_storage("event", flat_event)
 
-            async for destination_instance, reshaped_data in get_dispatch_destination_and_data(
-                    dot,
-                    destinations,
-                    debug):
-                await destination_instance.dispatch_event(reshaped_data,
+            async for destination_work_package in get_destination_data(destinations, dot):
+
+                destination_instance = destination_work_package.get_destination_instance(debug)  # type: DestinationInterface
+
+                await destination_instance.dispatch_event(destination_work_package.data,
                                                           flat_profile=flat_profile,
                                                           session=session,
                                                           flat_event=flat_event,
@@ -61,21 +102,20 @@ async def event_destination_dispatch(flat_profile: Optional[FlatProfile],
 
 
 async def profile_destination_dispatch(flat_profile: Optional[FlatProfile],
-                                       session: Optional[Session],
                                        changed_fields: List[dict],
                                        debug: bool,
                                        metadata: dict = None):  # debug is used to find out which resource to use.
 
-    dot = DotAccessor(flat_profile, session)
+    dot = DotAccessor(flat_profile)
     destinations: List[Destination] = await load_profile_destinations()
 
-    async for destination_instance, reshaped_data in get_dispatch_destination_and_data(dot, destinations, debug):
+    async for destination_work_package in get_destination_data(destinations, dot):
         try:
-            logger.info(f"Dispatching {destination_instance}. Profile id: {get_entity_id(flat_profile)}.")
+            destination_instance = destination_work_package.get_destination_instance(debug)  # type: DestinationInterface
+
             await destination_instance.dispatch_profile(
-                reshaped_data,
+                destination_work_package.data,
                 flat_profile=flat_profile,
-                session=session,
                 changed_fields=changed_fields,
                 metadata=metadata
             )

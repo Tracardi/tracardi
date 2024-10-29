@@ -3,11 +3,9 @@ from typing import List, Optional
 from .destination_interface import DestinationInterface
 from ..action.v1.connectors.hubspot.client import HubSpotClient, HubSpotClientException
 from ...domain.destination import Destination
-from ...domain.event import Event
 from tracardi.domain.flat_profile import FlatProfile
 from ...domain.flat_event import FlatEvent
 from ...domain.resource import Resource
-from ...domain.session import Session
 from ...exceptions.log_handler import get_logger
 from tracardi.service.storage.elastic.interface.integration_id import load_integration_id, save_integration_id
 
@@ -121,10 +119,10 @@ class HubSpotConnector(DestinationInterface):
             # Try to update
             await self._update_contact(payload, flat_profile.id, hubspot_id)
 
-    async def dispatch_profile(self, data: dict, flat_profile: Optional[FlatProfile], session: Session, changed_fields: List[dict] = None,
+    async def dispatch_profile(self, data: dict, flat_profile: Optional[FlatProfile], changed_fields: List[dict] = None,
                                metadata=None):
         if flat_profile:
             await self._dispatch(data, flat_profile)
 
-    async def dispatch_event(self, data: dict, flat_profile: Optional[FlatProfile], session: Session, flat_event: FlatEvent, metadata=None):
-        await self._dispatch(data, flat_profile)
+    async def dispatch_event(self, data, flat_event: FlatEvent, metadata=None, profile_id: Optional[str] = None, session_id: Optional[str] = None):
+        raise NotImplemented("Sending events to hubspot is not implemented")

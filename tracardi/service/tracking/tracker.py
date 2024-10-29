@@ -100,7 +100,6 @@ async def os_tracker(
 
         await sync_profile_destination(
             flat_profile,
-            session,
             timestamp_log
         )
 
@@ -142,7 +141,6 @@ async def os_tracker(
 
                 await sync_profile_destination(
                     flat_profile,
-                    session,
                     changed_fields=_changed_fields
                 )
 

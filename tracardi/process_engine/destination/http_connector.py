@@ -10,7 +10,6 @@ from aiohttp import ClientConnectorError, BasicAuth, ContentTypeError
 from pydantic import BaseModel
 
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.process_engine.action.v1.connectors.api_call.model.configuration import Method
@@ -92,10 +91,15 @@ class HttpConnector(DestinationInterface):
             url = str(credentials.url)
 
             async with aiohttp.ClientSession(timeout=timeout) as session:
-                params = config.get_params({
-                    "data": data,
-                    "changes": changed_fields
-                })
+                if changed_fields:
+                    params = config.get_params({
+                        "data": data,
+                        "changes": changed_fields
+                    })
+                else:
+                    params = config.get_params({
+                        "data": data
+                    })
 
                 headers = dict(config.headers)
                 headers['x-dispatch-type'] = type
@@ -138,10 +142,9 @@ class HttpConnector(DestinationInterface):
             logger.error(str(e), e, exc_info=True)
             raise e
 
-    async def dispatch_profile(self, data, flat_profile: FlatProfile, session: Optional[Session],
+    async def dispatch_profile(self, data, flat_profile: FlatProfile,
                                changed_fields: List[dict] = None, metadata=None):
         await self._dispatch("profile", data, changed_fields)
 
-    async def dispatch_event(self, data, flat_profile: Optional[FlatProfile], session: Optional[Session], flat_event: FlatEvent,
-                             metadata=None):
+    async def dispatch_event(self, data, flat_event: FlatEvent, metadata=None, profile_id: Optional[str] = None, session_id: Optional[str] = None):
         await self._dispatch("event", data, [])

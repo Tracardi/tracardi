@@ -1,9 +1,10 @@
-from typing import Optional, List
+from typing import Optional, List, Callable
 from pydantic import field_validator, BaseModel
 from tracardi.domain.entity import Entity
 from tracardi.domain.named_entity import NamedEntity, NamedEntityInContext
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.secrets import b64_decoder, b64_encoder
+from tracardi.service.module_loader import load_callable, import_package
 
 
 class DestinationConfig(BaseModel):
@@ -61,3 +62,17 @@ class Destination(NamedEntityInContext):
                                  "could not parse it. Please see the documentation for the condition syntax.", str(e))
 
         return value
+
+    def _get_class_and_module(self):
+        parts = self.destination.package.split(".")
+        if len(parts) < 2:
+            raise ValueError(f"Can not find class in package on {self.destination.package}")
+        return ".".join(parts[:-1]), parts[-1]
+
+    def get_destination_class(self) -> Callable:
+        module, class_name = self._get_class_and_module()
+        module = import_package(module)
+        return load_callable(module, class_name)
+
+
+

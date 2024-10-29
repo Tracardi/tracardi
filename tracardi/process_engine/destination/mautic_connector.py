@@ -3,10 +3,8 @@ from typing import List, Optional
 from tracardi.service.domain import resource as resource_db
 from .destination_interface import DestinationInterface
 from ..action.v1.connectors.mautic.client import MauticClient, MauticClientAuthException
-from ...domain.event import Event
 from tracardi.domain.flat_profile import FlatProfile
 from ...domain.flat_event import FlatEvent
-from ...domain.session import Session
 
 
 class MauticConnector(DestinationInterface):
@@ -42,11 +40,10 @@ class MauticConnector(DestinationInterface):
 
             await resource_db.save_record(self.resource)
 
-    async def dispatch_profile(self, data, flat_profile: Optional[FlatProfile], session: Session,
+    async def dispatch_profile(self, data, flat_profile: Optional[FlatProfile],
                                changed_fields: List[dict] = None,
                                metadata=None):
         await self._dispatch(data)
 
-    async def dispatch_event(self, data, flat_profile: Optional[FlatProfile], session: Session, flat_event: FlatEvent,
-                             metadata=None):
+    async def dispatch_event(self, data, flat_event: FlatEvent, metadata=None, profile_id: Optional[str] = None, session_id: Optional[str] = None):
         await self._dispatch(data)

@@ -8,7 +8,6 @@ from aiohttp import ClientConnectorError, BasicAuth, ContentTypeError
 from pydantic import BaseModel
 
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.domain.session import Session
 from tracardi.exceptions.log_handler import get_logger
 from .destination_interface import DestinationInterface
 from ...domain import ExtraInfo
@@ -30,7 +29,7 @@ class TracardiApiCredentials(BaseModel):
 
 class TracardiConnector(DestinationInterface):
 
-    async def _dispatch(self, flat_profile: Optional[FlatProfile], session: Optional[Session], flat_event: FlatEvent, metadata, context):
+    async def _dispatch(self, profile_id: Optional[str], session_id: Optional[str], flat_event: FlatEvent, metadata, context):
         try:
             credentials = self.resource.credentials.test if self.debug is True else self.resource.credentials.production
             credentials = TracardiApiCredentials(**credentials)
@@ -47,10 +46,10 @@ class TracardiConnector(DestinationInterface):
                         "id": credentials.source_id
                     },
                     "session": {
-                        "id": session.id
+                        "id": session_id
                     },
                     "profile": {
-                        "id": flat_profile.id
+                        "id": profile_id
                     },
                     "context": context,
                     "properties": {},
@@ -105,13 +104,12 @@ class TracardiConnector(DestinationInterface):
             logger.error(str(e), e, exc_info=True)
             raise e
 
-    async def dispatch_profile(self, data, flat_profile: Optional[FlatProfile], session: Optional[Session],
+    async def dispatch_profile(self, data, flat_profile: Optional[FlatProfile],
                                changed_fields: List[dict] = None, metadata=None):
         logger.error("Tracardi API Destination can be only used with events.", extra=ExtraInfo.build(
             origin="destination",
             profile_id=flat_profile.id
         ))
 
-    async def dispatch_event(self, data, flat_profile: Optional[FlatProfile], session: Optional[Session], flat_event: FlatEvent,
-                             metadata=None):
-        await self._dispatch(flat_profile, session, flat_event, metadata, context=data)
+    async def dispatch_event(self, data, flat_event: FlatEvent, metadata=None, profile_id: Optional[str] = None, session_id: Optional[str] = None):
+        await self._dispatch(profile_id, session_id, flat_event, metadata, context=data)

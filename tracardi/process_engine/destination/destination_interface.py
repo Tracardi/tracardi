@@ -4,7 +4,6 @@ from tracardi.domain.destination import Destination
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.resource import Resource
-from tracardi.domain.session import Session
 
 
 class DestinationInterface:
@@ -14,12 +13,11 @@ class DestinationInterface:
         self.debug = debug
         self.resource = resource
 
-    async def dispatch_profile(self, data, flat_profile: Optional[FlatProfile], session: Optional[Session],
+    async def dispatch_profile(self, data, flat_profile: Optional[FlatProfile],
                                changed_fields: List[dict] = None, metadata=None):
         pass
 
-    async def dispatch_event(self, data, flat_profile: Optional[FlatProfile], session: Optional[Session], flat_event: FlatEvent,
-                             metadata=None):
+    async def dispatch_event(self, data, flat_event: FlatEvent, metadata=None, profile_id: Optional[str] = None, session_id: Optional[str] = None):
         pass
 
     def _get_credentials(self):
