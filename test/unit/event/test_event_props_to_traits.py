@@ -3,11 +3,12 @@ from dotty_dict import Dotty
 
 from com_tracardi.service.event_mapper import map_event_props_to_traits, map_events_tags_and_journey
 from tracardi.domain.event_type_metadata import EventTypeMetadata
+from tracardi.domain.flat_event import FlatEvent
 
 
 @pytest.fixture
 def event_data():
-    return Dotty({
+    return FlatEvent({
         "id": "event-123",
         "properties": {
             "prop1": "value1",
@@ -57,7 +58,7 @@ def event_mapping_disabled():
 def test_map_event_props_to_traits_enabled_mapping(event_data, event_mapping_enabled):
     # Call the function with event mapping enabled
     updated_event = map_event_props_to_traits(event_data, event_mapping_enabled)
-
+    print(updated_event)
     # Check that properties were moved to traits
     assert "trait1" in updated_event["traits"]
     assert updated_event["traits"]["trait1"] == "value1"

@@ -700,6 +700,9 @@ class TrackerPayload(BaseModel):
         if session is None:  # loaded session is empty
             raise ValueError("Session must exist at this point")
 
+        if self.profile_less is True:
+            return None, session
+
         # There is profile
 
         # Load profile

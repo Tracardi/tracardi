@@ -25,6 +25,4 @@ async def tracker_loading(tracker_payload: TrackerPayload,
         tracker_payload
     )
 
-    # TODO update finger print profile id
-
     return flat_profile, session
