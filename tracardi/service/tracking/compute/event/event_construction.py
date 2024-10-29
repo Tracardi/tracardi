@@ -125,7 +125,6 @@ def event_payload_to_event(
             source=source_dict,  # Entity
             config=event_payload.options,
             context=event_payload.context,
-            operation=dict(new=True, update=False),
             tags=dict(values=tuple(event_payload.tags), count=len(event_payload.tags))
         )
 
@@ -142,7 +141,6 @@ def event_payload_to_event(
             source=source_dict,  # Entity
             config=event_payload.options,
             context=event_payload.context,
-            operation=dict(new=True, update=False),
             tags=dict(values=tuple(event_payload.tags), count=len(event_payload.tags))
         )
 
