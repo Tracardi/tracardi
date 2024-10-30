@@ -4,12 +4,15 @@ Version 2.0.1
 
 Version: 1.1.0
 ----------------------------------------------------------
-[ ] - Queueing of the tracker payloads
-[ ] - Bulk event payloads.
-[*] - Removed inject event plugin form workflow
-[*] - Selective auto merging
+[*] - Queueing of the tracker payloads (Now the API can be configured only to queue the payload)
+[*] - Bulk event payloads collection.
+[*] - Removed inject event plugin from workflow
+[*] - APM Selective auto merging (Merge only with selected PII data)
 [*] - Merged APM with Identification Points.
-[*] - Internal process refactored
+[*] - Internal process refactored (allows spreading of the server load for collector, and workflow on different nodes)
+[*] - Standardizing the forms in GUI
+[*] - Referer web page visible in data/events
+[*] - Overall performance boost form 50%-600%
 
 
 Version: 1.0.2
