@@ -220,6 +220,8 @@ class RulesEngine:
                     log_list = flow_invoke_result.log_list
                     post_invoke_event = flow_invoke_result.event
 
+                    # TODO log list not used. All logging inside plugins not visible
+
                     changed_field_timestamps.update(flow_invoke_result.flow.get_changed_fields().get_logged_changes())
 
                     flow_responses.append(flow_invoke_result.flow.response)

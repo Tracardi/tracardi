@@ -21,7 +21,6 @@ class Context:
     version: Optional[str] = None
     errors: int = 0
     warnings: int = 0
-    source_id: Optional[str] = None
     event_type: Optional[str] = None
 
     def __init__(self,
@@ -80,7 +79,6 @@ class Context:
                f"user: {str(self.user)}, " \
                f"tenant: {self.tenant}, " \
                f"version: {self.version}, " \
-               f"source: {self.source_id}, " \
                f"event: {self.event_type}, " \
                f"host: {self.host})"
 
@@ -89,7 +87,6 @@ class Context:
                f"user: {str(self.user)}, " \
                f"tenant: {self.tenant}, " \
                f"version: {self.version}, " \
-               f"source: {self.source_id}, " \
                f"event: {self.event_type}, " \
                f"host: {self.host})"
 

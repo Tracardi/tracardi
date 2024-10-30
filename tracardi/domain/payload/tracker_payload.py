@@ -203,6 +203,12 @@ class TrackerPayload(BaseModel):
                 return True
         return False
 
+    def has_sync_events(self) -> bool:
+        for event_payload in self.events:
+            if not event_payload.is_async():
+                return True
+        return False
+
     def get_event_types(self) -> List[str]:
         return [event_payload.type for event_payload in self.events]
 
@@ -727,28 +733,3 @@ class TrackerPayload(BaseModel):
                     f"Profile ID in session ({session.profile.id}) does not equal to loaded profile ({flat_profile.id}) ")
 
         return flat_profile, session
-
-    # @staticmethod
-    # async def _load_identification_points():
-    #     ips = IdentificationPointService()
-    #     records = await ips.load_enabled(limit=200)
-    #     return records.map_to_objects(map_to_identification_point)
-    #
-    # def _get_valid_identification_points(self,
-    #                                      identification_points: List[IdentificationPoint]):
-    #     for identification_point in identification_points:
-    #         if identification_point.source.id != "" and identification_point.source.id != self.source.id:
-    #             continue
-    #
-    #         if not self.has_type(identification_point.event_type.id):
-    #             continue
-    #
-    #         yield identification_point
-    #
-    # async def get_identification_points(self):
-    #     return self._get_valid_identification_points(await self._load_identification_points())
-    #
-    # @async_cache_for(memory_cache.identification_points_cache_ttl, use_context=True, key_func=_identification_list_key,
-    #                  lock=True)
-    # async def list_identification_points(self):
-    #     return list(await self.get_identification_points())

@@ -118,7 +118,7 @@ class WorkflowManagerAsync:
         else:
             # Routing rules are subject to caching
             wts = WorkflowTriggerService()
-            event_rules = await wts.load_by_source_and_events(self.tracker_payload.source, events)
+            event_rules = await wts.load_by_source_and_events(self.tracker_payload.source.id, events)
 
         return event_rules
 
@@ -129,7 +129,7 @@ class WorkflowManagerAsync:
 
         # Get routing rules if workflow is not disabled
 
-        event_trigger_rules = await self.get_routing_rules(events) if tracardi.enable_workflow else None
+        event_trigger_rules = await self.get_routing_rules(events)
 
         ux = []
         post_invoke_events = None
@@ -140,7 +140,7 @@ class WorkflowManagerAsync:
         try:
             #  If no event_rules for delivered event then no need to run rule invoke
             #  and no need for profile merging
-            if tracardi.enable_workflow and event_trigger_rules is not None:
+            if event_trigger_rules is not None:
 
                 # Skips INVALID events in invoke method
                 rules_engine = RulesEngine(

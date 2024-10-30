@@ -113,36 +113,38 @@ async def os_tracker(
 
         ux = None
         response = None
-        workflow_result = await exec_workflow(
-            get_entity_id(flat_profile),
-            session,
-            flat_events,
-            tracker_payload)
+        if tracardi.enable_workflow:
 
-        if workflow_result is not None:  # Workflow feature enabled
+            workflow_result = await exec_workflow(
+                get_entity_id(flat_profile),
+                session,
+                flat_events,
+                tracker_payload)
 
-            profile, session, events, ux, response, changed_fields, is_wf_triggered = workflow_result
+            if workflow_result is not None:  # Workflow feature enabled
 
-            if is_wf_triggered and bool(changed_fields):
+                profile, session, events, ux, response, changed_fields, is_wf_triggered = workflow_result
 
-                _changed_fields: List[dict] = [
-                    {"field": field, "timestamp": timestamp, "old_value": old_value}
-                    for field, (timestamp, old_value)
-                    in changed_fields.items()]
+                if is_wf_triggered and bool(changed_fields):
 
-                # Save changes to field log
-                if tracardi.enable_field_update_log:
-                    # Save to history if needed (DISABLE to REDO)
-                    # await profile_change_log_worker(_changed_fields)
-                    pass
+                    _changed_fields: List[dict] = [
+                        {"field": field, "timestamp": timestamp, "old_value": old_value}
+                        for field, (timestamp, old_value)
+                        in changed_fields.items()]
 
-                # Dispatch profile changed outbound traffic if profile changed in workflow
-                # Send it SYNCHRONOUSLY
+                    # Save changes to field log
+                    if tracardi.enable_field_update_log:
+                        # Save to history if needed (DISABLE to REDO)
+                        # await profile_change_log_worker(_changed_fields)
+                        pass
 
-                await sync_profile_destination(
-                    flat_profile,
-                    changed_fields=_changed_fields
-                )
+                    # Dispatch profile changed outbound traffic if profile changed in workflow
+                    # Send it SYNCHRONOUSLY
+
+                    await sync_profile_destination(
+                        flat_profile,
+                        changed_fields=_changed_fields
+                    )
 
         return {
             "task": tracker_payload.get_id(),

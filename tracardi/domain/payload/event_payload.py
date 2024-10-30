@@ -79,6 +79,9 @@ class EventPayload(BaseModel):
 
         return self.validation.error is False
 
+    def is_async(self) -> bool:
+        return self.options.get('async', True)
+
     def get_source_id(self) -> str:
         return self._source_id
 

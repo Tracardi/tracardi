@@ -78,7 +78,7 @@ class AsyncCache:
         else:
             result = await self._run(key, func, args, kwargs)
 
-        logger.warning(
+        logger.debug(
             f"Filling for cache {func.__qualname__}{key}. Filled in {time.time() - t:.4f}.")
 
         return result

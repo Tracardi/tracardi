@@ -101,18 +101,19 @@ class Tracker:
                 )
 
             # Only commercial
-            if not tracker_payload.queue_required():
+
+            # Split async and sync events
+            should_run_on_queue = tracker_payload.queue_required() and not tracker_payload.has_sync_events()
+
+            if not should_run_on_queue:
                 # Process without queue
-                return await run_com_tracker(source, tracker_payload, self.tracker_config, tracking_start)
+                return await run_com_tracker(source, tracker_payload, self.tracker_config)
 
             # Queue
             await run_com_tracker_worker(
                 self.tracker_config,
                 tracker_payload,
-                source,
-                tracking_start)
-
-
+                source)
 
             return {}
         finally:
