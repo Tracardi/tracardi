@@ -62,6 +62,11 @@ class MysqlConfig:
         self.mysql_database = env.get('MYSQL_DATABASE', "tracardi")
         self.mysql_echo = env.get('MYSQL_ECHO', "no") == "yes"
 
+        self.pool_size=get_env_as_int('MYSQL_POOL_SIZE', 5)
+        self.pool_max_overflow = get_env_as_int('MYSQL_POOL_MAX_OVERFLOW', 2)
+        self.pool_timeout = get_env_as_int('MYSQL_POOL_TIMEOUT', 3)
+        self.pool_recycle = get_env_as_int('MYSQL_RECYCLE', 1800)
+
         self.mysql_database = self.mysql_database.strip(" /")
 
         self.mysql_database_uri = self.uri(async_driver=True)

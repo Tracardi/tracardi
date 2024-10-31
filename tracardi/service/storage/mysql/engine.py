@@ -24,10 +24,10 @@ class AsyncMySqlEngine(metaclass=Singleton):
         if self.default is None:
             self.default = create_async_engine(
                 mysql.mysql_database_uri,
-                pool_size=3,
-                max_overflow=2,
-                pool_timeout=10,
-                pool_recycle=1800,
+                pool_size=mysql.pool_size,
+                max_overflow=mysql.pool_max_overflow,
+                pool_timeout=mysql.pool_timeout,
+                pool_recycle=mysql.pool_recycle,
                 echo=self.echo)
         return self.default
 
@@ -36,9 +36,9 @@ class AsyncMySqlEngine(metaclass=Singleton):
             db_url = f"{mysql.mysql_database_uri}/{mysql.mysql_database}"
             self.engines[mysql.mysql_database] = create_async_engine(
                 db_url,
-                pool_size=3,
-                max_overflow=2,
-                pool_timeout=10,
-                pool_recycle=1800,
+                pool_size=mysql.pool_size,
+                max_overflow=mysql.pool_max_overflow,
+                pool_timeout=mysql.pool_timeout,
+                pool_recycle=mysql.pool_recycle,
                 echo=self.echo)
         return self.engines[mysql.mysql_database]
