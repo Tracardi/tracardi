@@ -125,8 +125,8 @@ class Tracker:
                     # Calculate and print statistics
                     result = calculate_statistics(_measures)
 
-                print("\nTime Statistics:")
-                print(result)
+                    print("\nTime Statistics:")
+                    print(result)
 
                 context.profiler.reset_measures()
                 _measures = []
