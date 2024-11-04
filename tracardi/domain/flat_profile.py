@@ -75,8 +75,13 @@ class FlatProfile(FlatEntity):
         flat_profile = FlatProfile(
             {
                 "id": str(uuid.uuid4()) if not id else id,
-                "metadata": {"time": {"create": _now,
-                                      "insert": _now}}
+                "metadata": {
+                    "time": {
+                        "create": _now,
+                        "insert": _now,
+                        "update": _now
+                    }
+                }
             }
         )
         flat_profile.fill_meta_data()
