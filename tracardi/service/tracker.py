@@ -1,6 +1,5 @@
 from typing import Optional
 
-from com_tracardi.service.profiler_calculator import calculate_statistics
 from tracardi.context import get_context
 from tracardi.domain.bridges.configurable_bridges import WebHookBridge, RestApiBridge, ConfigurableBridge
 from tracardi.exceptions.exception import BlockedException
@@ -14,6 +13,7 @@ from tracardi.exceptions.log_handler import get_logger
 
 if License.has_license():
     from com_tracardi.workers.collector import run_com_tracker_worker, run_com_tracker
+    from com_tracardi.service.profiler_calculator import calculate_statistics
 else:
     from tracardi.service.tracking.tracker import os_tracker
 
@@ -121,8 +121,9 @@ class Tracker:
             context.profiler.measure('tracker-ends')
             if len(_measures) > 100:
 
-                # Calculate and print statistics
-                result = calculate_statistics(_measures)
+                if License.has_license():
+                    # Calculate and print statistics
+                    result = calculate_statistics(_measures)
 
                 print("\nTime Statistics:")
                 print(result)

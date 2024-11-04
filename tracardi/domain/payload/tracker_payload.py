@@ -1,10 +1,6 @@
 from urllib.parse import urlparse, ParseResult
 
 from user_agents.parsers import UserAgent
-
-from com_tracardi.service.tracking.domain.cross_domain import CrossDomainModel
-from com_tracardi.service.tracking.domain.profile_loader import ProfileLoaderConfig
-from com_tracardi.service.tracking.domain.session_compute_data import SessionComputeData
 from tracardi.service.utils.date import now_in_utc
 
 import time
@@ -39,6 +35,9 @@ from ...service.utils.hasher import get_shadow_session_id
 
 if License.has_service(LICENSE):
     from com_tracardi.bridge.bridges import javascript_bridge
+    from com_tracardi.service.tracking.domain.cross_domain import CrossDomainModel
+    from com_tracardi.service.tracking.domain.profile_loader import ProfileLoaderConfig
+    from com_tracardi.service.tracking.domain.session_compute_data import SessionComputeData
 
 logger = get_logger(__name__)
 
@@ -442,7 +441,7 @@ class TrackerPayload(BaseModel):
             return ttl > 0
         return False
 
-    def to_session_compute_data(self) -> SessionComputeData:
+    def to_session_compute_data(self):
         return SessionComputeData(
             channel=self.get_channel(),
             context=self.context,
@@ -450,7 +449,7 @@ class TrackerPayload(BaseModel):
             properties=self.properties
         )
 
-    def to_profile_loading_settings(self, session, is_static) -> ProfileLoaderConfig:
+    def to_profile_loading_settings(self, session, is_static):
         insert, update, create = self.get_times()
         return ProfileLoaderConfig(
             session_id=session.id,
@@ -476,7 +475,7 @@ class TrackerPayload(BaseModel):
 
         return insert, update, create
 
-    def to_cross_domain_model(self, allowed_bridges, is_static_profile_id) -> CrossDomainModel:
+    def to_cross_domain_model(self, allowed_bridges, is_static_profile_id):
         ttl = 15 * 60
         if self.source.config:
             ttl = int(self.source.config.get('device_fingerprint_ttl', 15 * 60))

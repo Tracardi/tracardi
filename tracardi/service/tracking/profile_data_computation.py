@@ -1,6 +1,5 @@
 from typing import List, Generator, AsyncGenerator
 
-from com_tracardi.service.tracking.compute.geo_location_computer import get_geo_location
 from tracardi.domain import ExtraInfo
 from tracardi.domain.event_compute import EventCompute
 from tracardi.domain.event_to_profile import EventToProfile
@@ -14,6 +13,7 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.service.tracking.compute.geo_location_computer import get_geo_location
 from tracardi.service.tracking.utils.function_call import default_event_call_function
 from tracardi.service.utils.date import now_in_utc
 from tracardi.service.utils.domains import free_email_domains
