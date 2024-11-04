@@ -1,6 +1,5 @@
 from typing import Optional, Tuple, List
 
-from com_tracardi.storage.preconfig.preconfigured_metadata import pc_event_reshaping
 from tracardi.domain.event_reshaping_schema import EventReshapingSchema
 from tracardi.service.storage.mysql.mapping.event_reshaping_mapping import map_to_event_reshaping
 from tracardi.service.storage.mysql.service.event_reshaping_service import EventReshapingService
@@ -22,14 +21,7 @@ async def load_all_event_reshaping(search: str = None, limit: int = None, offset
 
 
 async def load_event_reshaping_by_id(event_reshaping_id: str) -> Optional[EventReshapingSchema]:
-
-    event_reshaping = pc_event_reshaping.get_by_id(event_reshaping_id, EventReshapingSchema)
-
-    if event_reshaping:
-        return event_reshaping
-
     records = await ers.load_by_id(event_reshaping_id)
-
     return records.map_first_to_object(map_to_event_reshaping)
 
 
