@@ -1,5 +1,5 @@
 from collections.abc import AsyncGenerator
-from typing import List, Tuple, Optional, Set
+from typing import List, Tuple, Optional
 
 from tracardi.domain import ExtraInfo
 from tracardi.domain.entity import PrimaryEntity
@@ -252,7 +252,7 @@ async def compute_events(events: List[EventPayload],
                     flat_profile.set(field_change.field,
                                      field_change.value,
                                      session_id=session.id,
-                                     flat_event=flat_event)
+                                     event_type=flat_event.type)
 
         # Convert to event
 
