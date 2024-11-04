@@ -12,7 +12,7 @@ from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 from contextlib import asynccontextmanager
 
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.time.converters import pretty_time_format
+from tracardi.service.time_converters import pretty_time_format
 
 # Cache DB
 cache: Dict[str, MemoryCache] = {}
