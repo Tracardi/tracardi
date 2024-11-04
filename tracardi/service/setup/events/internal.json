@@ -6,8 +6,7 @@
     "properties": {},
     "tags": [
       "event:system"
-    ],
-    "state": "call:tracardi.service.setup.events.journey.logic,session_opened"
+    ]
   },
   {
     "name": "Visit Started",

@@ -65,7 +65,7 @@
       "hit.category": "properties.category"
     },
     "tags": ["activity:browsing", "event:behavioral"],
-    "state": "call:tracardi.service.setup.events.journey.logic,page_view"
+    "state": "awareness"
   },
   {
     "name": "Page Print",

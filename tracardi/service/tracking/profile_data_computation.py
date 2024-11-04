@@ -337,12 +337,6 @@ def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session_context: 
                 value=list(set(session_context['language']))
             )
 
-    if not flat_profile.has('aux.geo'):
-        yield FieldChange(
-            field='aux.geo',
-            value={}
-        )
-
     # Aux markets
 
     markets = []
@@ -351,7 +345,14 @@ def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session_context: 
             if lang_code in language_countries_dict:
                 markets += language_countries_dict[lang_code]
 
-    if markets != flat_profile.get('aux.geo.markets', None):
+    if markets and markets != flat_profile.get('aux.geo.markets', None):
+
+        if not flat_profile.has('aux.geo'):
+            yield FieldChange(
+                field='aux.geo',
+                value={}
+            )
+
         yield FieldChange(
             field='aux.geo.markets',
             value=markets
