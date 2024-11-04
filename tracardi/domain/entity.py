@@ -202,7 +202,7 @@ class FlatEntity(Dotty):
         return self._changes if self._changes is not None else FieldUpdateLogger()
 
     def has_changes(self) -> bool:
-        return self._changes and self._changes.has_changes()
+        return bool(self._changes) and self._changes.has_changes()
 
     def to_json(self):
         """Return wrapped dictionary as json string.

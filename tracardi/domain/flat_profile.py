@@ -92,7 +92,7 @@ class FlatProfile(FlatEntity):
         return flat_profile
 
     def has_not_saved_changes(self) -> bool:
-        return self.is_new() or self.needs_update()
+        return self.is_new() or self.needs_update() or self.has_changes()
 
     def needs_update(self) -> bool:
         return bool(self.get('operation.update', False))

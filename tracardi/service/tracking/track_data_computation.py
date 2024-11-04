@@ -71,6 +71,9 @@ async def _compute(source,
         tracker_payload
     )
 
+    print(1, flat_profile.has_not_saved_changes())
+    print(2, flat_profile.has_changes())
+
     # Caution: After clear session can become None if set sessionSave = False
 
     return flat_profile, session, flat_events, tracker_payload

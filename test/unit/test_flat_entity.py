@@ -2,7 +2,6 @@ import pytest
 from dotty_dict import Dotty
 from unittest.mock import patch
 
-from com_tracardi.storage.starrocks.kasuj import value
 from tracardi.domain.entity import FlatEntity, change_monitor
 from tracardi.service.change_monitoring.field_update_logger import FieldUpdateLogger
 
