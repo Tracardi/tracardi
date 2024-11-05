@@ -232,7 +232,6 @@ class TracardiConfig(metaclass=Singleton):
         self.save_logs = get_env_as_bool('SAVE_LOGS', 'yes')
         self.enable_event_destinations = get_env_as_bool('ENABLE_EVENT_DESTINATIONS', 'yes')
         self.enable_profile_destinations = get_env_as_bool('ENABLE_PROFILE_DESTINATIONS', 'yes')
-        self.enable_event_audiences = get_env_as_bool('ENABLE_AUDIENCES', 'yes')
         self.enable_workflow = get_env_as_bool('ENABLE_WORKFLOW', 'yes')
         self.enable_event_validation = get_env_as_bool('ENABLE_EVENT_VALIDATION', 'yes')
         self.enable_event_reshaping = get_env_as_bool('ENABLE_EVENT_RESHAPING', 'yes')
@@ -241,14 +240,13 @@ class TracardiConfig(metaclass=Singleton):
         self.enable_data_compliance = get_env_as_bool('ENABLE_DATA_COMPLIANCE', 'yes')
         self.enable_event_source_check = get_env_as_bool('ENABLE_EVENT_SOURCE_CHECK', 'yes')
         self.enable_identification_points = get_env_as_bool('ENABLE_IDENTIFICATION_POINTS', 'yes')
+        self.enable_audiences = get_env_as_bool('ENABLE_AUDIENCES', 'yes')
         self.system_events = get_env_as_bool('SYSTEM_EVENTS', 'no')
         self.enable_errors_on_response = get_env_as_bool('ENABLE_ERRORS_ON_RESPONSE', 'yes')
         self.enable_field_update_log = get_env_as_bool('ENABLE_FIELD_UPDATE_LOG', 'no')
         self.disallow_bot_traffic = get_env_as_bool('DISALLOW_BOT_TRAFFIC', 'yes')
         self.keep_profile_in_cache_for = get_env_as_int('KEEP_PROFILE_IN_CACHE_FOR', 60 * 60)
         self.keep_session_in_cache_for = get_env_as_int('KEEP_SESSION_IN_CACHE_FOR', 30 * 60)
-        self.enable_audiences = get_env_as_bool('ENABLE_AUDIENCES', 'yes')
-        self.enable_data_compliance = get_env_as_bool('ENABLE_DATA_COMPLIANCE', 'yes')
 
         self.skip_errors_on_profile_mapping = get_env_as_bool('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no')
 
@@ -258,13 +256,8 @@ class TracardiConfig(metaclass=Singleton):
         self.identification_event_property = env.get('IDENTIFICATION_EVENT_PROPERTY',
                                                      'data.identifier.pk,data.identifier.id,data.contact.email.business,data.contact.email.main,data.contact.email.private,data.contact.phone.business,data.contact.phone.main,data.contact.phone.mobile,data.contact.phone.whatsapp')
 
-        # Not used now
-        self.sync_profile_tracks_max_repeats = get_env_as_int('SYNC_PROFILE_TRACKS_MAX_REPEATS', 10)
-        self.sync_profile_tracks_wait = get_env_as_int('SYNC_PROFILE_TRACKS_WAIT', 1)
-        self.storage_driver = env.get('STORAGE_DRIVER', 'elastic')
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
-        self.server_logging_level = _get_logging_level(
-            env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
+
         self.multi_tenant = get_env_as_bool('MULTI_TENANT', "no")
         self.multi_tenant_manager_url = env.get('MULTI_TENANT_MANAGER_URL', None)
         self.multi_tenant_manager_api_key = env.get('MULTI_TENANT_MANAGER_API_KEY', None)
@@ -280,15 +273,21 @@ class TracardiConfig(metaclass=Singleton):
         self.event_partitioning = env.get('EVENT_PARTITIONING', 'quarter')
         self.profile_partitioning = env.get('PROFILE_PARTITIONING', 'quarter')
         self.session_partitioning = env.get('SESSION_PARTITIONING', 'quarter')
-        self.entity_partitioning = env.get('ITEM_PARTITIONING', 'quarter')
-        self.item_partitioning = env.get('ITEM_PARTITIONING', 'year')
+        self.entity_partitioning = env.get('ENTITY_PARTITIONING', 'quarter')
         self.log_partitioning = env.get('LOG_PARTITIONING', 'month')
-        self.dispatch_log_partitioning = env.get('DISPATCH_LOG_PARTITIONING', 'month')
-        self.console_log_partitioning = env.get('CONSOLE_LOG_PARTITIONING', 'month')
+
         self.user_log_partitioning = env.get('USER_LOG_PARTITIONING', 'year')
         self.field_change_log_partitioning = env.get('FIELD_CHANGE_LOG_PARTITIONING', 'month')
         self.auto_profile_merging = env.get('AUTO_PROFILE_MERGING', 's>a.d-kljsa87^5adh')
         self.apm_on = get_env_as_bool('APM', 'yes')
+
+        # Not used now
+        self.storage_driver = env.get('STORAGE_DRIVER', 'elastic')
+        self.dispatch_log_partitioning = env.get('DISPATCH_LOG_PARTITIONING', 'month')
+        self.console_log_partitioning = env.get('CONSOLE_LOG_PARTITIONING', 'month')
+        self.item_partitioning = env.get('ITEM_PARTITIONING', 'year')
+        self.server_logging_level = _get_logging_level(
+            env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
 
         self._config = None
         self._unset_secrets()

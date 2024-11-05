@@ -96,23 +96,7 @@ system_settings = [
             "desc": "Default: 15. Set cache time for event tagging, indexing, etc. configuration. Set 0 for no caching."
         }
     ),
-    SystemSettings(
-        **{
-            "label": "SYNC_PROFILE_TRACKS_MAX_REPEATS",
-            "value": tracardi.sync_profile_tracks_max_repeats,
-            "desc": "Maximum number of repeated requests the must be synchronized. If this number is crossed then "
-                    "the requests will not be synchronized. Do not set it to big number as this can block server. "
-                    "Default: 10"
-        }
-    ),
-    SystemSettings(
-        **{
-            "label": "SYNC_PROFILE_TRACKS_WAIT",
-            "value": tracardi.sync_profile_tracks_wait,
-            "desc": "Maximum number of seconds to wait between profile synchronization attempts. Profile must be saved "
-                    "before the next rule can be run  on it. Default: 1"
-        }
-    ),
+
     SystemSettings(
         **{
             "label": "MYSQL_HOST",
@@ -201,30 +185,9 @@ system_settings = [
     ),
     SystemSettings(
         **{
-            "label": "ITEM_PARTITIONING",
-            "value": tracardi.item_partitioning,
-            "desc": "Default: year. Determines the partitioning interval for items."
-        }
-    ),
-    SystemSettings(
-        **{
             "label": "LOG_PARTITIONING",
             "value": tracardi.log_partitioning,
             "desc": "Default: month. Log data partitioning frequency."
-        }
-    ),
-    SystemSettings(
-        **{
-            "label": "DISPATCH_LOG_PARTITIONING",
-            "value": tracardi.dispatch_log_partitioning,
-            "desc": "Default: month. Sets how often dispatch logs are partitioned."
-        }
-    ),
-    SystemSettings(
-        **{
-            "label": "CONSOLE_LOG_PARTITIONING",
-            "value": tracardi.console_log_partitioning,
-            "desc": "Default: month. Interval for partitioning console log data."
         }
     ),
     SystemSettings(
@@ -406,7 +369,7 @@ system_settings = [
     SystemSettings(
         **{
             "label": "ENABLE_AUDIENCES",
-            "value": tracardi.enable_event_audiences,
+            "value": tracardi.enable_audiences,
             "desc": "Default: yes. Enables audiences    .",
             "expose": True
         }
@@ -464,14 +427,6 @@ system_settings = [
             "label": "ENABLE_FIELD_UPDATE_LOG",
             "value": tracardi.enable_field_update_log,
             "desc": "Default: Yes. Save timestamps of updated fields."
-        }
-    ),
-    SystemSettings(
-        **{
-            "label": "ENABLE_AUDIENCES",
-            "value": tracardi.enable_audiences,
-            "desc": "Default: Yes. Enable audiences.",
-            "expose": True
         }
     ),
     SystemSettings(
