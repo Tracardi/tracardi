@@ -248,8 +248,6 @@ class TracardiConfig(metaclass=Singleton):
         self.keep_profile_in_cache_for = get_env_as_int('KEEP_PROFILE_IN_CACHE_FOR', 60 * 60)
         self.keep_session_in_cache_for = get_env_as_int('KEEP_SESSION_IN_CACHE_FOR', 30 * 60)
 
-        self.skip_errors_on_profile_mapping = get_env_as_bool('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no')
-
         # Only this event can set hashed ID fo email, phone, etc.
         self.identification_point_type = env.get('IDENTIFICATION_POINT_TYPE', 'restricted')
         self.identification_event_type = env.get('IDENTIFICATION_EVENT_TYPE', None)
@@ -288,6 +286,7 @@ class TracardiConfig(metaclass=Singleton):
         self.item_partitioning = env.get('ITEM_PARTITIONING', 'year')
         self.server_logging_level = _get_logging_level(
             env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
+        self.skip_errors_on_profile_mapping = get_env_as_bool('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no')
 
         self._config = None
         self._unset_secrets()
