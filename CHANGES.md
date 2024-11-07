@@ -2,18 +2,24 @@ Version 2.0.1
 ----------------------------------------------------------
 [ ] New SQL compliant data-warehouse
 
+Version: 1.2.0
+----------------------------------------------------------
+[*] - Property Confirmation Process (PCP)
+
+
 Version: 1.1.0
 ----------------------------------------------------------
+[*] - Internal process refactored (allows spreading of the server load for collector, and workflow on different nodes)
 [*] - Queueing of the tracker payloads (Now the API can be configured only to queue the payload)
 [*] - Bulk event payloads collection.
-[*] - Removed inject event plugin from workflow
 [*] - APM Selective auto merging (Merge only with selected PII data)
 [*] - Merged APM with Identification Points.
-[*] - Internal process refactored (allows spreading of the server load for collector, and workflow on different nodes)
 [*] - Standardizing the forms in GUI
 [*] - Referer web page visible in data/events
 [*] - Overall performance boost form 50%-600%
-
+[*] - Monitoring profile properties for changes
+[*] - Removed inject event plugin from workflow
+[*] - New Tracardi Destination (Chaining Tracardi Instances)
 
 Version: 1.0.2
 ----------------------------------------------------------
