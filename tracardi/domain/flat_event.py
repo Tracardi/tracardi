@@ -3,6 +3,7 @@ from collections import defaultdict
 import json
 
 from typing import Optional, List, Dict, Generator, Tuple
+from uuid import uuid4
 
 from .entity import Entity, FlatEntity
 
@@ -45,6 +46,11 @@ class FlatEvent(FlatEntity):
         if field not in self or not isinstance(self[field], instance):
             self[field] = value
 
+    @staticmethod
+    def new() -> 'FlatEvent':
+        return FlatEvent({
+            "id": str(uuid4())
+        })
 
 class FlatEvents(list):
     def group_by_type(self):

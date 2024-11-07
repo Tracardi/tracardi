@@ -42,7 +42,7 @@ async def install_system(credentials: Credentials):
         logger.info(f"Authorizing `{context.tenant}` for installation at {mtm.auth_endpoint}.")
 
         if not tracardi.multi_tenant_manager_api_key:
-            raise PermissionError(f"Installation stopped not Tenant Management API key set.")
+            raise PermissionError(f"Installation stopped no Tenant Management API key set.")
 
         if not tracardi.multi_tenant_manager_url:
             raise PermissionError(f"Installation stopped not Tenant Management API URL set.")

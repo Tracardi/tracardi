@@ -23,3 +23,23 @@ class ProfileFieldChanges(BaseModel):
 
     def get_as_list(self) -> List[dict]:
         return [item.model_dump() for item in self.changes]
+
+    def has_change_in_field(self, fields: List[str]) -> Optional[FieldChange]:
+        for change in self.changes:
+            if change.field in fields:
+                return change
+
+        return None
+
+
+class ListOfProfileChanges(List[ProfileFieldChanges]):
+
+    def has_change_in_field(self, fields: List[str]) -> Optional[FieldChange]:
+        for item in self:
+            changed_field = item.has_change_in_field(fields)
+            if changed_field is not None:
+                return changed_field
+        return None
+
+    def serialize(self) -> List[dict]:
+        return [item.model_dump(mode="json") for item in self]
