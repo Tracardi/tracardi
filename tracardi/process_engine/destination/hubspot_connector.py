@@ -125,4 +125,4 @@ class HubSpotConnector(DestinationInterface):
             await self._dispatch(data, flat_profile)
 
     async def dispatch_event(self, data, flat_event: FlatEvent, metadata=None, profile_id: Optional[str] = None, session_id: Optional[str] = None):
-        raise NotImplemented("Sending events to hubspot is not implemented")
+        raise NotImplementedError("Sending events to hubspot is not implemented")
