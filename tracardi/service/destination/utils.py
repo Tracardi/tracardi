@@ -15,10 +15,10 @@ from tracardi.service.setup.setup_resources import get_resource_types
 logger = get_logger(__name__)
 
 
-async def _check_condition(condition, dot) -> bool:
-    if condition:
+async def _check_condition(query: str, dot) -> bool:
+    if query:
         condition = Condition()
-        return await condition.evaluate(condition, dot)
+        return await condition.evaluate(query, dot)
     # Return always true is not condition
     return True
 
@@ -41,15 +41,17 @@ async def get_destination_data(destinations: List[Destination], dot: DotAccessor
             if resource.enabled is False:
                 raise ConnectionError(f"Can't connect to disabled resource: {resource.name}.")
 
+            if await _check_condition(destination.condition, dot):
+                data = dict_traverser.reshape(reshape_template=destination.mapping)
+
+                yield DestinationWorkPackage(destination=destination, resource=resource, data=data)
+
         except ValueError as e:
             logger.warning(f"Destination `{destination.name}` not triggered. Reason: {str(e)}",
                          exc_info=ExtraInfo.exact('resource-loading', package=__name__))
             continue
 
-        if await _check_condition(destination.condition, dot):
-            data = dict_traverser.reshape(reshape_template=destination.mapping)
 
-            yield DestinationWorkPackage(destination=destination, resource=resource, data=data)
 
 
 def get_destination_types():

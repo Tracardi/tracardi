@@ -22,7 +22,7 @@ class Parser:
         with open(os.path.join(_local_dir, file)) as f:
             return f.read()
 
-    def parse(self, query):
+    def parse(self, query: str):
         return self.base_parser.parse(query)
 
     def next(self, query):
