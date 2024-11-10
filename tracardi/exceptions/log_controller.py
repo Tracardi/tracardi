@@ -13,6 +13,9 @@ async def log_controller(log_handler: ElasticLogHandler) -> Optional[list]:
         try:
             if await is_save_logs_on():
                 yield log_handler.collection
+            else:
+                yield None
+
         finally:
             log_handler.reset()
     else:
