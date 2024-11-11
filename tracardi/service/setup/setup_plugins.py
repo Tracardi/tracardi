@@ -802,6 +802,21 @@ installed_plugins: Dict[str, PluginMetadata] = {
             resource=None),
     ),
     
+    "tracardi.process_engine.action.v1.genai_action": PluginMetadata(
+        test=PluginTest(init={
+            'provider': '',
+            'model': '',
+            'prompt_template': '',
+            'max_tokens': '',
+            'temperature': '',
+        },
+        resource={
+            "api_url": "<api-url>",
+            "api_key": "<api-key>"
+        })
+    ),
+    
+
 }
 
 if License.has_service(SCHEDULER):

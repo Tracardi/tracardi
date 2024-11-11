@@ -533,7 +533,18 @@ def get_resource_types() -> List[ResourceSettings]:
             #         "label_remove": "<label-to-remove>"
             #     }
             # )
-        )
+        ),
+        ResourceSettings(
+            id='genAI',
+            config={
+                "api_url": "<api-url>",
+                "api_key": "<api-key>"
+            },
+            icon='genai',
+            tags=['genai'],
+            name='GenAI',
+            manual='genai_resource',
+        ),
     ]
 
     if License.has_license():
