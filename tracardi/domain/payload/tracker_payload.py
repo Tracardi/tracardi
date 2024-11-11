@@ -505,23 +505,6 @@ class TrackerPayload(BaseModel):
 
         return session_id, profile_id, insert, update, create
 
-    # def create_session(self) -> Session:
-    #     # Artificial session (Mutates tracker Payload)
-    #
-    #     # If no session in tracker payload this means that we do not need session.
-    #     # But we may need an artificial session for workflow handling. We create
-    #     # one but will not save it.
-    #
-    #     session = self.create_default_session()
-    #
-    #     # Set profile from tracker payload to session
-    #     if isinstance(self.profile, Entity) and self.profile.id:
-    #         session.profile = Entity(id=self.profile.id)
-    #
-    #     self.session = session
-    #
-    #     return session
-
     def has_tracker_payload_profile_id(self) -> bool:
         return self.profile is not None and isinstance(self.profile.id, str) and self.profile.id.strip() != ""
 
