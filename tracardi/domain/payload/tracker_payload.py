@@ -464,7 +464,7 @@ class TrackerPayload(BaseModel):
         )
 
     def get_times(self):
-        if self.session and self.session.metadata:
+        if isinstance(self.session, DefaultEntity) and self.session.metadata:
             insert = self.session.metadata.insert
             update = self.session.metadata.update
             create = self.session.metadata.create
