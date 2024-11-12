@@ -6,7 +6,6 @@ from unittest.mock import patch
 
 from tracardi.domain.entity import FlatEntity, change_monitor
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.domain.storage_record import StorageRecord
 from tracardi.service.change_monitoring.field_update_logger import FieldUpdateLogger
 
 
@@ -23,16 +22,21 @@ def test_init(flat_entity):
 
 
 def test_changes_method():
-    flat_entity = FlatProfile(StorageRecord({'key': 'value'}))
+    flat_entity = FlatProfile({'key': 'value'})
     assert not flat_entity.has_changes()
 
 
 
 def test_serialization():
-    serialized = pickle.dumps(StorageRecord({'key': 'value'}))
+    fp = FlatProfile({'key': 'value'})
+    fp.monitor_changes(True)
+    fp['test'] = 1
+
+    serialized = pickle.dumps(fp)
     deserialized = pickle.loads(serialized)
-    flat_entity = FlatProfile(deserialized)
-    assert not flat_entity.has_changes()
+    assert deserialized.has_changes()
+
+    fp.fill_changed_fields()
 
 
 def test_getstate(flat_entity):
