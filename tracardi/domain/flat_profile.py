@@ -16,6 +16,7 @@ from tracardi.service.storage.index import Resource
 class FlatProfile(FlatEntity):
 
     def __init__(self, dictionary):
+        self._changes = None
         super().__init__(dictionary)
 
         # Set default values and basic validation

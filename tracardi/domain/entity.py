@@ -193,8 +193,6 @@ class FlatEntity(Dotty):
                               event_type,
                               ignore=('metadata.fields', 'operation')
                               )
-        else:
-            logger.warning(f"No _changes property.")
         super().__setitem__(key, value)
 
     def override(self, key, value):
