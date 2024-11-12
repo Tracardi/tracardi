@@ -11,6 +11,7 @@ from tracardi.exceptions.log_handler import ElasticLogHandler
 async def log_controller(log_handler: ElasticLogHandler) -> Optional[list]:
     if tracardi.save_logs and log_handler.has_logs():
         try:
+            # Check global settings
             if await is_save_logs_on():
                 yield log_handler.collection
             else:
