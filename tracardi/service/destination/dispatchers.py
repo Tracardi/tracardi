@@ -1,4 +1,4 @@
-from typing import Optional, List, AsyncGenerator, Dict, Tuple
+from typing import Optional, List, AsyncGenerator, Tuple
 
 from tracardi.domain import ExtraInfo
 from tracardi.domain.destination_work_package import DestinationWorkPackage
@@ -82,8 +82,8 @@ async def event_destination_dispatch(flat_profile: Optional[FlatProfile],
                 destination_instance = destination_work_package.get_destination_instance(debug)  # type: DestinationInterface
 
                 await destination_instance.dispatch_event(destination_work_package.data,
-                                                          flat_profile=flat_profile,
-                                                          session=session,
+                                                          profile_id=get_entity_id(flat_profile),
+                                                          session_id=get_entity_id(session),
                                                           flat_event=flat_event,
                                                           metadata=metadata)
         except Exception as e:
