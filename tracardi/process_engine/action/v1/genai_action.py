@@ -7,11 +7,13 @@ from tracardi.service.domain import resource as resource_db
 from pydantic import field_validator
 from tracardi.service.tracardi_http_client import HttpClient
 from tracardi.domain.resources.genai import genAIResourceCredentials
+from tracardi.domain.named_entity import NamedEntity
 from langchain.prompts import PromptTemplate
+from base64 import b64encode
 from typing import Literal
 
 class Configuration(PluginConfig):
-    resource: str
+    resource: NamedEntity
     provider: Literal["cloudflare", "ollama"]
     model: str
     prompt_template: str
@@ -37,7 +39,7 @@ class GenAIAction(ActionRunner):
         config = validate(init)
         resource = await resource_db.load(config.resource.id)
         self.config = config
-        self.credentials = resource.credentials.get_credentials(self, output=genAIResourceCredentials)
+        self.credentials = resource.credentials.get_credentials(self)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
@@ -55,14 +57,14 @@ class GenAIAction(ActionRunner):
             else:
                 raise ValueError("Unsupported GenAI provider.")
             
-            return Result(port='result', value={'text': response_text})
+            return Result(port='result', value={'text': response_text,'text_base64' :b64encode(response_text.encode("utf-8"))})
 
         except Exception as e:
             return Result(value={"message": str(e)}, port="error") 
 
     async def _call_cloudflare(self, prompt_input: str) -> str:
-        api_key = self.credentials.get('api_key')
-        api_url = self.credentials.get('api_url')
+        api_key = self.credentials['api_key']
+        api_url = self.credentials['api_url']
         
         headers = {
             'Authorization': f'Bearer {api_key}',
@@ -85,7 +87,7 @@ class GenAIAction(ActionRunner):
                     raise Exception(f"Cloudflare AI API error: {response.status}, {await response.text()}")
 
     async def _call_ollama(self, prompt_input: str) -> str:
-        api_url = self.credentials.get('api_url')
+        api_url = self.credentials['api_url']
         
         payload = {
             "model": self.config.model,
@@ -127,11 +129,11 @@ def register() -> Plugin:
                     fields=[
                         FormField(
                             id="resource",
-                            name="Resource",
-                            description="Select the resource containing API credentials.",
+                            name="genAI Resource",
+                            description="genAI Resource",
                             component=FormComponent(type="resource", props={
                                 "label": "Resource",
-                                "tag": ["cloudflare", "ollama"]
+                                "tag": "genAI"
                             })
                         ),
                         FormField(
@@ -153,7 +155,8 @@ def register() -> Plugin:
                             component=FormComponent(type="text", props={
                                 "label": "Model"
                             })
-                        ),                        FormField(
+                        ), 
+                        FormField(
                             id="prompt_template",
                             name="Prompt Template",
                             description="Template for generating text.",

@@ -542,7 +542,7 @@ def get_resource_types() -> List[ResourceSettings]:
             },
             icon='genai',
             tags=['genai'],
-            name='GenAI',
+            name='genAI',
             manual='genai_resource',
         ),
     ]
