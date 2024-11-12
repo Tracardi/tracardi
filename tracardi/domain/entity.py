@@ -153,6 +153,7 @@ class DottyEncoder(json.JSONEncoder):
 class FlatEntity(Dotty):
 
     def __init__(self, dictionary):
+        self._changes: Optional[FieldUpdateLogger] = None
         super().__init__(dictionary)
         self._metadata = None
         # Keeps current changes

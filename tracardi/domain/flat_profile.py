@@ -262,7 +262,7 @@ class FlatProfile(FlatEntity):
 
     @staticmethod
     def from_es_storage_record(record: StorageRecord) -> 'FlatProfile':
-        fp = FlatProfile(record)
+        fp = FlatProfile(dict(record))
         fp.set_new(False)
         fp.set_updated(False)
         fp.set_meta_data(record.get_meta_data())
