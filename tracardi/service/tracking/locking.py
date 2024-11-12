@@ -4,11 +4,8 @@ import asyncio
 
 from typing import Union, Tuple, Optional
 
-# from tracardi.domain.profile import Profile
 from tracardi.exceptions.log_handler import get_logger
-# from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.storage.redis.driver.redis_client import RedisClient
-# from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
 
 logger = get_logger(__name__)
 _redis = RedisClient()
@@ -17,7 +14,7 @@ LOCKED = 0
 BROKE = 1
 EXPIRED = 2
 RELEASED = 3
-
+DONE_WAITING = 4
 
 class Lock:
 
@@ -226,10 +223,15 @@ class GlobalMutexLock(_GlobalMutexLock):
 
 class AsyncGlobalMutexLock(_GlobalMutexLock):
 
-    async def _keep_locked_for(self) -> 'Lock':
+    async def _keep_locked_for(self) -> int:
+
+        if self._lock.key is None:
+            return RELEASED
 
         while True:
             _now = time.time()
+
+
             if self._lock.is_locked():  # Key exists, when expires it will be unlocked
 
                 lock_time = self._get_lock_time()
@@ -240,8 +242,8 @@ class AsyncGlobalMutexLock(_GlobalMutexLock):
                     # We are fed up waiting
                     logger.info(
                         f"Lock {self._lock.key} breaks. Currently locked by (Running process): {self._lock.get_locked_inside()}, Knocking consumer (Waiting process): {self._name}")
-                    self._lock.break_in()  # Still locked but break in marked BROKE
-                    return self._lock
+                    self._lock.break_in()  # Still locked but break is marked BROKE in redis
+                    return DONE_WAITING
 
                 logger.info(
                     f"Suppressing execution of {self._lock.key}. Process {self._lock.get_locked_inside()} is using resource."
@@ -253,13 +255,13 @@ class AsyncGlobalMutexLock(_GlobalMutexLock):
                 continue
             break
 
+        # Get last state and return it
+        prev_lock_state = self._lock.state
         self._lock.lock(self._name)
+        return prev_lock_state
 
-    async def __aenter__(self):
-        if self._lock.key is None:
-            return self._lock
-        await self._keep_locked_for()
-        return self._lock
+    async def __aenter__(self) -> int:
+        return await self._keep_locked_for()
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         self._exit(exc_type)
@@ -328,7 +330,7 @@ def mutex(lock: Lock, name: str, break_after_time: Union[int, float] = None, rai
 def async_mutex(lock: Lock,
                 name: str,
                 break_after_time: Union[int, float] = None,
-                raise_error_when_locked: bool = False):
+                raise_error_when_locked: bool = False) -> AsyncGlobalMutexLock:
     if lock.is_locked() and raise_error_when_locked:
         raise BlockingIOError(
             f"Resource {lock.key} is locked. Currently locked by (Running process): {lock.get_locked_inside()}, Waiting consumer: {name}")
