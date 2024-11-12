@@ -42,7 +42,6 @@ def test_serialization():
 def test_getstate(flat_entity):
     flat_entity._metadata = {'some': 'metadata'}
     state = flat_entity.__getstate__()
-    print(flat_entity)
     assert state['_data']['key'] == 'value'
     assert state['_metadata'] == {'some': 'metadata'}
 
@@ -59,6 +58,7 @@ def test_setstate():
     entity.__setstate__(state)
     assert entity['key'] == 'value'
     assert entity._metadata == {'some': 'metadata'}
+    assert entity._changes is None
 
 
 def test_setstate_no_metadata():
@@ -72,6 +72,7 @@ def test_setstate_no_metadata():
     entity.__setstate__(state)
     assert entity['key'] == 'value'
     assert entity._metadata is None
+    assert entity._changes is None
 
 
 def test_setitem(flat_entity):
