@@ -70,6 +70,7 @@ async def get_duplicated_profiles_by_field(field):
 
 
 async def load_profiles_with_duplicated_ids(log_error=True) -> AsyncGenerator[Profile, Any]:
+    logger.info(f"Looking for duplicates.")
     query = {
         "size": 0,
         "aggs": {
