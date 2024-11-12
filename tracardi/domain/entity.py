@@ -153,10 +153,6 @@ class DottyEncoder(json.JSONEncoder):
 class FlatEntity(Dotty):
 
     def __init__(self, dictionary):
-
-        if isinstance(dictionary, StorageRecord):
-            raise ValueError("Not a dict.")
-
         self._changes: Optional[FieldUpdateLogger] = None
         super().__init__(dictionary)
         self._metadata = None
@@ -174,12 +170,14 @@ class FlatEntity(Dotty):
         # Here, you should retrieve the state, not set it.
         state = super().__getstate__()
         state['_metadata'] = self._metadata
+        state['_changes'] = self._changes
         return state
 
     def __setstate__(self, state):
         # Here, you should call the base class' setstate, not getstate.
         super().__setstate__(state)
         self._metadata = state.get('_metadata', None)
+        self._changes = state.get('_changes', None)
 
     def __setitem__(self, key, value):
         if self._changes:
@@ -208,6 +206,9 @@ class FlatEntity(Dotty):
 
     def has_changes(self) -> bool:
         return bool(self._changes) and self._changes.has_changes()
+
+    def clear_changes(self):
+        self._changes = FieldUpdateLogger()
 
     def to_json(self):
         """Return wrapped dictionary as json string.

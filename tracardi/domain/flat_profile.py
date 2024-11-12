@@ -16,7 +16,6 @@ from tracardi.service.storage.index import Resource
 class FlatProfile(FlatEntity):
 
     def __init__(self, dictionary):
-        self._changes = None
         super().__init__(dictionary)
 
         # Set default values and basic validation
@@ -387,9 +386,9 @@ class FlatProfile(FlatEntity):
 
         return None
 
-    def _set_changed_fields(self, dict_od_changed_fields):
+    def _set_changed_fields(self, dict_of_changed_fields):
         fields = self['metadata.fields']
-        fields.update(dict_od_changed_fields)
+        fields.update(dict_of_changed_fields)
         self.override('metadata.fields', fields)
 
     def fill_changed_fields(self, custom_changes: Dict[str, List] = None):
