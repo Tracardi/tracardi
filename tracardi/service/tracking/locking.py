@@ -321,7 +321,7 @@ class AsyncGlobalMutexLock(_GlobalMutexLock):
 def mutex(lock: Lock, name: str, break_after_time: Union[int, float] = None, raise_error_when_locked: bool = False):
     if lock.is_locked() and raise_error_when_locked:
         raise BlockingIOError(
-            f"Resource {lock.key} is locked. Currently locked by (Running process): {lock.get_locked_inside()}, Knocking consumer (Waiting process): {name}")
+            f"Resource {lock.key} is locked. Currently locked by (Running process): {lock.get_locked_inside()}, Waiting consumer: {name}")
     return GlobalMutexLock(lock, name, break_after_time)
 
 
@@ -331,6 +331,6 @@ def async_mutex(lock: Lock,
                 raise_error_when_locked: bool = False):
     if lock.is_locked() and raise_error_when_locked:
         raise BlockingIOError(
-            f"Resource {lock.key} is locked. Currently locked by (Running process): {lock.get_locked_inside()}, Knocking consumer (Waiting process): {name}")
+            f"Resource {lock.key} is locked. Currently locked by (Running process): {lock.get_locked_inside()}, Waiting consumer: {name}")
     return AsyncGlobalMutexLock(lock, name, break_after_time)
 
