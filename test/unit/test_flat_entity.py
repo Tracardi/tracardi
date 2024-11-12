@@ -1,8 +1,12 @@
+import pickle
+
 import pytest
 from dotty_dict import Dotty
 from unittest.mock import patch
 
 from tracardi.domain.entity import FlatEntity, change_monitor
+from tracardi.domain.flat_profile import FlatProfile
+from tracardi.domain.storage_record import StorageRecord
 from tracardi.service.change_monitoring.field_update_logger import FieldUpdateLogger
 
 
@@ -18,6 +22,19 @@ def test_init(flat_entity):
     assert flat_entity._changes is None
 
 
+def test_changes_method():
+    flat_entity = FlatProfile(StorageRecord({'key': 'value'}))
+    assert not flat_entity.has_changes()
+
+
+
+def test_serialization():
+    serialized = pickle.dumps(StorageRecord({'key': 'value'}))
+    deserialized = pickle.loads(serialized)
+    flat_entity = FlatProfile(deserialized)
+    assert not flat_entity.has_changes()
+
+
 def test_getstate(flat_entity):
     flat_entity._metadata = {'some': 'metadata'}
     state = flat_entity.__getstate__()
@@ -28,10 +45,10 @@ def test_getstate(flat_entity):
 
 def test_setstate():
     state = {
-        '_data':{'key': 'value'},
-        'separator':'.',
-        'esc_char' : '\\',
-        'no_list' : False,
+        '_data': {'key': 'value'},
+        'separator': '.',
+        'esc_char': '\\',
+        'no_list': False,
         '_metadata': {'some': 'metadata'}
     }
     entity = FlatEntity({})
@@ -66,12 +83,14 @@ def test_setitem_ignored_keys(flat_entity):
         with patch.object(flat_entity._changes, 'add') as mock_add:
             flat_entity['metadata.fields'] = 'some_value'
             assert flat_entity['metadata.fields'] == 'some_value'
-            mock_add.assert_called_once_with('metadata.fields', 'some_value', None, ignore=('metadata.fields', 'operation'))
+            mock_add.assert_called_once_with('metadata.fields', 'some_value', None,
+                                             ignore=('metadata.fields', 'operation'))
 
         with patch.object(flat_entity._changes, 'add') as mock_add:
             flat_entity['operation'] = 'some_operation'
             assert flat_entity['operation'] == 'some_operation'
-            mock_add.assert_called_once_with('operation', 'some_operation', None, ignore=('metadata.fields', 'operation'))
+            mock_add.assert_called_once_with('operation', 'some_operation', None,
+                                             ignore=('metadata.fields', 'operation'))
 
 
 def test_inheritance(flat_entity):
@@ -84,12 +103,12 @@ def test_changes_attribute(flat_entity):
         assert isinstance(flat_entity._changes, FieldUpdateLogger)
     assert flat_entity._changes is None
 
+
 def test_changes(flat_entity):
     with change_monitor(flat_entity):
         assert not flat_entity._changes.changes()
         flat_entity['a'] = 1
         assert bool(flat_entity._changes.changes())
-
 
         assert list(flat_entity._changes.changes())[0][0] == 'a'
         assert len(flat_entity._changes.changes()) == 1
@@ -104,6 +123,7 @@ def test_changes(flat_entity):
         # Still no new changes
         assert len(flat_entity._changes.changes()) == 2
         assert flat_entity._changes._changes.exists('key')
+
 
 def test_embedded_changes(flat_entity):
     flat_entity['a.b.c'] = False
@@ -123,6 +143,7 @@ def test_multiple_changes_that_cancel_themselves(flat_entity):
         print(flat_entity.get_change_logger().changes())
         flat_entity['field'] = 'a'
         print(flat_entity.get_change_logger().changes())
+
 
 # TODO
 def test_appending_changes():

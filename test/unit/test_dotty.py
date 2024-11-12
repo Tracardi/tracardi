@@ -1,5 +1,16 @@
-from dotty_dict import dotty
+from dotty_dict import dotty, Dotty
 
+
+class XXX(Dotty):
+    def __init__(self, dictionary):
+        self._xxx = None
+        super().__init__(dictionary)
+
+
+
+def test_inner_property():
+    x = XXX({"_xxx": 1})
+    assert  x._xxx is None
 
 def test_dotty_deep_set():
     a = dotty({})
