@@ -1,0 +1,33 @@
+[
+  {
+    "name": "Content Viewed",
+    "description": "Signals that customer viewed some content.",
+    "id": "content-viewed",
+    "properties": {
+      "id": "string",
+      "type": "string",
+      "tag": "string",
+      "content": "string",
+      "duration": 0,
+      "mouseOverDuration": 0,
+      "selectedText": [],
+      "duplicateCount": 1,
+      "clickCount": 0
+    },
+    "tags": [
+      "event:signal"
+    ],
+    "copy": {
+      "traits.content.id": "properties.id",
+      "traits.content.type": "properties.type",
+      "traits.content.tag": "properties.tag",
+      "traits.content.body": "properties.content",
+      "traits.content.selected.text": "properties.selectedText",
+      "traits.content.metric.no_of_views": "properties.duplicateCount",
+      "traits.content.metric.clicks": "properties.duplicateCount",
+      "traits.content.metric.visible": "properties.duration",
+      "traits.content.metric.mouse_over": "properties.mouseOverDuration"
+    }
+  }
+]
+
