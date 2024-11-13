@@ -1,5 +1,3 @@
-import os
-
 from tracardi.service.cluster.settings import GlobalSettings
 from tracardi.service.utils.environment import get_env_as_bool, _str_to_bool
 
