@@ -55,7 +55,7 @@ class HtmlPageFetchAction(ActionRunner):
 
                 async with client.request(
                         method=self.config.method,
-                        url=str(self.config.url),
+                        url=str(dot[self.config.url]),
                         headers=headers,
                         cookies=cookies,
                         ssl=self.config.ssl_check,
