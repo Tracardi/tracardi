@@ -73,16 +73,16 @@ class GenAIAction(ActionRunner):
         
         payload = {
             "prompt": prompt_input,
-            "max_tokens": self.config.max_tokens,
-            "temperature": self.config.temperature
+            "max_tokens": int(self.config.max_tokens),
+            "temperature": float(self.config.temperature)
         }
 
         # Use HttpClient to send the request
         async with HttpClient(3, [200], headers=headers) as client:
-            async with client.post(api_url, json=payload) as response:
+            async with client.post((api_url+self.config.model), json=payload) as response:
                 if response.status == 200:
                     data = await response.json()
-                    return data.get("text", "").strip()
+                    return data.get("result", {}).get("response", "").strip()
                 else:
                     raise Exception(f"Cloudflare AI API error: {response.status}, {await response.text()}")
 
