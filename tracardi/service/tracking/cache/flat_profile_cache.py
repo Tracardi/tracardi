@@ -5,15 +5,12 @@ from tracardi.context import get_context, Context
 from tracardi.domain import ExtraInfo
 from tracardi.domain.storage_record import RecordMetadata
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.redis.cache import RedisCache
 from tracardi.service.storage.redis.collections import Collection
-from tracardi.service.storage.redis.driver.redis_client import RedisClient
+from tracardi.service.tracking.cache.cache_helper import _delete_cache, _has_cache, _get_cache, _set_cache
 from tracardi.service.tracking.cache.prefix import get_cache_prefix
 from tracardi.domain.flat_profile import FlatProfile
 
 logger = get_logger(__name__)
-redis_cache = RedisCache(ttl=tracardi.keep_profile_in_cache_for)
-_redis = RedisClient()
 
 
 def get_flat_profile_key_namespace(profile_id, context):
@@ -22,7 +19,7 @@ def get_flat_profile_key_namespace(profile_id, context):
 
 def delete_flat_profile_cache(profile_id: str, context: Context):
     key_namespace = get_flat_profile_key_namespace(profile_id, context)
-    redis_cache.delete(
+    _delete_cache(
         profile_id,
         key_namespace
     )
@@ -34,10 +31,10 @@ def load_flat_profile_cache(profile_id: str, context: Context) -> Optional[FlatP
 
     key_namespace = get_flat_profile_key_namespace(profile_id, context)
 
-    if not redis_cache.has(profile_id, key_namespace):
+    if not _has_cache(profile_id, key_namespace):
         return None
 
-    _data = redis_cache.get(
+    _data = _get_cache(
         profile_id,
         key_namespace
     )
@@ -61,7 +58,7 @@ def _save_single_flat_profile(flat_profile: FlatProfile, context: Context):
     if index is None:
         logger.warning("Empty profile metadata. Index is not set. Profile removed from cache.",
                        extra=ExtraInfo.exact(origin="cache", package=__name__))
-        redis_cache.delete(flat_profile.id, key)
+        _delete_cache(flat_profile.id, key)
     else:
         value = (
             {
@@ -73,16 +70,16 @@ def _save_single_flat_profile(flat_profile: FlatProfile, context: Context):
             index.model_dump(mode="json")
         )
 
-        redis_cache.set(
+        _set_cache(
             flat_profile.id,
             value,
-            key
+            key,
+            ttl=tracardi.keep_profile_in_cache_for
         )
 
 
 def save_flat_profile_cache(flat_profile: Union[Optional[FlatProfile], List[FlatProfile], Set[FlatProfile]],
                             context: Optional[Context] = None):
-
     if flat_profile:
 
         if context is None:

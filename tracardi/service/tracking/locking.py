@@ -5,10 +5,9 @@ import asyncio
 from typing import Union, Tuple, Optional
 
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.redis.driver.redis_client import RedisClient
+from tracardi.service.adapter.cache.cache_protocol import CacheProtocol
 
 logger = get_logger(__name__)
-_redis = RedisClient()
 
 LOCKED = 0
 BROKE = 1
@@ -18,8 +17,8 @@ DONE_WAITING = 4
 
 class Lock:
 
-    def __init__(self, redis, key, default_lock_ttl: float):
-        self._redis = redis
+    def __init__(self, cache: CacheProtocol, key, default_lock_ttl: float):
+        self._cache = cache
         self._key = key
         self._lock_ttl = default_lock_ttl
         self._mutex_name = None
@@ -58,10 +57,10 @@ class Lock:
             mutex_name,
             state
         ))
-        self._redis.set(self._key, payload, ex=self._lock_ttl)
+        self._cache.set(self._key, payload, ex=self._lock_ttl)
 
     def delete(self):
-        self._redis.delete(self._key)
+        self._cache.delete(self._key)
 
     def unlock(self):
         logger.debug(f"UnLocking {self.key}")
@@ -77,10 +76,10 @@ class Lock:
     def is_locked(self) -> bool:
         if self._key is None:
             return False
-        return self._redis.exists(self._key) != 0
+        return self._cache.exists(self._key) != 0
 
     def get_lock_metadata(self) -> Optional[Tuple[str, str, int]]:
-        payload = self._redis.get(self._key)
+        payload = self._cache.get(self._key)
         if payload:
             return msgpack.unpackb(payload)
 
@@ -103,7 +102,7 @@ class Lock:
 
     def _update_state(self, new_state):
         try:
-            payload = self._redis.get(self._key)
+            payload = self._cache.get(self._key)
             if payload:
                 lock_time, mutex_name, state = msgpack.unpackb(payload)
                 self._set_lock_metadata(lock_time, mutex_name, new_state)

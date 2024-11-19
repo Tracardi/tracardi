@@ -6,13 +6,10 @@ from tracardi.domain import ExtraInfo
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import RecordMetadata
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.redis.cache import RedisCache
 from tracardi.service.storage.redis.collections import Collection
-from tracardi.service.storage.redis.driver.redis_client import RedisClient
+from tracardi.service.tracking.cache.cache_helper import _has_cache, _delete_cache, _set_cache, _get_cache
 from tracardi.service.tracking.cache.prefix import get_cache_prefix
 
-redis_cache = RedisCache(ttl=tracardi.keep_session_in_cache_for)
-_redis = RedisClient()
 logger = get_logger(__name__)
 
 
@@ -26,10 +23,10 @@ def load_session_cache(session_id: str, context: Context):
 
     key_namespace = get_session_key_namespace(session_id, context)
 
-    if not redis_cache.has(session_id, key_namespace):
+    if not _has_cache(session_id, key_namespace):
         return None
 
-    context, session, changes, session_metadata = redis_cache.get(
+    context, session, changes, session_metadata = _get_cache(
         session_id,
         key_namespace)
 
@@ -46,9 +43,9 @@ def _save_single_session(session, context):
     if index is None:
         logger.warning("Empty session metadata. Index is not set. Cached session removed.",
                        extra=ExtraInfo.exact(origin="cache", package=__name__))
-        redis_cache.delete(session.id, get_session_key_namespace(session.id, context))
+        _delete_cache(session.id, get_session_key_namespace(session.id, context))
     else:
-        redis_cache.set(
+        _set_cache(
             session.id,
             (
                 {
@@ -59,7 +56,8 @@ def _save_single_session(session, context):
                 None,
                 index.model_dump(mode="json")
             ),
-            get_session_key_namespace(session.id, context)
+            get_session_key_namespace(session.id, context),
+            ttl=tracardi.keep_session_in_cache_for
         )
 
 
@@ -77,7 +75,7 @@ def save_session_cache(session: Union[Optional[Session], List[Session]], context
 
 def delete_session_cache(session_id: str, context: Context):
     key_namespace = get_session_key_namespace(session_id, context)
-    redis_cache.delete(
+    _delete_cache(
         session_id,
         key_namespace
     )

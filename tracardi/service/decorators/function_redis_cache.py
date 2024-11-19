@@ -2,11 +2,11 @@ import inspect
 import msgpack
 from functools import wraps
 
+from tracardi.service.adapter.cache.redis.redis_cache_adapter import redis_cache_adapter
 from tracardi.service.storage.redis.collections import Collection
-from tracardi.service.storage.redis.driver.redis_client import RedisClient
 
 # Connect to Redis
-redis = RedisClient()
+cache = redis_cache_adapter
 
 def redis_cache(key_param):
     def decorator(func):
@@ -22,7 +22,7 @@ def redis_cache(key_param):
             key = f"{Collection.function_cache}:{func.__name__}:{str(key_value)}"
 
             # Try to get the cached value from Redis
-            cached_value = redis.get(key)
+            cached_value = cache.get(key)
 
             if cached_value is not None:
                 return msgpack.loads(cached_value, raw=False)
@@ -32,7 +32,7 @@ def redis_cache(key_param):
             if inspect.iscoroutine(result):
                 result = await result
 
-            redis.set(key, msgpack.dumps(result))
+            cache.set(key, msgpack.dumps(result))
             return result
 
         return wrapper

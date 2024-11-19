@@ -5,9 +5,9 @@ from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
+from tracardi.service.adapter.cache.redis.redis_members_adapter import RedisMembersCacheAdapter
 from tracardi.service.singleton import Singleton
 from tracardi.service.storage.redis.collections import Collection
-from tracardi.service.storage.redis.driver.redis_client import RedisClient
 
 batch = 3
 i = 0
@@ -28,11 +28,11 @@ class FieldMapper(metaclass=Singleton):
     def __init__(self):
         self.i = 0
         self.batch = 5
-        self.redis = RedisClient()
+        self._cache = RedisMembersCacheAdapter()
 
     def get_field_mapping(self, type: str) -> Set[str]:
         if type in redis_collections:
-            return {item.decode() for item in self.redis.smembers(redis_collections[type])}
+            return {item.decode() for item in self._cache.smembers(redis_collections[type])}
         return set()
 
     def add_field_mappings(self, type, entities: List[Entity]) -> bool:
@@ -59,7 +59,7 @@ class FieldMapper(metaclass=Singleton):
         self.i = 0
         for type, field_maps in field_mappings.items():
             if len(field_maps) > 0 and type in redis_collections:
-                self.redis.sadd(redis_collections[type], *list(field_maps))
+                self._cache.sadd(redis_collections[type], *list(field_maps))
 
 
 def add_new_field_mappings(profile: Optional[Profile], session: Optional[Session]):
