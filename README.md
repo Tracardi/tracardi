@@ -76,7 +76,7 @@ The easiest way to run TRACARDI is to run it as a :whale: **docker container**.
 * Clone [tracardi/tracardi-api](https://github.com/Tracardi/tracardi-api.git) by executing the following line in your terminal.
 
   ```bash
-  git clone https://github.com/Tracardi/tracardi-api.git
+  git clone https://github.com/Tracardi/tracardi-api.git:1.1.x
   ```
 
 * Go to the `TRACARDI API` folder, and run the following command:
