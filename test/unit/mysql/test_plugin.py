@@ -113,7 +113,7 @@ def test_to_plugin_mapping():
 
     assert flow_action_plugin.id == "123"
     assert flow_action_plugin.metadata.time.insert is not None
-    assert flow_action_plugin.metadata.time.create is None
+    assert flow_action_plugin.metadata.time.create is not None
     assert flow_action_plugin.metadata.time.update is None
     assert flow_action_plugin.plugin.start is True
     assert flow_action_plugin.plugin.debug is False
