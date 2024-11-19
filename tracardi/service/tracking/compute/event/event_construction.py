@@ -31,9 +31,9 @@ def _get_event_session(session: Union[Session, Entity]) -> Optional[EventSession
     return event_session
 
 
-def _get_metadata(event_payload: EventPayload, metadata: EventPayloadMetadata, source: EventSource,
+def _get_metadata(event_payload: EventPayload, tracker_payload_metadata: EventPayloadMetadata, source: EventSource,
                   profile_less) -> EventMetadata:
-    meta = EventMetadata(**metadata.model_dump())
+    meta = EventMetadata(**tracker_payload_metadata.model_dump())
     meta.status = COLLECTED
     meta.profile_less = profile_less
     meta.instance = Entity(id=ApiInstance().id)
@@ -87,7 +87,7 @@ def _update_event_from_request(request: dict, event: EventDict):
 def event_payload_to_event(
         request: dict,
         event_payload: EventPayload,
-        metadata: EventPayloadMetadata,
+        tracker_payload_metadata: EventPayloadMetadata,
         source: EventSource,
         session: Union[Optional[Entity], Optional[Session]],
         profile_id: Optional[str],
@@ -97,7 +97,7 @@ def event_payload_to_event(
     event_type = event_payload.type.strip()
     event_name = capitalize_event_type_id(event_type)
     # TODO Create Dict not Object
-    meta = _get_metadata(event_payload, metadata, source, profile_less)
+    meta = _get_metadata(event_payload, tracker_payload_metadata, source, profile_less)
     meta_dict = meta.model_dump(mode="json")
     source_dict = {"id": source.id} if not event_payload.has_source_id() else dict(id=event_payload.get_source_id())
     profile_entity_dict = {"id": profile_id} if profile_id else None

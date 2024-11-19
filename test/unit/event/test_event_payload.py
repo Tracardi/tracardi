@@ -11,18 +11,24 @@ from tracardi.service.tracking.compute.event.event_construction import event_pay
 
 
 def test_event_payload_time_fallback():
-    ep = EventPayload(type="text", tags=["tag1", "tag2", "tag3"])
-
-    epm = EventPayloadMetadata(
+    ep = EventPayload(
+        type="text",
+        tags=["tag1", "tag2", "tag3"],
         time=Time(
-            insert="2002-01-01 00:00:00",
-            create="2001-01-01 00:00:00"
+            create="2001-01-01 00:00:00"   # Time for event (local)
+        )
+    )
+
+    tracker_payload_metadata = EventPayloadMetadata(
+        time=Time(
+            insert="2002-01-01 00:00:00",  # Times from whole tracker payload
+            create="2004-01-01 00:00:00"
         )
     )
     event, _ = event_payload_to_event(
         {},
         ep,
-        epm,
+        tracker_payload_metadata,
         source=EventSource(id="1", name="test", type=["rest"], bridge=NamedEntity(id="1", name="rest")),
         session=Session(id="1", metadata=SessionMetadata()),
         profile_id="1",
