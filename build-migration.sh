@@ -1,1 +1,1 @@
-docker build . --rm --no-cache --progress=plain -f docker.migration.Dockerfile -t tracardi/migration:1.1.x
+docker build . --rm --no-cache --progress=plain -f docker.migration.Dockerfile -t tracardi/migration:1.2.x
