@@ -286,7 +286,6 @@ class TracardiConfig(metaclass=Singleton):
         self.skip_errors_on_profile_mapping = get_env_as_bool('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no')
 
         self.cache_adapter = env.get('CACHE_ADAPTER', 'redis')
-        self.queue_adapter = env.get('QUEUE_ADAPTER', 'pulsar')
 
         self._config = None
         self._unset_secrets()

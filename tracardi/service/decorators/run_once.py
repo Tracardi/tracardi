@@ -1,10 +1,10 @@
 def run_once(func):
-    result = None
+    cache = {}
 
     def wrapper(*args, **kwargs):
-        nonlocal result
-        if result is None:
-            result = func(*args, **kwargs)
-        return result
+        key = (func, args, frozenset(kwargs.items()))
+        if key not in cache:
+            cache[key] = func(*args, **kwargs)
+        return cache[key]
 
     return wrapper

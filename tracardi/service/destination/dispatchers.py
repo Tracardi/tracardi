@@ -1,5 +1,8 @@
 from typing import Optional, List, AsyncGenerator, Tuple
 
+from defer.model.transport_context import TransportContext
+
+from tracardi.context import ServerContext, Context
 from tracardi.domain import ExtraInfo
 from tracardi.domain.destination_work_package import DestinationWorkPackage
 from tracardi.domain.flat_profile import FlatProfile
@@ -21,7 +24,6 @@ async def yield_event_destination_work_package(flat_events: List[FlatEvent],
                                                flat_profile: Optional[FlatProfile] = None,
                                                session: Optional[Session] = None,
                                                ) -> AsyncGenerator[Tuple[FlatEvent, DestinationWorkPackage], None]:
-
     dot = DotAccessor(flat_profile, session)
     for flat_event in flat_events:
 
@@ -78,8 +80,8 @@ async def event_destination_dispatch(flat_profile: Optional[FlatProfile],
             dot.set_storage("event", flat_event)
 
             async for destination_work_package in get_destination_data(destinations, dot):
-
-                destination_instance = destination_work_package.get_destination_instance(debug)  # type: DestinationInterface
+                destination_instance = destination_work_package.get_destination_instance(
+                    debug)  # type: DestinationInterface
 
                 await destination_instance.dispatch_event(destination_work_package.data,
                                                           profile_id=get_entity_id(flat_profile),
@@ -111,7 +113,8 @@ async def profile_destination_dispatch(flat_profile: Optional[FlatProfile],
 
     async for destination_work_package in get_destination_data(destinations, dot):
         try:
-            destination_instance = destination_work_package.get_destination_instance(debug)  # type: DestinationInterface
+            destination_instance = destination_work_package.get_destination_instance(
+                debug)  # type: DestinationInterface
 
             await destination_instance.dispatch_profile(
                 destination_work_package.data,
@@ -132,3 +135,13 @@ async def profile_destination_dispatch(flat_profile: Optional[FlatProfile],
                     traceback=get_traceback(e)
                 )
             )
+
+
+async def profile_destination_dispatch_in_queue(
+        context: TransportContext,
+        flat_profile: Optional[FlatProfile],
+        changed_fields: List[dict],
+        debug: bool,
+        metadata: dict = None):
+    with ServerContext(Context(**context.as_context())):
+        return await profile_destination_dispatch(flat_profile, changed_fields, debug, metadata)
