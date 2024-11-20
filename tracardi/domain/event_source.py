@@ -4,8 +4,10 @@ from datetime import datetime
 from typing import Optional, Union, List, Any
 
 from tracardi.domain.named_entity import NamedEntity, NamedEntityInContext
+from tracardi.service.license import License, LICENSE
 from tracardi.service.utils.date import now_in_utc
-
+if License.has_service(LICENSE):
+    from com_tracardi.bridge.bridges import javascript_bridge
 
 class EventSource(NamedEntityInContext):
     type: List[str]
@@ -100,3 +102,10 @@ class EventSource(NamedEntityInContext):
             return True
 
         return restrict_to.hostname.lower().strip() == origin.hostname.lower().strip()
+
+
+    def finger_printing_enabled(self):
+        if License.has_service(LICENSE) and self.bridge.id == javascript_bridge.id:
+            ttl = int(self.config.get('device_fingerprint_ttl', 30))
+            return ttl > 0
+        return False
