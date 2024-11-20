@@ -1,10 +1,10 @@
-from tracardi.service.adapter.cache.redis.redis_cache_adapter import redis_cache_adapter
+from tracardi.service.adapter.cache_adaper_selector import cache_adapter
 from tracardi.service.utils.date import now_in_utc
 from typing import Optional
 from tracardi.domain.value_threshold import ValueThreshold
 from tracardi.service.storage.redis.collections import Collection
 
-cache = redis_cache_adapter
+_cache = cache_adapter()
 
 
 class ValueThresholdManager:
@@ -47,7 +47,7 @@ class ValueThresholdManager:
         return None
 
     async def delete(self):
-        return cache.delete(self._get_key(self.id))
+        return _cache.delete(self._get_key(self.id))
 
     async def save_current_value(self, current_value):
         value = ValueThreshold(
@@ -62,4 +62,4 @@ class ValueThresholdManager:
         kwargs = {}
         if self.ttl > 0:
             kwargs['ex'] = self.ttl
-        return cache.set(self._get_key(self.id), record, **kwargs)
+        return _cache.set(self._get_key(self.id), record, **kwargs)

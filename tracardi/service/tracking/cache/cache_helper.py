@@ -1,8 +1,8 @@
 import msgpack
 from typing import Optional, Any
-from tracardi.service.adapter.cache.redis.redis_cache_adapter import redis_cache_adapter
+from tracardi.service.adapter.cache_adaper_selector import cache_adapter
 
-_cache = redis_cache_adapter
+_cache = cache_adapter()
 
 def _delete_cache(key: str, collection: str):
     _cache.delete(f"{collection}{key}")

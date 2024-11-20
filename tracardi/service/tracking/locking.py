@@ -6,6 +6,7 @@ from typing import Union, Tuple, Optional
 
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.adapter.cache.cache_protocol import CacheProtocol
+from tracardi.service.adapter.cache_adaper_selector import cache_adapter
 
 logger = get_logger(__name__)
 
@@ -17,8 +18,8 @@ DONE_WAITING = 4
 
 class Lock:
 
-    def __init__(self, cache: CacheProtocol, key, default_lock_ttl: float):
-        self._cache = cache
+    def __init__(self, key, default_lock_ttl: float, cache: Optional[CacheProtocol] = None):
+        self._cache: CacheProtocol = cache_adapter() if cache is None else cache
         self._key = key
         self._lock_ttl = default_lock_ttl
         self._mutex_name = None

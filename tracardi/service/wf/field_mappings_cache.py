@@ -5,7 +5,7 @@ from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.service.adapter.cache.redis.redis_members_adapter import RedisMembersCacheAdapter
+from tracardi.service.adapter.cache_adaper_selector import mcache_adapter
 from tracardi.service.singleton import Singleton
 from tracardi.service.storage.redis.collections import Collection
 
@@ -17,10 +17,10 @@ redis_collections = {
     "event": Collection.event_fields,
     "session": Collection.session_fields,
 }
+_mcache = mcache_adapter()
 
 
 class FieldMapper(metaclass=Singleton):
-
     """
     Saves added fields for session, profile, event.
     """
@@ -28,11 +28,10 @@ class FieldMapper(metaclass=Singleton):
     def __init__(self):
         self.i = 0
         self.batch = 5
-        self._cache = RedisMembersCacheAdapter()
 
     def get_field_mapping(self, type: str) -> Set[str]:
         if type in redis_collections:
-            return {item.decode() for item in self._cache.smembers(redis_collections[type])}
+            return {item.decode() for item in _mcache.smembers(redis_collections[type])}
         return set()
 
     def add_field_mappings(self, type, entities: List[Entity]) -> bool:
@@ -59,7 +58,7 @@ class FieldMapper(metaclass=Singleton):
         self.i = 0
         for type, field_maps in field_mappings.items():
             if len(field_maps) > 0 and type in redis_collections:
-                self._cache.sadd(redis_collections[type], *list(field_maps))
+                _mcache.sadd(redis_collections[type], *list(field_maps))
 
 
 def add_new_field_mappings(profile: Optional[Profile], session: Optional[Session]):

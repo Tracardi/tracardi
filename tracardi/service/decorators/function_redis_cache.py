@@ -2,11 +2,11 @@ import inspect
 import msgpack
 from functools import wraps
 
-from tracardi.service.adapter.cache.redis.redis_cache_adapter import redis_cache_adapter
+from tracardi.service.adapter.cache_adaper_selector import cache_adapter
 from tracardi.service.storage.redis.collections import Collection
 
 # Connect to Redis
-cache = redis_cache_adapter
+cache = cache_adapter()
 
 def redis_cache(key_param):
     def decorator(func):

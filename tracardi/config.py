@@ -45,9 +45,6 @@ class MemoryCacheConfig:
         self.identification_points_cache_ttl = _get_random_value(get_env_as_int('IDENTIFICATION_POINTS_CACHE_TTL', _default_ttl))
         self.resource_load_cache_ttl = _get_random_value(get_env_as_int('RESOURCE_LOAD_CACHE_TTL', _default_ttl))
 
-        logger.info(f"EVENT_TO_PROFILE_COPY_CACHE_TTL={self.event_to_profile_coping_ttl}")
-        logger.info(f"SOURCE_CACHE_TTL={self.source_ttl}")
-
 
 class MysqlConfig:
 
@@ -287,6 +284,9 @@ class TracardiConfig(metaclass=Singleton):
         self.server_logging_level = _get_logging_level(
             env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
         self.skip_errors_on_profile_mapping = get_env_as_bool('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no')
+
+        self.cache_adapter = env.get('CACHE_ADAPTER', 'redis')
+        self.queue_adapter = env.get('QUEUE_ADAPTER', 'pulsar')
 
         self._config = None
         self._unset_secrets()

@@ -2,10 +2,10 @@ from time import sleep
 
 import redis
 
-from tracardi.service.adapter.cache.redis.redis_cache_adapter import redis_cache_adapter
 from tracardi.exceptions.log_handler import get_logger
+from tracardi.service.adapter.cache_adaper_selector import cache_adapter
 
-
+_cache = cache_adapter()
 logger = get_logger(__name__)
 
 def wait_for_redis_connection():
@@ -17,7 +17,7 @@ def wait_for_redis_connection():
                 logger.error(f"Could not connect to redis")
                 exit(1)
 
-            if redis_cache_adapter.ping():
+            if _cache.ping():
                 break
 
         except redis.exceptions.ConnectionError as e:

@@ -10,7 +10,7 @@ class RedisCacheAdapter(CacheProtocol):
     def get(self, key: str):
         return self._client.get(key)
 
-    def set(self, key: str, value, ex):
+    def set(self, key: str, value, ex=None):
         return self._client.set(
             name=key,
             value=value,
@@ -22,7 +22,6 @@ class RedisCacheAdapter(CacheProtocol):
 
     def delete(self, key: str):
         self._client.delete(key)
-
 
     def exists(self, key: str):
         self._client.exists(key)
@@ -41,6 +40,3 @@ class RedisCacheAdapter(CacheProtocol):
 
     def ping(self):
         return self._client.ping()
-
-
-redis_cache_adapter:CacheProtocol = RedisCacheAdapter()

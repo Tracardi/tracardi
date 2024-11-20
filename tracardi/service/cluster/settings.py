@@ -12,16 +12,15 @@ from threading import Thread
 from tracardi.domain import ExtraInfo
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.domain.configuration import Configuration
-from tracardi.service.adapter.cache.pubsub_protocol import PubSubProtocol
+from tracardi.service.adapter.cache_adaper_selector import pubsub_adapter
 from tracardi.service.cache.load_settings import load_global_settings_by_key
 from tracardi.service.singleton import Singleton
-from tracardi.service.adapter.cache.redis.redis_pubsub_adapter import RedisPubSubAdapter
 from tracardi.service.storage.mysql.mapping.configuration_mapping import map_to_configuration
 from tracardi.service.storage.mysql.service.configuration_service import ConfigurationService
 from tracardi.service.utils.date import now_in_utc
 
 logger = get_logger(__name__)
-
+_pubsub_cache = pubsub_adapter()
 
 class ValueMessage(BaseModel):
     key: str
@@ -32,13 +31,12 @@ class GlobalSettingsBroadcaster(metaclass=Singleton):
 
     def __init__(self):
         self.settings = GlobalSettings()
-        self._queue: PubSubProtocol = RedisPubSubAdapter()
         self._channel = 'global-broadcaster'
 
     def _listen_for_messages(self):
         while True:
             try:
-                for message in self._queue.subscribe(self._channel):
+                for message in _pubsub_cache.subscribe(self._channel):
                     if message['type'] == 'message':
                         data = json.loads(message['data'])
                         data = ValueMessage(**data)
@@ -61,7 +59,7 @@ class GlobalSettingsBroadcaster(metaclass=Singleton):
     def publish(self, key, value) -> bool:
         try:
             payload = ValueMessage(key=key, value=value)
-            self._queue.publish(self._channel, payload.model_dump_json())
+            _pubsub_cache.publish(self._channel, payload.model_dump_json())
             logger.info(f"Global setting for key `{key}` have been broadcast to other nodes, payload: {payload}",
                         extra=ExtraInfo.build('GlobalSettingsBroadcaster', self))
             return True
