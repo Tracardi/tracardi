@@ -20,7 +20,6 @@ from .device import Device
 from .. import ExtraInfo
 from ..request import Request
 from ...exceptions.log_handler import get_logger
-from ...service.license import License, LICENSE
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
 from ..payload.event_payload import EventPayload
@@ -32,12 +31,6 @@ from ...service.storage.elastic.interface.collector.load.flat_profile import loa
 
 from ...service.utils.getters import get_entity_id
 from ...service.utils.hasher import get_shadow_session_id
-
-if License.has_service(LICENSE):
-    from com_tracardi.bridge.bridges import javascript_bridge
-    from com_tracardi.service.tracking.domain.cross_domain import CrossDomainModel
-    from com_tracardi.service.tracking.domain.profile_loader import ProfileLoaderConfig
-    from com_tracardi.service.tracking.domain.session_compute_data import SessionComputeData
 
 logger = get_logger(__name__)
 
@@ -435,34 +428,6 @@ class TrackerPayload(BaseModel):
                          )
             return None
 
-    def finger_printing_enabled(self):
-        if License.has_service(LICENSE) and self.source.bridge.id == javascript_bridge.id:
-            ttl = int(self.source.config.get('device_fingerprint_ttl', 30))
-            return ttl > 0
-        return False
-
-    def to_session_compute_data(self):
-        return SessionComputeData(
-            channel=self.get_channel(),
-            context=self.context,
-            request=self.request,
-            properties=self.properties
-        )
-
-    def to_profile_loading_settings(self, session, is_static):
-        insert, update, create = self.get_times()
-        return ProfileLoaderConfig(
-            session_id=session.id,
-            session_profile_id=get_entity_id(session.profile),
-            session_context=session.context,
-            is_session_new=session.is_new(),
-            profile_id = get_entity_id(self.profile),
-            is_profile_static = is_static,
-            insert=insert,
-            update=update,
-            create=create
-        )
-
     def get_times(self):
         if isinstance(self.session, DefaultEntity) and self.session.metadata:
             insert = self.session.metadata.insert
@@ -475,32 +440,10 @@ class TrackerPayload(BaseModel):
 
         return insert, update, create
 
-    def to_cross_domain_model(self, allowed_bridges, is_static_profile_id):
-        ttl = 15 * 60
-        if self.source.config:
-            ttl = int(self.source.config.get('device_fingerprint_ttl', 15 * 60))
-
-        return CrossDomainModel(
-            source_id=self.source.id,
-            profile_id=get_entity_id(self.profile),
-            profile_ids=self.profile.ids if self.profile else [],
-            session_id=get_entity_id(self.session),
-            allowed_bridges=allowed_bridges,
-            is_cde=self.is_cde(),
-            is_finder_print=self.finger_printing_enabled(),
-            is_profile_static= is_static_profile_id or self.has_static_profile_id(),
-            referer_source_id=self.get_referer_data('source'),
-            referred_profile_id=self.get_referer_data('profile'),
-            fingerprint_ttl=ttl,
-            request_ip=self.get_ip(),
-            browser_agent=self.get_browser_agent(),
-            browser_language = self.get_browser_language()
-        )
-
     def for_session_creation(self):
 
         session_id = get_entity_id(self.session)
-        profile_id= get_entity_id(self.profile)
+        profile_id = get_entity_id(self.profile)
         insert, update, create = self.get_times()
 
         return session_id, profile_id, insert, update, create
@@ -513,7 +456,7 @@ class TrackerPayload(BaseModel):
         return session and session.profile and isinstance(session.profile.id, str) and session.profile.id.strip() != ""
 
     @staticmethod
-    def _profile_consistency_check(requested_profile_id:str, profile: FlatProfile):
+    def _profile_consistency_check(requested_profile_id: str, profile: FlatProfile):
         if profile.id != requested_profile_id and requested_profile_id not in profile.ids:
             raise ValueError(f"Loading of profile failed. Some inconsistent profile loaded. "
                              f"Requested profile (ID: {requested_profile_id}), loaded profile (ID: {profile.id} "
