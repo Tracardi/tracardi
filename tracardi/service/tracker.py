@@ -63,8 +63,12 @@ class Tracker:
                 tracker_payload.source.id = str(tracker_payload.source.id).strip()
             if tracker_payload.session:
                 tracker_payload.session.id = str(tracker_payload.session.id).strip()
+                if tracker_payload.session.id == "":
+                    tracker_payload.session = None
             if tracker_payload.profile:
                 tracker_payload.profile.id = str(tracker_payload.profile.id).strip()
+                if tracker_payload.profile.id == "":
+                    tracker_payload.profile = None
 
             # Validate event source
 
