@@ -52,12 +52,13 @@ class Lock:
         logger.debug(f"Locking {self.key}")
         self._set_lock_metadata(time.time(), mutex_name, LOCKED)
 
-    def _set_lock_metadata(self, time: float, mutex_name, state: int):
+    def _set_lock_metadata(self, lock_time: float, mutex_name, state: int):
         payload = msgpack.packb((
-            time,
+            lock_time,
             mutex_name,
             state
         ))
+
         self._cache.set(self._key, payload, ex=self._lock_ttl)
 
     def delete(self):
@@ -241,7 +242,7 @@ class AsyncGlobalMutexLock(_GlobalMutexLock):
                 if _broke:  # Time is up
                     # We are fed up waiting
                     logger.info(
-                        f"Lock {self._lock.key} breaks. Currently locked by (Running process): {self._lock.get_locked_inside()}, Knocking consumer (Waiting process): {self._name}")
+                        f"Lock ({self._name}) {self._lock.key} breaks. Time-out: {lock_time}. Currently locked by (Running process): {self._lock.get_locked_inside()}, Knocking consumer (Waiting process): {self._name}")
                     self._lock.break_in()  # Still locked but break is marked BROKE in redis
                     return DONE_WAITING
 

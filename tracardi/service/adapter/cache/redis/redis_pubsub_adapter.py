@@ -16,4 +16,4 @@ class RedisPubSubAdapter(PubSubProtocol):
             yield message
 
     def publish(self, channel, payload):
-        self._client.publish(channel, payload)
+        return self._client.publish(channel, payload)

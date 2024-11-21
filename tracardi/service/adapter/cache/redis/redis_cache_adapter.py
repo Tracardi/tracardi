@@ -21,13 +21,13 @@ class RedisCacheAdapter(CacheProtocol):
         return self._client.mset(mapping)
 
     def delete(self, key: str):
-        self._client.delete(key)
+        return self._client.delete(key)
 
     def exists(self, key: str):
-        self._client.exists(key)
+        return self._client.exists(key)
 
     def expire(self, key, ttl):
-        self._client.expire(key, ttl)
+        return self._client.expire(key, ttl)
 
     def incr(self, key: str):
         return self._client.incr(key)

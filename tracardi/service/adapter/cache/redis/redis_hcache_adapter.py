@@ -9,7 +9,7 @@ class RedisHCacheAdapter(HCacheProtocol):
         self._client = RedisClient()
 
     def hexists(self, name, key):
-        self._client.hexists(name, key)
+        return self._client.hexists(name, key)
 
     def hset(self, name, key, value):
         return self._client.hset(name, key, value)
@@ -18,4 +18,4 @@ class RedisHCacheAdapter(HCacheProtocol):
         return self._client.hget(name, key)
 
     def hdel(self, name: str, *keys: List):
-        self._client.hdel(name, *keys)
+        return self._client.hdel(name, *keys)
