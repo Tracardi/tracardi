@@ -18,7 +18,7 @@ def remove_ephemeral_data(tracker_payload,
     _save_profile_flag = tracker_payload.is_on('saveProfile', default=True)
 
     if not _save_events_flag:
-        events = []
+        flat_events = []
 
     if not _save_session_flag:
         session = None
