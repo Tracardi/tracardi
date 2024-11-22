@@ -232,7 +232,7 @@ class AsyncGlobalMutexLock(_GlobalMutexLock):
         while True:
             _now = time.time()
 
-
+            _lock_info = False
             if self._lock.is_locked():  # Key exists, when expires it will be unlocked
 
                 lock_time = self._get_lock_time()
@@ -250,10 +250,17 @@ class AsyncGlobalMutexLock(_GlobalMutexLock):
                     f"Suppressing execution of {self._lock.key}. Process {self._lock.get_locked_inside()} is using resource."
                     f"Expires in {self._lock.ttl}s. Waiting no longer then {_time_to_break}s then skipping execution."
                 )
+                _lock_info = True
 
                 await asyncio.sleep(self._wait)
 
                 continue
+
+            if _lock_info:
+                _lock_info = True
+                logger.info(
+                    f"Suppressed execution of {self._lock.key} released."
+                )
             break
 
         # Get last state and return it
