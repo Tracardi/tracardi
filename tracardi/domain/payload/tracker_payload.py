@@ -1,3 +1,4 @@
+from datetime import datetime
 from urllib.parse import urlparse, ParseResult
 
 from user_agents.parsers import UserAgent
@@ -428,7 +429,7 @@ class TrackerPayload(BaseModel):
                          )
             return None
 
-    def get_times(self):
+    def get_times(self) -> Tuple[Optional[datetime], Optional[datetime], Optional[datetime]]:
         if isinstance(self.session, DefaultEntity) and self.session.metadata:
             insert = self.session.metadata.insert
             update = self.session.metadata.update

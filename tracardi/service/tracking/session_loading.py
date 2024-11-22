@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import uuid4
 
 from typing import Tuple, Optional
@@ -106,7 +107,7 @@ async def load_or_create_session(tracker_payload: TrackerPayload) -> Tuple[Sessi
     return session, tracker_payload
 
 
-def _copy_tracker_payload_session_metadata_1(session: Session, insert, update, create) -> Session:
+def _copy_tracker_payload_session_metadata_1(session: Session, insert: Optional[datetime], update: Optional[datetime], create: Optional[datetime]) -> Session:
     if insert:
         session.metadata.time.insert = insert
     if update:
@@ -116,7 +117,7 @@ def _copy_tracker_payload_session_metadata_1(session: Session, insert, update, c
     return session
 
 
-def _create_session_1(session_id: Optional[str], profile_id: Optional[str], insert, update, create) -> Session:
+def _create_session_1(session_id: Optional[str], profile_id: Optional[str], insert: Optional[datetime], update: Optional[datetime], create: Optional[datetime]) -> Session:
     # Artificial session (Mutates tracker Payload)
 
     # If no session in tracker payload this means that we do not need session.
