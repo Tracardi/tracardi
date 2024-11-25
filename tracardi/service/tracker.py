@@ -2,7 +2,7 @@ from typing import Optional
 
 from tracardi.context import get_context
 from tracardi.domain.bridges.configurable_bridges import WebHookBridge, RestApiBridge, ConfigurableBridge
-from tracardi.exceptions.exception import BlockedException
+from tracardi.exceptions.exception import InvalidBotTrafficException
 from tracardi.service.license import License
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.tracking.source_validation import validate_source
@@ -55,7 +55,7 @@ class Tracker:
             context.profiler.measure('tracker-starts')
 
             if tracardi.disallow_bot_traffic and tracker_payload.is_bot():
-                raise BlockedException(f"Traffic from bot is not allowed.")
+                raise InvalidBotTrafficException(f"Traffic from bot is not allowed.")
 
                 # Trim ids - spaces are frequent issues
 
