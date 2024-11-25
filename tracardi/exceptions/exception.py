@@ -38,6 +38,9 @@ class UnauthorizedException(TracardiException):
 class BlockedException(TracardiException):
     pass
 
+class InvalidBotTrafficException(TracardiException):
+    pass
+
 class WorkflowException(Exception):
     pass
 
