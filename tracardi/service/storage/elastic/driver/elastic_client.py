@@ -100,6 +100,10 @@ class ElasticClient:
     def cluster(self):
         return self._client.cluster
 
+    @property
+    def shards(self):
+        return self._client.cat.shards(format="json")
+
     async def delete_bulk(self, index, record_ids, repeats: int = 3) -> BulkInsertResult:
 
         if not isinstance(record_ids, list):
