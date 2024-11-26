@@ -18,6 +18,7 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.singleton import Singleton
 
 from .elastic_client import ElasticClient
+from .model.field_sort import ElasticFieldSort
 
 _local_dir = os.path.dirname(__file__)
 logger = get_logger(__name__)
