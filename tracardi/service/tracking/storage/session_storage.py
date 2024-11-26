@@ -38,23 +38,3 @@ async def save_session(sessions: Union[Session, List[Session], Set[Session]],
 
     if cache:
         save_session_cache(sessions, context)
-
-
-async def store_session(sessions: Union[Session, List[Session], Set[Session]],
-                        context: Optional[Context] = None,
-                        refresh: bool = False,
-                        cache: bool = True
-                        ):
-    """
-    Used to store data.
-    """
-
-    if context is None:
-        context = get_context()
-
-    await save_session_to_db(sessions)
-    if refresh:
-        await refresh_session_db()
-
-    if cache:
-        save_session_cache(sessions, context)

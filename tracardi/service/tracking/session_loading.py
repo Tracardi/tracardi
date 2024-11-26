@@ -1,17 +1,16 @@
 from datetime import datetime
 from uuid import uuid4
 
-from typing import Tuple, Optional
+from typing import Optional
 
 from tracardi.domain.entity import Entity
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.tracking.storage.session_storage import load_session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.session import Session
-from tracardi.service.utils.getters import get_entity_id
+# from tracardi.service.utils.getters import get_entity_id
 
 logger = get_logger(__name__)
-
 
 # TODO Remove after 2024-12-01
 def _copy_tracker_payload_session_metadata(tracker_payload: TrackerPayload, session: Session) -> Session:
