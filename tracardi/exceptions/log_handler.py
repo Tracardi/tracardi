@@ -114,6 +114,8 @@ class ElasticLogHandler(Handler):
         self.collection = []
         self.last_save = time()
 
+    def add(self, logs: list):
+        self.collection.extend(logs)
 
 log_handler = ElasticLogHandler()
 
