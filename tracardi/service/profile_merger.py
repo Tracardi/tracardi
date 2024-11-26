@@ -45,6 +45,7 @@ async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Pr
 async def _move_profile_events_and_sessions(duplicate_profiles: List[Profile], merged_profile: Profile):
     for old_profile in duplicate_profiles:
         if old_profile.id != merged_profile.id:
+            # TODO Adapter
             await raw_db.update_profile_ids('event', old_profile.id, merged_profile.id)
             await refresh_event_db()
             await raw_db.update_profile_ids('session', old_profile.id, merged_profile.id)
@@ -343,9 +344,11 @@ class ProfileMerger:
 
             # Auto refresh db
             merged_flat_profile = FlatProfile.from_profile(merged_profile)
+            # TODO Adapter
             await mutation_profile_db.save_flat_profile(merged_flat_profile, refresh=True)
 
             # Schedule - move events from duplicated profiles
+            # TODO Adapter
             await _move_profile_events_and_sessions(duplicate_profiles, merged_profile)
 
             # Schedule - mark duplicated profiles
@@ -355,6 +358,7 @@ class ProfileMerger:
             logger.debug(f"Profiles to delete {records_to_delete}.",
                          extra=ExtraInfo.build(origin="merging", object=self))
 
+            # TODO Adapter
             await delete_multiple_profiles(records_to_delete)
 
             # Replace current profile with merged profile
