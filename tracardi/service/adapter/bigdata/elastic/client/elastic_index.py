@@ -353,6 +353,9 @@ class ElasticIndex:
     async def flush(self, params=None, headers=None):
         return await self.client.flush(self.index.get_write_index(), params, headers)
 
+    async def refresh(self, params=None, headers=None):
+        return await self.client.refresh(self.index.get_write_index(), params, headers)
+
     async def load(self, id: str) -> Optional[StorageRecord]:
         try:
             index = self.index.get_index_alias()

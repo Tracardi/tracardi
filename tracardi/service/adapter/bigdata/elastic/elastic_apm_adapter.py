@@ -34,6 +34,9 @@ class ElasticApmAdapter:
     def index(self, index) -> ElasticIndex:
         return ElasticIndex(self._client, index)
 
+    async def refresh(self, index_type: str):
+        return await self.index(index_type).refresh()
+
     async def load_duplicated_profiles_by_field(self, field: str) -> AsyncGenerator[Tuple[str, int], None]:
         query = get_agg_query_for_duplicated_profiles_by_field(field)
         result = await self.index('profile').query(query)
