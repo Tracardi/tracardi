@@ -7,7 +7,7 @@ _big_data_adapter_var = com_tracardi_settings.big_data_adapter
 
 
 @run_once
-def apm_collector_adapter() -> ElasticApmAdapter:
+def bd_apm_adapter() -> ElasticApmAdapter:
     if _big_data_adapter_var.lower() == 'elastic':
         return ElasticApmAdapter()
     else:

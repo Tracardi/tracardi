@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile import Profile
-from tracardi.service.profile_merger import ProfileMerger
+from tracardi.service.merging.profile_merger import ProfileMerger
 from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
 
 from tracardi.service.storage.elastic.interface import profile as profile_db

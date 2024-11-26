@@ -4,10 +4,10 @@ from tracardi.service.adapter.bigdata.elastic.client.model.field_sort import Ela
 
 
 def get_query_by_values(fields_and_values: List[tuple],
-                              sort_by: Optional[List[ElasticFieldSort]] = None,
-                              limit=1000,
-                              condition='must'
-                              ) -> dict:
+                        sort_by: Optional[List[ElasticFieldSort]] = None,
+                        limit=1000,
+                        condition='must'
+                        ) -> dict:
     if condition not in ['must', 'should']:
         raise AssertionError(f"Can not use {condition} for querying elasticsearch.")
 
@@ -65,6 +65,7 @@ def get_query_for_duplicated_profiles(profile_ids: List[str]):
         ]
     }
 
+
 def get_query_for_auto_merge():
     return {
         "query": {
@@ -73,6 +74,7 @@ def get_query_for_auto_merge():
             }
         }
     }
+
 
 def get_agg_query_for_duplicated_profile_counts():
     return {
@@ -126,6 +128,7 @@ def get_agg_query_for_duplicated_profiles_by_field(field: str):
             },
         }
     }
+
 
 def get_query_to_load_profiles_by_field_and_value(field, value):
     return {

@@ -1,32 +1,30 @@
 from dotty_dict import Dotty
 
-from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
+from tracardi.service.merging.storage.mutation import save_flat_profile, delete_multiple_profiles, \
+    move_profile_events_and_sessions
 
 from tracardi.domain.profile_data import ProfileData
-from .adapter.bigdata.adapter_selector import apm_collector_adapter
-from .storage.elastic.interface.merging import delete_multiple_profiles
 
-from ..context import get_context
-from ..domain import ExtraInfo
-from ..domain.flat_profile import FlatProfile
-from ..domain.storage_record import RecordMetadata
+from tracardi.context import get_context
+from tracardi.domain import ExtraInfo
+from tracardi.domain.flat_profile import FlatProfile
+from tracardi.domain.storage_record import RecordMetadata
 from tracardi.service.storage.elastic.interface import profile as profile_db
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple
 from pydantic.v1.utils import deep_update
 
-from ..domain.metadata import ProfileMetadata
-from ..domain.profile import Profile
-from ..domain.profile_stats import ProfileStats
-from ..domain.time import ProfileTime
-from ..exceptions.log_handler import get_logger
+from tracardi.domain.metadata import ProfileMetadata
+from tracardi.domain.profile import Profile
+from tracardi.domain.profile_stats import ProfileStats
+from tracardi.domain.time import ProfileTime
+from tracardi.exceptions.log_handler import get_logger
 
-from ..service.dot_notation_converter import DotNotationConverter
+from tracardi.service.dot_notation_converter import DotNotationConverter
 
 from tracardi.service.merging.merger import merge as dict_merge, get_conflicted_values, MergingStrategy
 
 logger = get_logger(__name__)
-_apm_adapter = apm_collector_adapter()
 
 async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Profile,
                                                               duplicate_profiles: List[Profile]) -> Profile:
@@ -38,15 +36,6 @@ async def _copy_duplicated_profiles_ids_to_merged_profile_ids(merged_profile: Pr
     merged_profile.ids = list(set(merged_profile.ids))
 
     return merged_profile
-
-
-async def _move_profile_events_and_sessions(duplicate_profiles: List[Profile], merged_profile: Profile):
-    for old_profile in duplicate_profiles:
-        if old_profile.id != merged_profile.id:
-            await _apm_adapter.update_profile_id_in('event', old_profile.id, merged_profile.id)
-            await _apm_adapter.refresh('event')
-            await _apm_adapter.update_profile_id_in('session', old_profile.id, merged_profile.id)
-            await _apm_adapter.refresh('session')
 
 
 class ProfileMerger:
@@ -341,11 +330,10 @@ class ProfileMerger:
 
             # Auto refresh db
             merged_flat_profile = FlatProfile.from_profile(merged_profile)
-            # TODO Adapter
-            await mutation_profile_db.save_flat_profile(merged_flat_profile, refresh=True)
+            await save_flat_profile(merged_flat_profile, refresh=True)
 
             # Schedule - move events from duplicated profiles
-            await _move_profile_events_and_sessions(duplicate_profiles, merged_profile)
+            await move_profile_events_and_sessions(duplicate_profiles, merged_profile)
 
             # Schedule - mark duplicated profiles
             records_to_delete: List[Tuple[str, RecordMetadata]] = [(profile.id, profile.get_meta_data())
@@ -354,7 +342,6 @@ class ProfileMerger:
             logger.debug(f"Profiles to delete {records_to_delete}.",
                          extra=ExtraInfo.build(origin="merging", object=self))
 
-            # TODO Adapter
             await delete_multiple_profiles(records_to_delete)
 
             # Replace current profile with merged profile
