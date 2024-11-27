@@ -1,16 +1,12 @@
 import asyncio
 from typing import Union, List, Set, Tuple, AsyncGenerator, Any
 
-from tracardi.config import elastic
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile import Profile
 from tracardi.domain.storage_record import RecordMetadata, StorageRecords
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.adapter.bigdata.elastic.client.elastic_client import ElasticClient
-from tracardi.service.adapter.bigdata.elastic.client.elastic_index import ElasticIndex
-from tracardi.service.adapter.bigdata.elastic.helpers.adapter_helper import (load_profile as load_profile_helper,
-                                                                             save_profiles as save_profiles_helper,
-                                                                             delete_profile as delete_profile_helper)
+from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
+from tracardi.service.adapter.bigdata.elastic.helpers.adapter_helper import (load_profile as load_profile_helper)
 from tracardi.service.adapter.bigdata.elastic.client.elastic_query import get_query_by_values, \
     get_query_for_duplicated_profiles_by_ids, get_query_for_auto_merge, get_agg_query_for_duplicated_profile_counts, \
     get_update_query_to_update_profile_id, get_agg_query_for_duplicated_profiles_by_field, \
@@ -18,19 +14,7 @@ from tracardi.service.adapter.bigdata.elastic.client.elastic_query import get_qu
 
 logger = get_logger(__name__)
 
-
-class ElasticApmAdapter:
-
-    def __init__(self):
-        kwargs = ElasticClient.get_elastic_config(elastic)
-        self._client = ElasticClient(**kwargs)
-        self._params = {}
-
-    def index(self, index) -> ElasticIndex:
-        return ElasticIndex(self._client, index)
-
-    async def refresh(self, index_type: str):
-        return await self.index(index_type).refresh()
+class ElasticApmAdapter(ElasticAdapter):
 
     async def load_duplicated_profiles_by_field(self, field: str) -> AsyncGenerator[Tuple[str, int], None]:
         query = get_agg_query_for_duplicated_profiles_by_field(field)
@@ -81,22 +65,22 @@ class ElasticApmAdapter:
     # Mutations
 
     async def save_profiles(self, profiles: Union[FlatProfile, List[FlatProfile], Set[FlatProfile]], **kwargs):
-        return save_profiles_helper(self._client, profiles, **kwargs)
+        return await self.core.save('profile', profiles, **kwargs)
 
     async def delete_multiple_profiles(self, profile_tuples: List[Tuple[str, RecordMetadata]]):
-        tasks = [asyncio.create_task(delete_profile_helper(self._client, profile_id, metadata.index))
+        tasks = [asyncio.create_task(self.core.delete('profile', profile_id, metadata.index))
                  for profile_id, metadata in profile_tuples]
         return await asyncio.gather(*tasks)
 
     async def update_profile_id_in(self, index: str, old_profile_id: str, merged_profile_id):
         query = get_update_query_to_update_profile_id(old_profile_id, new_profile_id=merged_profile_id)
-        return await self.index(index).update_by_query(query=query)
+        return await self.core.update(index, query=query)
 
     async def move_profile_events_and_sessions(self, duplicate_profile_ids: Set[str], merged_profile_id: str):
         # Changes ids of old events and sessions to match merged profile
         for old_id in duplicate_profile_ids:
             if old_id != merged_profile_id:
                 await self.update_profile_id_in('event', old_id, merged_profile_id)
-                await self.refresh('event')
+                await self.core.refresh('event')
                 await self.update_profile_id_in('session', old_id, merged_profile_id)
-                await self.refresh('session')
+                await self.core.refresh('session')

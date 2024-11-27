@@ -5,7 +5,7 @@ import time
 from tracardi.config import tracardi
 from tracardi.context import get_context
 from tracardi.domain.flat_event import FlatEvent
-from tracardi.service.storage.elastic.interface.event import save_events_in_db
+from tracardi.service.adapter.bigdata.adapter_selector import bd_collector_adapter
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
 from tracardi.service.tracking.process.loading import tracker_loading
 from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
@@ -20,6 +20,7 @@ from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.triggers import exec_workflow
 
 logger = get_logger(__name__)
+_collector_adapter = bd_collector_adapter()
 
 def _exclude_ephemeral(flat_events: List[FlatEvent]):
     for flat_event in flat_events:
@@ -77,7 +78,7 @@ async def os_tracker(
         # Save events
         if flat_events:
             # Sync save
-            await save_events_in_db(list(_exclude_ephemeral(flat_events)))
+            await _collector_adapter.save_events(list(_exclude_ephemeral(flat_events)))
 
         # Clean up so can not be used. It is already in session
         if 'location' in tracker_payload.context:

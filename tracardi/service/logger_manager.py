@@ -1,11 +1,12 @@
 from tracardi.context import get_context
 from tracardi.exceptions.log_controller import log_controller
 from tracardi.exceptions.log_handler import log_handler, get_installation_logger
+from tracardi.service.adapter.bigdata.adapter_selector import bd_log_adapter
 from tracardi.service.license import License
 from tracardi.domain.installation_status import installation_status
-from tracardi.service.storage.elastic.interface import log as log_db
 
 logger = get_installation_logger(__name__)
+_log_adapter = bd_log_adapter()
 
 if License.has_license():
     from com_tracardi.workers.log_saver import log_saver_worker
@@ -23,7 +24,7 @@ async def save_logs():
                 await log_saver_worker(logs)
             else:
                 if await installation_status.has_logs_index(get_context()):
-                    return await log_db.save(logs)
+                    return await _log_adapter.save_logs(logs)
                 else:
                     logger.warning(
                         "Logs index is not available. Probably system is not installed or being installed or the index went missing.")

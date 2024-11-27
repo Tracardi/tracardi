@@ -6,12 +6,12 @@ from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.storage.driver.elastic import event as event_db
 
 
-async def refresh_event_db():
-    return await event_db.refresh()
+# async def refresh_event_db():
+#     return await event_db.refresh()
 
 
-async def flush_event_db():
-    await event_db.flush()
+# async def flush_event_db():
+#     await event_db.flush()
 
 
 async def load_event_from_db(event_id: str) -> Optional[Event]:
@@ -56,8 +56,8 @@ async def load_events_avg_requests():
     return result['count'] / (5 * 60) if 'count' in result else 0
 
 
-async def save_events_in_db(flat_events: List[FlatEvent]) -> BulkInsertResult:
-    return await event_db.save(flat_events, exclude={"operation": ...})
+# async def save_events_in_db(flat_events: List[FlatEvent]) -> BulkInsertResult:
+#     return await event_db.save(flat_events, exclude={"operation": ...})
 
 
 async def load_events_by_session_and_profile(profile_id: str, session_id: str, limit: int):

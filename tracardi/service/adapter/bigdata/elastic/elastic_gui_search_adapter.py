@@ -1,29 +1,18 @@
 from typing import Set
 
-from tracardi.config import elastic
 from tracardi.domain.query_result import QueryResult
 from tracardi.domain.time_range_query import DatetimeRangePayload
-
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.adapter.bigdata.elastic.cache.field_mapping import load_cached_field_names, \
     load_cached_column_values
-from tracardi.service.adapter.bigdata.elastic.client.elastic_client import ElasticClient
-from tracardi.service.adapter.bigdata.elastic.client.elastic_index import ElasticIndex
+from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from tracardi.service.adapter.bigdata.elastic.helpers.search_engine_helper import SqlSearchQueryEngine
 from tracardi.service.wf.field_mappings_cache import FieldMapper
 
 logger = get_logger(__name__)
 
 
-class ElasticSearchAdapter:
-
-    def __init__(self):
-        kwargs = ElasticClient.get_elastic_config(elastic)
-        self._client = ElasticClient(**kwargs)
-        self._params = {}
-
-    def index(self, index) -> ElasticIndex:
-        return ElasticIndex(self._client, index)
+class ElasticSearchAdapter(ElasticAdapter):
 
     # Search
 

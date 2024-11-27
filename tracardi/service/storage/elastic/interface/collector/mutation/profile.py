@@ -3,20 +3,21 @@ from typing import Union, List, Set, Optional
 from tracardi.context import Context, get_context
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile import Profile
-from tracardi.service.storage.driver.elastic import profile as profile_db
+from tracardi.service.adapter.bigdata.adapter_selector import bd_collector_adapter
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.tracking.cache.flat_profile_cache import save_flat_profile_cache, delete_flat_profile_cache
 
+_collector_adapter = bd_collector_adapter()
 
 async def save_profiles_in_db(profiles: Union[FlatProfile, Profile, List[FlatProfile], List[Profile], Set[Profile]],
                               refresh_after_save=False):
-    return await profile_db.save(profiles, refresh_after_save)
+    return await _collector_adapter.save_profiles(profiles, refresh_after_save=refresh_after_save)
 
 
-async def save_flat_profile_in_db_and_cache(flat_profile: FlatProfile):
-    save_flat_profile_cache(flat_profile)
-    # Save to database - do not defer
-    await save_profiles_in_db(flat_profile, refresh_after_save=True)
+# async def save_flat_profile_in_db_and_cache(flat_profile: FlatProfile):
+#     save_flat_profile_cache(flat_profile)
+#     # Save to database - do not defer
+#     await save_profiles_in_db(flat_profile, refresh_after_save=True)
 
 
 async def save_flat_profile(profiles: Union[FlatProfile, List[FlatProfile], Set[FlatProfile]],
@@ -68,7 +69,7 @@ async def delete_profile(id: str,
         context = get_context()
 
     result = await _delete_by_id(id, index)
-    await profile_db.refresh()
+    await _collector_adapter.refresh('profile')
     if cache:
         delete_flat_profile_cache(profile_id=id, context=context)
 

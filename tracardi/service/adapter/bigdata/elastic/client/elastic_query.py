@@ -176,3 +176,32 @@ def get_agg_query_for_log_levels(date_from) -> dict:
             }
         }
     }
+
+def get_query_to_load_profile_by_id(profile_id: str) -> dict:
+    return {
+        "size": 2,
+        "query": {
+            "bool": {
+                "should": [
+                    {
+                        "term": {
+                            "ids": profile_id
+                        }
+                    },
+                    {
+                        "term": {
+                            "id": profile_id
+                        }
+                    }
+                ],
+                "minimum_should_match": 1
+            }
+        },
+        "sort": [
+            {
+                "metadata.time.update": {
+                    "order": "desc"
+                }
+            }
+        ]
+    }

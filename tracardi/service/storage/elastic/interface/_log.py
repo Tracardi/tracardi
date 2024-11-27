@@ -10,8 +10,8 @@ from tracardi.service.utils.date import now_in_utc
 # from tracardi.service.storage.index import Resource
 
 
-async def save(data) -> BulkInsertResult:
-    return await storage_manager('log').upsert(data)
+# async def save(data) -> BulkInsertResult:
+#     return await storage_manager('log').upsert(data)
 
 
 # async def load_all(start: int = 0, limit: int = 100) -> dict:
@@ -22,33 +22,33 @@ async def save(data) -> BulkInsertResult:
 #     return result.dict()
 
 
-async def group_by_level(date_from: Optional[datetime] = None) -> dict:
-    if date_from is None:
-        date_from = now_in_utc() - timedelta(days=30)
-
-    query = {
-        "size": 0,
-        "query": {
-            "range": {
-                "date": {
-                    "gte": date_from,
-                    # "format": "yyyy-MM-dd'T'HH:mm:ss"
-                }
-            }
-        },
-        "aggs": {
-            "error_levels": {
-                "terms": {
-                    "field": "level",
-                    "size": 10
-                }
-            }
-        }
-    }
-
-    result = await storage_manager('log').query(query)
-    buckets = result.aggregations('error_levels').buckets()
-    return {item['key']:item['doc_count'] for item in buckets}
+# async def load_group_logs_by_level(date_from: Optional[datetime] = None) -> dict:
+#     if date_from is None:
+#         date_from = now_in_utc() - timedelta(days=30)
+#
+#     query = {
+#         "size": 0,
+#         "query": {
+#             "range": {
+#                 "date": {
+#                     "gte": date_from,
+#                     # "format": "yyyy-MM-dd'T'HH:mm:ss"
+#                 }
+#             }
+#         },
+#         "aggs": {
+#             "error_levels": {
+#                 "terms": {
+#                     "field": "level",
+#                     "size": 10
+#                 }
+#             }
+#         }
+#     }
+#
+#     result = await storage_manager('log').query(query)
+#     buckets = result.aggregations('error_levels').buckets()
+#     return {item['key']:item['doc_count'] for item in buckets}
 
 
 # async def exists():
