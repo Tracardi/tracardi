@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Set, List
 
 from tracardi.domain.query_result import QueryResult
 from tracardi.domain.time_range_query import DatetimeRangePayload
@@ -6,7 +6,8 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.adapter.bigdata.elastic.cache.field_mapping import load_cached_field_names, \
     load_cached_column_values
 from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
-from tracardi.service.adapter.bigdata.elastic.helpers.search_engine_helper import SqlSearchQueryEngine
+from tracardi.service.adapter.bigdata.elastic.helpers.search_engine_helper import SqlSearchQueryEngine, \
+    get_fields_of_given_field_type
 from tracardi.service.wf.field_mappings_cache import FieldMapper
 
 logger = get_logger(__name__)
@@ -40,3 +41,14 @@ class ElasticSearchAdapter(ElasticAdapter):
 
     async def get_values_from_table_colum(self, table: str, column: str, limit=100) -> Set[str]:
         return await load_cached_column_values(self.index(table), column, limit)
+
+
+    async def _get_mapping_for_table(self, table: str) -> dict:
+        idx = self.index(table)
+        write_index = idx.index.get_write_index()
+        result = await idx.client.get_mapping(write_index)
+        return result[write_index]
+
+    async def get_columns_with_give_type(self, table: str, types: List[str]):
+        mapping = await self._get_mapping_for_table(table)
+        return get_fields_of_given_field_type(mapping, types)
