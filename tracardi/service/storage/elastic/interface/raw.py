@@ -2,8 +2,6 @@ from typing import List, Optional, Tuple
 from elasticsearch import NotFoundError
 from tracardi.domain.storage_record import StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.service.cache.field_mapping import load_fields
-from tracardi.service.wf.field_mappings_cache import FieldMapper
 from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.elastic.driver.factory import storage_manager
@@ -229,21 +227,21 @@ async def remove_index(index: str) -> bool:
     return False
 
 
-async def get_unique_field_values(index, field, limit=100):
-    es = ElasticClient.instance()
-    query = {
-        "size": 0,
-        "aggs": {
-            "fields": {
-                "terms": {"field": field, "size": limit}
-            }
-        }}
-    index = Resource()[index]
-    return StorageRecords.build_from_elastic(await es.search(index.get_index_alias(), query))
+# async def get_values_from_table_colum(index, field, limit=100):
+#     es = ElasticClient.instance()
+#     query = {
+#         "size": 0,
+#         "aggs": {
+#             "fields": {
+#                 "terms": {"field": field, "size": limit}
+#             }
+#         }}
+#     index = Resource()[index]
+#     return StorageRecords.build_from_elastic(await es.search(index.get_index_alias(), query))
 
 
-async def get_mapping_fields(index: str) -> list:
-    db_mappings = await load_fields(index)
-    set_of_db_mappings = set(db_mappings)
-    set_of_db_mappings.update(FieldMapper().get_field_mapping(index))
-    return sorted(list(set_of_db_mappings))
+# async def get_defined_columns_in_table(index: str) -> list:
+#     db_mappings = await load_fields(index)
+#     set_of_db_mappings = set(db_mappings)
+#     set_of_db_mappings.update(FieldMapper().get_field_mapping(index))
+#     return sorted(list(set_of_db_mappings))

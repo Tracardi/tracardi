@@ -304,6 +304,9 @@ class ElasticIndex:
         self.index = resource[index_key]  # type: Index
         self.index_key = index_key
 
+    def __hash__(self):
+        return hash(self.index_key)
+
     @staticmethod
     def _get_storage_record(record, replace_id, exclude=None) -> StorageRecord:
         if isinstance(record, StorageRecord):
@@ -453,3 +456,6 @@ class ElasticIndex:
             conflicts=conflicts,
             wait_for_completion=wait_for_completion
         )
+
+    async def get_mapping(self):
+        return await self.client.get_mapping(self.index.get_index_alias())

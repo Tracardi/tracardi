@@ -138,3 +138,14 @@ def get_query_to_load_profiles_by_field_and_value(field, value):
             }
         }
     }
+
+
+def get_query_for_unique_values_from_field(field: str, limit: int):
+    return {
+        "size": 0,
+        "aggs": {
+            "fields": {
+                "terms": {"field": field, "size": limit}
+            }
+        }
+    }
