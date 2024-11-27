@@ -68,10 +68,12 @@ class StartAction(ActionRunner):
 
         if self.config.profile_id:
             # TODO EOFP - End of FlatProfile
-            _profile = await load_profile(self.config.profile_id)
-            if not _profile:
-                msg = f"Can not load session with id {self.config.profile_id}"
+            profile = await load_profile(self.config.profile_id)
+            if not profile:
+                msg = f"Can not load profile with id {self.config.profile_id}"
                 raise ValueError(msg)
+            self.profile = profile
+            event.profile = profile
 
         # Replace event
 
@@ -79,8 +81,7 @@ class StartAction(ActionRunner):
             event: Optional[Event] = await load_event_from_db(self.config.event_id)
             if event is None:
                 raise ValueError(f"Can not load event with id {self.config.event_id}")
-
-        event.profile = profile
+            event.profile =profile
 
 
         try:
