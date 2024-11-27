@@ -39,7 +39,7 @@ def get_query_by_values(fields_and_values: List[tuple],
     return query
 
 
-def get_query_for_duplicated_profiles(profile_ids: List[str]):
+def get_query_for_duplicated_profiles_by_ids(profile_ids: List[str]):
     return {
         "size": 1000,
         "query": {

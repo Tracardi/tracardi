@@ -3,9 +3,9 @@ from typing import List, Optional
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile import Profile
 from tracardi.service.merging.profile_merger import ProfileMerger
-from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
+from tracardi.service.merging.storage.mutation import save_flat_profile
+from tracardi.service.merging.storage.loaders import load_duplicated_profiles_with_ids
 
-from tracardi.service.storage.elastic.interface import profile as profile_db
 from tracardi.domain.storage_record import RecordMetadata
 
 
@@ -34,8 +34,7 @@ async def deduplicate_profile(profile_id: str, profile_ids: List[str] = None) ->
         profile_ids = list(profile_ids)
     else:
         profile_ids = [profile_id]
-
-    _duplicated_profiles = await profile_db.load_profile_duplicates(profile_ids)  # 1st records is the newest
+    _duplicated_profiles = await load_duplicated_profiles_with_ids(profile_ids)
     first_profile = first(_duplicated_profiles)  # type: Profile
     if first_profile is None:
         raise ValueError("Could not fetch first profile. Probably already merged.")
@@ -47,7 +46,7 @@ async def deduplicate_profile(profile_id: str, profile_ids: List[str] = None) ->
             # Removed not needed to always hash IDS. Hash only on update.
             # first_profile.hash_all_allowed_pii_as_ids()
             first_flat_profile = FlatProfile.from_profile(first_profile)
-            await mutation_profile_db.save_flat_profile(first_flat_profile, refresh=True)
+            await save_flat_profile(first_flat_profile, refresh=True)
 
         # If 1 then there is no duplication
         return first_profile

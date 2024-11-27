@@ -279,7 +279,7 @@ async def aggregate_by_field(bucket, aggr_field: str, query: dict = None, bucket
 #     else:
 #         profile_ids = [profile.id]
 #
-#     return await load_profile_duplicates(profile_ids)
+#     return await load_duplicated_profiles_with_ids(profile_ids)
 
 
 # async def load_duplicated_profiles_with_merge_key(merge_by: List[Tuple[str, str]]) -> StorageRecords:

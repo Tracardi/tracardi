@@ -1,5 +1,6 @@
 from dotty_dict import Dotty
 
+from tracardi.service.merging.storage.loaders import load_duplicated_profiles_with_merge_key
 from tracardi.service.merging.storage.mutation import save_flat_profile, delete_multiple_profiles, \
     move_profile_events_and_sessions
 
@@ -9,7 +10,6 @@ from tracardi.context import get_context
 from tracardi.domain import ExtraInfo
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.storage_record import RecordMetadata
-from tracardi.service.storage.elastic.interface import profile as profile_db
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple
 from pydantic.v1.utils import deep_update
@@ -72,7 +72,7 @@ class ProfileMerger:
 
             merge_by = ProfileMerger.add_keywords(merge_by)
 
-            similar_profiles = await profile_db.load_profiles_to_merge(
+            similar_profiles = await load_duplicated_profiles_with_merge_key(
                 merge_by,
                 condition=condition,
                 limit=limit
@@ -333,7 +333,8 @@ class ProfileMerger:
             await save_flat_profile(merged_flat_profile, refresh=True)
 
             # Schedule - move events from duplicated profiles
-            await move_profile_events_and_sessions(duplicate_profiles, merged_profile)
+            duplicated_profile_ids = {_profile.id for _profile in duplicate_profiles}
+            await move_profile_events_and_sessions(duplicated_profile_ids, merged_profile.id)
 
             # Schedule - mark duplicated profiles
             records_to_delete: List[Tuple[str, RecordMetadata]] = [(profile.id, profile.get_meta_data())

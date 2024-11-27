@@ -44,20 +44,20 @@ _max_load_chunk = 1000
 #         limit=_max_load_chunk)
 
 
-async def delete_multiple_profiles(profile_tuples: List[Tuple[str, RecordMetadata]]):
-    tasks = [asyncio.create_task(mutation_profile_db.delete_profile(profile_id, metadata.index))
-             for profile_id, metadata in profile_tuples]
-    return await asyncio.gather(*tasks)
+# async def delete_multiple_profiles(profile_tuples: List[Tuple[str, RecordMetadata]]):
+#     tasks = [asyncio.create_task(mutation_profile_db.delete_profile(profile_id, metadata.index))
+#              for profile_id, metadata in profile_tuples]
+#     return await asyncio.gather(*tasks)
 
 
 
-async def save_merged_flat_profile(flat_profile: FlatProfile):
-    # Auto refresh db
-    await mutation_profile_db.save_flat_profile(flat_profile, refresh=True)
+# async def save_merged_flat_profile(flat_profile: FlatProfile):
+#     # Auto refresh db
+#     await mutation_profile_db.save_flat_profile(flat_profile, refresh=True)
 
 
-async def save_marked_for_merge_profiles(flat_profiles: List[FlatProfile]):
-    # Convert to profiles
-    # TODO EOFP - End of FlatProfile
-    profiles = [flat_profile.as_profile() for flat_profile in flat_profiles]
-    await mutation_profile_db.save_profiles_in_db(profiles)
+# async def save_marked_for_merge_profiles(flat_profiles: List[FlatProfile]):
+#     # Convert to profiles
+#     # TODO EOFP - End of FlatProfile
+#     profiles = [flat_profile.as_profile() for flat_profile in flat_profiles]
+#     await mutation_profile_db.save_profiles_in_db(profiles)
