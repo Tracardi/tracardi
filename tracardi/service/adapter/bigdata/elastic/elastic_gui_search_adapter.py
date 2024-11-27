@@ -43,12 +43,13 @@ class ElasticSearchAdapter(ElasticAdapter):
         return await load_cached_column_values(self.index(table), column, limit)
 
 
-    async def _get_mapping_for_table(self, table: str) -> dict:
+    # TODO move to index
+    async def _get_mapping_for_write_table(self, table: str) -> dict:
         idx = self.index(table)
         write_index = idx.index.get_write_index()
         result = await idx.client.get_mapping(write_index)
         return result[write_index]
 
     async def get_columns_with_give_type(self, table: str, types: List[str]):
-        mapping = await self._get_mapping_for_table(table)
+        mapping = await self._get_mapping_for_write_table(table)
         return get_fields_of_given_field_type(mapping, types)
