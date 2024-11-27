@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from tracardi.service.adapter.bigdata.elastic.client.model.field_sort import ElasticFieldSort
 
@@ -130,14 +130,19 @@ def get_agg_query_for_duplicated_profiles_by_field(field: str):
     }
 
 
-def get_query_to_load_profiles_by_field_and_value(field, value):
-    return {
+def get_query_to_load_by_field_and_value(field, value, sort: List[Dict[str, Dict]] = None, limit=100) -> dict:
+    query = {
+        "size": limit,
         "query": {
             "term": {
                 field: value
             }
         }
     }
+    if sort:
+        query['sort'] = sort
+
+    return query
 
 
 def get_query_for_unique_values_from_field(field: str, limit: int):
@@ -146,6 +151,28 @@ def get_query_for_unique_values_from_field(field: str, limit: int):
         "aggs": {
             "fields": {
                 "terms": {"field": field, "size": limit}
+            }
+        }
+    }
+
+
+def get_agg_query_for_log_levels(date_from) -> dict:
+    return {
+        "size": 0,
+        "query": {
+            "range": {
+                "date": {
+                    "gte": date_from,
+                    # "format": "yyyy-MM-dd'T'HH:mm:ss"
+                }
+            }
+        },
+        "aggs": {
+            "error_levels": {
+                "terms": {
+                    "field": "level",
+                    "size": 10
+                }
             }
         }
     }

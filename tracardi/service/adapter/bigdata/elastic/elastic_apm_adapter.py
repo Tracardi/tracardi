@@ -14,7 +14,7 @@ from tracardi.service.adapter.bigdata.elastic.helpers.adapter_helper import (loa
 from tracardi.service.adapter.bigdata.elastic.client.elastic_query import get_query_by_values, \
     get_query_for_duplicated_profiles_by_ids, get_query_for_auto_merge, get_agg_query_for_duplicated_profile_counts, \
     get_update_query_to_update_profile_id, get_agg_query_for_duplicated_profiles_by_field, \
-    get_query_to_load_profiles_by_field_and_value
+    get_query_to_load_by_field_and_value
 
 logger = get_logger(__name__)
 
@@ -39,7 +39,7 @@ class ElasticApmAdapter:
             yield bucket['key'], bucket['doc_count']
 
     async def load_profiles_by_field_and_value(self, field: str, value: str) -> AsyncGenerator[FlatProfile, Any]:
-        query = get_query_to_load_profiles_by_field_and_value(field, value)
+        query = get_query_to_load_by_field_and_value(field, value)
         async for profile_record in self.index('profile').scan(query, batch=1000):
             yield FlatProfile.from_es_storage_record(profile_record)
 
