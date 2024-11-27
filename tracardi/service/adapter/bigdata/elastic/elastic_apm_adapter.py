@@ -1,11 +1,11 @@
 import asyncio
 import logging
-from typing import Optional, Union, List, Set, Generator, Tuple, AsyncGenerator, Any
+from typing import Union, List, Set, Tuple, AsyncGenerator, Any
 
 from tracardi.config import elastic
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile import Profile
-from tracardi.domain.storage_record import StorageRecord, RecordMetadata, StorageRecords
+from tracardi.domain.storage_record import RecordMetadata, StorageRecords
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.adapter.bigdata.elastic.client.elastic_client import ElasticClient
 from tracardi.service.adapter.bigdata.elastic.client.elastic_index import ElasticIndex
@@ -16,7 +16,6 @@ from tracardi.service.adapter.bigdata.elastic.client.elastic_query import get_qu
     get_query_for_duplicated_profiles_by_ids, get_query_for_auto_merge, get_agg_query_for_duplicated_profile_counts, \
     get_update_query_to_update_profile_id, get_agg_query_for_duplicated_profiles_by_field, \
     get_query_to_load_profiles_by_field_and_value
-from tracardi.service.storage.elastic.driver.factory import storage_manager
 
 logger = logging.getLogger('elasticsearch')
 logger.setLevel(elastic.logging_level)
