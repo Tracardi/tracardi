@@ -90,11 +90,10 @@ class ElasticApmAdapter(ElasticAdapter):
         return await self.core.update(index, query=query, **kwargs)
 
     async def move_profile_events_and_sessions(self, duplicate_profile_ids: List[Tuple[str, int]],
-                                               merged_profile_id: str):
+                                               merged_profile_id: str,
+                                               wait_for_completion = True):
         # duplicate_profile_ids should be sorted ascending so the least frequent events are moved first.
         if duplicate_profile_ids:
-
-            wait_for_completion = True
 
             try:
                 # Changes ids of old events and sessions to match merged profile
