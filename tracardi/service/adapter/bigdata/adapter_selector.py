@@ -4,6 +4,7 @@ from com_tracardi.config import com_tracardi_settings
 from tracardi.service.adapter.bigdata.elastic.elastic_collector_adapter import ElasticCollectorAdapter
 from tracardi.service.adapter.bigdata.elastic.elastic_log_adapter import ElasticLogAdapter
 from tracardi.service.adapter.bigdata.elastic.elastic_gui_search_adapter import ElasticSearchAdapter
+from tracardi.service.adapter.bigdata.elastic.elstic_analitics_adapter import ElasticAnalyticsAdapter
 
 from tracardi.service.decorators.run_once import run_once
 
@@ -45,5 +46,13 @@ def bd_search_adapter() -> ElasticSearchAdapter:
 def bd_log_adapter() -> ElasticLogAdapter:
     if _big_data_adapter_var.lower() == 'elastic':
         return ElasticLogAdapter()
+    else:
+        raise ValueError(f"Unknown big data log adapter `{_big_data_adapter_var}`")
+
+
+@run_once
+def bd_analytics_adapter() -> ElasticAnalyticsAdapter:
+    if _big_data_adapter_var.lower() == 'elastic':
+        return ElasticAnalyticsAdapter()
     else:
         raise ValueError(f"Unknown big data log adapter `{_big_data_adapter_var}`")

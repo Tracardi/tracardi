@@ -448,12 +448,11 @@ class ElasticIndex:
         else:
             return await self.delete_by_field('_id', id, index)
 
-    async def update_by_query(self, query, conflicts: str = 'abort', wait_for_completion: bool = None):
+    async def update_by_query(self, query, **kwargs):
         return await self.client.update_by_query(
             index=self.index.get_index_alias(),
             query=query,
-            conflicts=conflicts,
-            wait_for_completion=wait_for_completion
+            **kwargs
         )
 
     async def get_mapping(self):

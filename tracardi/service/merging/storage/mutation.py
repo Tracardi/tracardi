@@ -24,5 +24,8 @@ async def delete_multiple_profiles(records_to_delete):
     return _apm_adapter.delete_multiple_profiles(records_to_delete)
 
 
-async def move_profile_events_and_sessions(duplicate_profile_ids: Set[str], merged_profile_id: str):
+async def move_profile_events_and_sessions(duplicate_profile_ids: List[str], merged_profile_id: str):
+    # Convert to new format. We add ) as we do not know the counts of events with given profile id
+    duplicate_profile_ids = [(id, 0) for id in duplicate_profile_ids]
+
     await _apm_adapter.move_profile_events_and_sessions(duplicate_profile_ids, merged_profile_id)

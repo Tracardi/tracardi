@@ -243,12 +243,11 @@ class ElasticClient(metaclass=Singleton):
     async def flush(self, index, params=None, headers=None):
         return await self._client.indices.flush(index=index, params=params, headers=headers)
 
-    async def update_by_query(self, index, query, conflicts: str = 'abort', wait_for_completion=None):
+    async def update_by_query(self, index, query, **kwargs):
         return await self._client.update_by_query(
             index=index,
             body=query,
-            conflicts=conflicts,
-            wait_for_completion=wait_for_completion
+            **kwargs
         )
 
     async def count(self, index, query: Optional[dict] = None):

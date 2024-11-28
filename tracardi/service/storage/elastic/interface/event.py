@@ -96,11 +96,11 @@ async def load_events_by_session(session_id: str, limit: int) -> Optional[List[E
     return result.to_domain_objects(Event)
 
 
-async def aggregate_profile_events_from_db(profile_id, aggregate_query):
-    return await event_db.aggregate_profile_events(
-        profile_id=profile_id,
-        aggregate_query=aggregate_query
-    )
+# async def aggregate_profile_events_from_db(profile_id, aggregate_query):
+#     return await event_db.aggregate_profile_events(
+#         profile_id=profile_id,
+#         aggregate_query=aggregate_query
+#     )
 
 
 async def aggregate_events_by_profile_and_field(profile_id: str, field: str, bucket_name: str):

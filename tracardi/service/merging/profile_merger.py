@@ -333,7 +333,7 @@ class ProfileMerger:
             await save_flat_profile(merged_flat_profile, refresh=True)
 
             # Schedule - move events from duplicated profiles
-            duplicated_profile_ids = {_profile.id for _profile in duplicate_profiles}
+            duplicated_profile_ids = list({_profile.id for _profile in duplicate_profiles})
             await move_profile_events_and_sessions(duplicated_profile_ids, merged_profile.id)
 
             # Schedule - mark duplicated profiles

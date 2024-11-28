@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Set
 
 from tracardi.service.adapter.bigdata.elastic.client.model.field_sort import ElasticFieldSort
 
@@ -204,4 +204,26 @@ def get_query_to_load_profile_by_id(profile_id: str) -> dict:
                 }
             }
         ]
+    }
+
+
+def get_agg_query_for_groups_of_profile_ids(profile_ids: Set[str]) -> dict:
+    return {
+        "size": 0,
+        "query": {
+            "terms": {
+                "profile.id":list(profile_ids)
+            }
+        },
+        "aggs": {
+            "group_by_profile": {
+                "terms": {
+                    "field": "profile.id",
+                    "size": 1000,
+                    "order": {
+                        "_count": "asc"
+                    }
+                }
+            }
+        }
     }

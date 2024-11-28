@@ -46,12 +46,11 @@ class ElasticCoreAdapter:
             await entity_index.flush()
         return result
 
-    async def update(self, index_type: str, query: dict, conflicts: str = 'abort', wait_for_completion: bool = None):
+    async def update(self, index_type: str, query: dict, **kwargs):
         entity_index = self._index(index_type)
         return await entity_index.update_by_query(
             query=query,
-            conflicts=conflicts,
-            wait_for_completion=wait_for_completion
+            **kwargs
         )
 
     async def query(self, index_type: str, query: dict) -> StorageRecords:
