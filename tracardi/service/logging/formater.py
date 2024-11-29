@@ -2,9 +2,7 @@ import json
 import logging
 
 
-
 class CustomFormatter(logging.Formatter):
-
     white = "\x1b[97m"
     grey = "\x1b[37m"
     yellow = "\x1b[33;20m"
@@ -26,6 +24,7 @@ class CustomFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
+
 class ConsoleFormatter(logging.Formatter):
     format = "%(asctime)s [%(levelname)s] %(message)s | %(name)s | %(filename)s | %(lineno)d"
 
@@ -43,7 +42,6 @@ class ConsoleFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-
 class JSONFormatter(logging.Formatter):
     def format(self, record):
         # Ensure asctime and message are computed
@@ -59,4 +57,3 @@ class JSONFormatter(logging.Formatter):
             "lineno": record.lineno,
         }
         return json.dumps(log_record)
-
