@@ -78,10 +78,13 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
 
         # There is no index but the alias may exist
         exists_index_with_alias_name = await raw_db.exists_index(alias_index)
+        exists_index_with_alias_name = True
 
         # Skip this error if the index is static. With static indexes there must be one alias to two indices.
         if not index.static:
-            if exists_index_with_alias_name:
+            # If alias exists but it is not multi index.
+            # Alias may exist for multi indexes before it was created like last quarter but template did not create an index yet.
+            if exists_index_with_alias_name and not index.multi_index:
                 message = f"Could not create index `{target_index}` because the alias `{alias_index}` exists " \
                           f"and points to other index or there is an index name with the same name as the alias."
                 logger.error(message)
