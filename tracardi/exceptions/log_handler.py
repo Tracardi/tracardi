@@ -1,10 +1,8 @@
-from contextlib import asynccontextmanager
-
 import os
 
 import logging
 
-from tracardi.service.logging.formater import CustomFormatter
+from tracardi.service.adapter.logger.logger_adapter import log_format_adapter
 from tracardi.service.logging.tools import _get_logging_level
 from tracardi.service.utils.date import now_in_utc
 from logging import Handler, LogRecord
@@ -30,7 +28,7 @@ class StackInfoLogger(logging.Logger):
 
 logging.setLoggerClass(StackInfoLogger)
 logging.basicConfig(level=logging.INFO)
-
+_log_format_adapter = log_format_adapter()
 
 def get_logger(name, level=None):
     # Replace the default logger class with your custom class
@@ -45,7 +43,7 @@ def get_logger(name, level=None):
     # Console log handler
 
     clh = logging.StreamHandler()
-    clh.setFormatter(CustomFormatter())
+    clh.setFormatter(_log_format_adapter)
     logger.addHandler(clh)
 
     return logger
@@ -60,7 +58,7 @@ def get_installation_logger(name, level=None):
     # Console log handler
 
     clh = logging.StreamHandler()
-    clh.setFormatter(CustomFormatter())
+    clh.setFormatter(_log_format_adapter)
     logger.addHandler(clh)
 
     return logger
