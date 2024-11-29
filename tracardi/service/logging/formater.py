@@ -26,16 +26,37 @@ class CustomFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
+class ConsoleFormatter(logging.Formatter):
+    format = "%(asctime)s [%(levelname)s] %(message)s | %(name)s | %(filename)s | %(lineno)d"
+
+    FORMATS = {
+        logging.DEBUG: format,
+        logging.INFO: format,
+        logging.WARNING: format,
+        logging.ERROR: format,
+        logging.CRITICAL: format
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno, self.format)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
+
 
 class JSONFormatter(logging.Formatter):
     def format(self, record):
+        # Ensure asctime and message are computed
+        record.asctime = self.formatTime(record, self.datefmt)
+        record.message = record.getMessage()
+
         log_record = {
             "timestamp": record.asctime,
             "level": record.levelname,
             "message": record.message,
             "name": record.name,
             "filename": record.filename,
-            "lineno": record.lineno
+            "lineno": record.lineno,
         }
         return json.dumps(log_record)
 
