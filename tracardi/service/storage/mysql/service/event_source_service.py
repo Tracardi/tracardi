@@ -1,4 +1,7 @@
 from typing import Tuple, Optional
+
+from sqlalchemy import desc
+
 from tracardi.domain.event_source import EventSource
 from tracardi.service.storage.mysql.mapping.event_source_mapping import map_to_event_source_table, map_to_event_source
 from tracardi.service.storage.mysql.schema.table import EventSourceTable
@@ -10,8 +13,8 @@ from tracardi.service.storage.mysql.utils.select_result import SelectResult
 class EventSourceService(TableService):
 
     async def load_all_in_deployment_mode(self, search: str = None, limit: int = None,
-                                          offset: int = None) -> SelectResult:
-        return await self._load_all_in_deployment_mode(EventSourceTable, search, limit, offset)
+                                          offset: int = None, order_by=None) -> SelectResult:
+        return await self._load_all_in_deployment_mode(EventSourceTable, search, limit, offset, order_by=order_by)
 
     async def load_by_id_in_deployment_mode(self, source_id: str) -> SelectResult:
         return await self._load_by_id_in_deployment_mode(
@@ -43,6 +46,18 @@ class EventSourceService(TableService):
                 EventSourceTable.bridge_id == bridge_id,
                 EventSourceTable.enabled == True
             )
+        )
+
+    async def load_active(self, limit) -> SelectResult:
+        # It is PRODUCTION CONTEXT-LESS
+        return await self._select_in_deployment_mode(
+            EventSourceTable,
+            where=where_tenant_and_mode_context(
+                EventSourceTable,
+                EventSourceTable.enabled == True
+            ),
+            limit=limit,
+            order_by=desc(EventSourceTable.timestamp)
         )
 
     async def insert(self, event_source: EventSource):

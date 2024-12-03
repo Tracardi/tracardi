@@ -24,6 +24,11 @@ async def load_active_event_sources_by_bridge_id(bridge_id: str) -> Tuple[List[E
     return _records(records)
 
 
+async def load_active(limit: int) -> Tuple[List[EventSource], int]:
+    records = await ess.load_active(limit)
+    return _records(records)
+
+
 async def load_event_source_by_id(source_id) -> Optional[EventSource]:
     record = await ess.load_by_id_in_deployment_mode(source_id)
 
@@ -33,8 +38,8 @@ async def load_event_source_by_id(source_id) -> Optional[EventSource]:
     return record.map_to_object(map_to_event_source)
 
 
-async def load_all_event_sources(query, limit) -> Tuple[List[EventSource], int]:
-    records = await ess.load_all_in_deployment_mode(query, limit=limit)
+async def load_all_event_sources(query, limit, order_by=None) -> Tuple[List[EventSource], int]:
+    records = await ess.load_all_in_deployment_mode(query, limit=limit, order_by=order_by)
     return _records(records)
 
 
