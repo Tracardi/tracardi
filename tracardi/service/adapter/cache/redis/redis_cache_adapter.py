@@ -1,7 +1,7 @@
 import msgpack
 
 from tracardi.service.adapter.cache.cache_protocol import CacheProtocol
-from tracardi.service.storage.redis.driver.redis_client import RedisClient
+from tracardi.service.adapter.cache.redis.client.redis_client import RedisClient
 
 
 class RedisCacheAdapter(CacheProtocol):

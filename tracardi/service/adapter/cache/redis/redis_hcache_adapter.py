@@ -1,7 +1,7 @@
 from typing import List
 
 from tracardi.service.adapter.cache.hcache_protocol import HCacheProtocol
-from tracardi.service.storage.redis.driver.redis_client import RedisClient
+from tracardi.service.adapter.cache.redis.client.redis_client import RedisClient
 
 
 class RedisHCacheAdapter(HCacheProtocol):

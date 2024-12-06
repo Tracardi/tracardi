@@ -12,15 +12,18 @@ logger = get_logger(__name__)
 
 class UpStashRedisClient(metaclass=Singleton):
     def __init__(self):
-        host = os.environ.get('UPSTASH_REDIS_HOST', None)
-        token = os.environ.get('UPSTASH_REDIS_TOKEN', None)
+        host = os.environ.get('UPSTASH_REDIS_REST_URL', None)
+        token = os.environ.get('UPSTASH_REDIS_REST_TOKEN', None)
 
-        logger.debug(f"Connecting upstash redis at {host}")
+        if host is None and token is None:
+            raise ConnectionError("Can not connect to UpStash Redis. Set: UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.")
+
+        logger.debug(f"Connecting UpStash Redis at {host}")
         self.client = Redis(
-            url="https://sincere-serval-37248.upstash.io",
-            token="AZGAAAIjcDExM2NmMmE3ZDZkMGU0ZmU1YWZmNWJmNDg1MmZhODU2YnAxMA",
+            url=host,
+            token=token,
         rest_encoding=None)
-        logger.info(f"Redis at {host} connected.")
+        logger.info(f"UpStash Redis at {host} connected.")
 
     @staticmethod
     def get_tenant_prefix(name):

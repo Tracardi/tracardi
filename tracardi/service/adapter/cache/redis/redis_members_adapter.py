@@ -1,5 +1,5 @@
 from tracardi.service.adapter.cache.member_cache_protocol import MemberCacheProtocol
-from tracardi.service.storage.redis.driver.redis_client import RedisClient
+from tracardi.service.adapter.cache.redis.client.redis_client import RedisClient
 
 
 class RedisMembersCacheAdapter(MemberCacheProtocol):

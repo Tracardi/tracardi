@@ -1,7 +1,7 @@
 from typing import Generator
 
 from tracardi.service.adapter.cache.pubsub_protocol import PubSubProtocol
-from tracardi.service.storage.redis.driver.redis_client import RedisClient
+from tracardi.service.adapter.cache.redis.client.redis_client import RedisClient
 
 
 class RedisPubSubAdapter(PubSubProtocol):
