@@ -7,16 +7,13 @@ from hashlib import md5
 import yaml
 
 from tracardi.domain import ExtraInfo
-from tracardi.domain.version import Version
 from tracardi.domain.yaml_config import YamlConfig
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.logging.tools import _get_logging_level
 from tracardi.service.singleton import Singleton
 from tracardi.service.utils.environment import get_env_as_int, get_env_as_bool
 from tracardi.service.utils.validators import is_valid_url
-
-VERSION = os.environ.get('_DEBUG_VERSION', '1.1.x')
-TENANT_NAME = os.environ.get('TENANT_NAME', None)
+from tracardi.version import version
 
 logger = get_logger(__name__)
 
@@ -228,7 +225,7 @@ class TracardiConfig(metaclass=Singleton):
 
     def __init__(self, env):
         self.env = env
-        _production = (env['PRODUCTION'].lower() == 'yes') if 'PRODUCTION' in env else False
+        self.version = version
         self.track_debug = get_env_as_bool('TRACK_DEBUG', 'no')
         self.save_logs = get_env_as_bool('SAVE_LOGS', 'yes')
         self.enable_event_destinations = get_env_as_bool('ENABLE_EVENT_DESTINATIONS', 'yes')
@@ -257,11 +254,10 @@ class TracardiConfig(metaclass=Singleton):
 
         self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
 
-        self.multi_tenant = get_env_as_bool('MULTI_TENANT', "no")
+        self.multi_tenant = version.multi_tenant
         self.multi_tenant_manager_url = env.get('MULTI_TENANT_MANAGER_URL', None)
         self.multi_tenant_manager_api_key = env.get('MULTI_TENANT_MANAGER_API_KEY', None)
         self.expose_gui_api = get_env_as_bool('EXPOSE_GUI_API', 'yes')
-        self.version: Version = Version(version=VERSION, name=TENANT_NAME, production=_production)
         self.image_tag = env.get('IMAGE_TAG', 'n/a')
         self.installation_token = env.get('INSTALLATION_TOKEN', 'tracardi')
         random_hash = md5(f"akkdskjd-askmdj-jdff-3039djn-{self.version.db_version}".encode()).hexdigest()

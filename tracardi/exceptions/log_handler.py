@@ -1,7 +1,12 @@
+import json
 import os
 
 import logging
+import traceback
 
+import sys
+
+from tracardi.context import get_context, ContextError
 from tracardi.service.adapter.logger.logger_adapter import log_format_adapter
 from tracardi.service.logging.tools import _get_logging_level
 from tracardi.service.utils.date import now_in_utc
@@ -10,6 +15,39 @@ from time import time
 
 _env = os.environ
 _logging_level = _get_logging_level(_env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in _env else logging.WARNING
+
+
+def stack_trace(level):
+    if level not in ["ERROR", "CRITICAL", "WARNING"]:
+        return []
+
+    # Extract the traceback object
+    tb = sys.exc_info()[2]
+
+    # Convert the traceback to a list of structured frames
+    stack = traceback.extract_tb(tb)
+
+    if not stack:
+        stack = traceback.extract_stack()
+
+    try:
+        context = get_context()
+        metadata = context.get_metadata()
+    except ContextError:
+        metadata = {}
+
+    # Format the stack trace as a list of dictionaries
+    return {
+        "context": metadata,
+        "stack": [
+            {
+                "filename": frame.filename,
+                "line_number": frame.lineno,
+                "function_name": frame.name,
+                "code_context": frame.line
+            }
+            for frame in stack
+        ]}
 
 
 class StackInfoLogger(logging.Logger):
@@ -29,6 +67,7 @@ class StackInfoLogger(logging.Logger):
 logging.setLoggerClass(StackInfoLogger)
 logging.basicConfig(level=logging.INFO)
 _log_format_adapter = log_format_adapter()
+
 
 def get_logger(name, level=None):
     # Replace the default logger class with your custom class
@@ -89,7 +128,7 @@ class ElasticLogHandler(Handler):
             "file": record.filename,
             "line": record.lineno,
             "level": record.levelname,
-            "stack_info": record.stack_info,
+            "stack_info": json.dumps(stack_trace(record.levelname)),
             # "exc_info": record.exc_info  # Can not save this to TrackerPayload
             "module": self._get(record, "package", record.module),
             "class_name": self._get(record, "class_name", record.funcName),
@@ -114,6 +153,3 @@ class ElasticLogHandler(Handler):
 
 
 log_handler = ElasticLogHandler()
-
-
-
