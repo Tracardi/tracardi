@@ -7,6 +7,7 @@ import traceback
 import sys
 
 from tracardi.context import get_context, ContextError
+from tracardi.logging import log_stack_trace_as, log_stack_trace_for, log_bulk_size
 from tracardi.service.adapter.logger.logger_adapter import log_format_adapter
 from tracardi.service.logging.tools import _get_logging_level
 from tracardi.service.utils.date import now_in_utc
@@ -18,8 +19,8 @@ _logging_level = _get_logging_level(_env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in
 
 
 def stack_trace(level):
-    if level not in ["ERROR", "CRITICAL", "WARNING"]:
-        return []
+    if level not in log_stack_trace_for:
+        return {}
 
     # Extract the traceback object
     tb = sys.exc_info()[2]
@@ -121,6 +122,15 @@ class ElasticLogHandler(Handler):
         if record.levelno <= 25:
             return
 
+        _trace = stack_trace(record.levelname)
+        if log_stack_trace_as == 'json':
+            if _trace:
+                stack_trace_str = f"JSON:{json.dumps(_trace)}"
+            else:
+                stack_trace_str = None
+        else:
+            stack_trace_str = record.stack_info
+
         log = {  # Maps to tracardi-log index
             "date": now_in_utc(),
             "message": record.msg,
@@ -128,7 +138,7 @@ class ElasticLogHandler(Handler):
             "file": record.filename,
             "line": record.lineno,
             "level": record.levelname,
-            "stack_info": json.dumps(stack_trace(record.levelname)),
+            "stack_info": stack_trace_str,
             # "exc_info": record.exc_info  # Can not save this to TrackerPayload
             "module": self._get(record, "package", record.module),
             "class_name": self._get(record, "class_name", record.funcName),
@@ -142,7 +152,9 @@ class ElasticLogHandler(Handler):
 
         self.collection.append(log)
 
-    def has_logs(self, min_log_size=500):
+    def has_logs(self, min_log_size=None):
+        if min_log_size is None:
+            min_log_size = log_bulk_size
         if not isinstance(self.collection, list):
             return False
         return len(self.collection) >= min_log_size or (time() - self.last_save) > 60
