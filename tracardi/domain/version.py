@@ -11,6 +11,7 @@ class Version(BaseModel):
     config: Optional[dict] = {}
     db_version: str = '09x'
     mysql_version: int = 1
+    multi_tenant: Optional[bool] = False
 
     def __init__(self, **data):
         super().__init__(**data)

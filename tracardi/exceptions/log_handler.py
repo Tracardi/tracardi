@@ -1,7 +1,13 @@
+import json
 import os
 
 import logging
+import traceback
 
+import sys
+
+from tracardi.context import get_context, ContextError
+from tracardi.logging import log_stack_trace_as, log_stack_trace_for, log_bulk_size
 from tracardi.service.adapter.logger.logger_adapter import log_format_adapter
 from tracardi.service.logging.tools import _get_logging_level
 from tracardi.service.utils.date import now_in_utc
@@ -10,6 +16,39 @@ from time import time
 
 _env = os.environ
 _logging_level = _get_logging_level(_env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in _env else logging.WARNING
+
+
+def stack_trace(level):
+    if level not in log_stack_trace_for:
+        return {}
+
+    # Extract the traceback object
+    tb = sys.exc_info()[2]
+
+    # Convert the traceback to a list of structured frames
+    stack = traceback.extract_tb(tb)
+
+    if not stack:
+        stack = traceback.extract_stack()
+
+    try:
+        context = get_context()
+        metadata = context.get_metadata()
+    except ContextError:
+        metadata = {}
+
+    # Format the stack trace as a list of dictionaries
+    return {
+        "context": metadata,
+        "stack": [
+            {
+                "filename": frame.filename,
+                "line_number": frame.lineno,
+                "function_name": frame.name,
+                "code_context": frame.line
+            }
+            for frame in stack
+        ]}
 
 
 class StackInfoLogger(logging.Logger):
@@ -29,6 +68,7 @@ class StackInfoLogger(logging.Logger):
 logging.setLoggerClass(StackInfoLogger)
 logging.basicConfig(level=logging.INFO)
 _log_format_adapter = log_format_adapter()
+
 
 def get_logger(name, level=None):
     # Replace the default logger class with your custom class
@@ -82,6 +122,15 @@ class ElasticLogHandler(Handler):
         if record.levelno <= 25:
             return
 
+        _trace = stack_trace(record.levelname)
+        if log_stack_trace_as == 'json':
+            if _trace:
+                stack_trace_str = f"JSON:{json.dumps(_trace)}"
+            else:
+                stack_trace_str = None
+        else:
+            stack_trace_str = record.stack_info
+
         log = {  # Maps to tracardi-log index
             "date": now_in_utc(),
             "message": record.msg,
@@ -89,7 +138,7 @@ class ElasticLogHandler(Handler):
             "file": record.filename,
             "line": record.lineno,
             "level": record.levelname,
-            "stack_info": record.stack_info,
+            "stack_info": stack_trace_str,
             # "exc_info": record.exc_info  # Can not save this to TrackerPayload
             "module": self._get(record, "package", record.module),
             "class_name": self._get(record, "class_name", record.funcName),
@@ -103,7 +152,9 @@ class ElasticLogHandler(Handler):
 
         self.collection.append(log)
 
-    def has_logs(self, min_log_size=500):
+    def has_logs(self, min_log_size=None):
+        if min_log_size is None:
+            min_log_size = log_bulk_size
         if not isinstance(self.collection, list):
             return False
         return len(self.collection) >= min_log_size or (time() - self.last_save) > 60
@@ -116,6 +167,3 @@ class ElasticLogHandler(Handler):
         self.collection.extend(logs)
 
 log_handler = ElasticLogHandler()
-
-
-

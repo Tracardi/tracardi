@@ -1,20 +1,24 @@
+import json
 from contextvars import ContextVar
 from pydantic import BaseModel
 from typing import Optional, Any
 from uuid import uuid4
 
 from defer.model.transport_context import TransportContext
-from tracardi.config import tracardi
+from tracardi.version import version as system_version
 from tracardi.domain.user import User
 from tracardi.service.singleton import Singleton
 from tracardi.service.tracking.tracker_profiler import TrackerProfiler
+from starlette.datastructures import QueryParams
 
 ctx_id: ContextVar[str] = ContextVar("request_id", default="")
 
+class ContextError(ValueError):
+    pass
 
 class Context:
     id: Optional[str] = None
-    production: bool = tracardi.version.production
+    production: bool = system_version.production
     user: Optional[User] = None
     tenant: Optional[str] = None
     host: Optional[str] = None
@@ -22,31 +26,34 @@ class Context:
     errors: int = 0
     warnings: int = 0
     event_type: Optional[str] = None
+    metadata: Optional[dict] = None
 
     def __init__(self,
                  production: bool = None,
                  user: Optional[User] = None,
                  tenant: str = None,
                  host: Optional[str] = None,
-                 version: Optional[str] = None
+                 version: Optional[str] = None,
+                 metadata: Optional[dict] = None
                  ):
 
-        self.version = version if version else tracardi.version.version
+        self.version = version if version else system_version.version
 
         # This is every important: if not multi tenant replace tenant version by version name.
-        if not tracardi.multi_tenant:
-            self.tenant = tracardi.version.name
+        if not system_version.multi_tenant:
+            self.tenant = system_version.name
         else:
             if tenant is None:
                 raise ValueError("Tenant is not set.")
             self.tenant = tenant
 
         self.user = user
-        self.production = tracardi.version.production if production is None else production
+        self.production = system_version.production if production is None else production
         self.host = host
         self.errors = 0
         self.warnings = 0
         self._profiler = TrackerProfiler()
+        self.metadata = metadata
 
     @property
     def profiler(self) -> TrackerProfiler:
@@ -74,13 +81,43 @@ class Context:
             version=self.version
         )
 
+    @staticmethod
+    def _parse_body(body: bytes) -> dict:
+        """Parse JSON body or return raw data."""
+        if not body:
+            return {}
+        try:
+            return json.loads(body)
+        except json.JSONDecodeError:
+            return {"raw": body.decode("utf-8", errors="ignore")}
+
+    def get_metadata(self):
+
+        if not self.metadata:
+            return {
+                "path": None,
+                "params": {},
+                # "body": self._parse_body(self.metadata["body"].decode('utf-8')),
+                "body": "",
+                "headers": {}
+            }
+
+        return {
+            "path": self.metadata["path"],
+            "params": dict(QueryParams(self.metadata['params'].decode('utf-8'))),
+            # "body": self._parse_body(self.metadata["body"].decode('utf-8')),
+            "body": "",
+            "headers": {key.decode("utf-8"): value.decode("utf-8") for key, value in self.metadata["headers"]}
+        }
+
     def __str__(self):
         return f"Context(mode: {'production' if self.production else 'sand-box'}, " \
                f"user: {str(self.user)}, " \
                f"tenant: {self.tenant}, " \
                f"version: {self.version}, " \
                f"event: {self.event_type}, " \
-               f"host: {self.host})"
+               f"host: {self.host}), " \
+               f"metadata: {self.metadata})"
 
     def __repr__(self):
         return f"Context(mode: {'production' if self.production else 'sand-box'}, " \
@@ -88,7 +125,8 @@ class Context:
                f"tenant: {self.tenant}, " \
                f"version: {self.version}, " \
                f"event: {self.event_type}, " \
-               f"host: {self.host})"
+               f"host: {self.host}), " \
+               f"metadata: {self.metadata})"
 
     def __hash__(self):
         return hash((self.production, self.tenant))
@@ -131,7 +169,7 @@ class ContextManager(metaclass=Singleton):
 
     def get(self, var):
         if self._empty():
-            raise ValueError("No context is set.")
+            raise ContextError("No context is set.")
         _request_id = ctx_id.get()
         store = self._store[_request_id]
         context = store.get(var, None)
