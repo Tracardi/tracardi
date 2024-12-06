@@ -1,4 +1,3 @@
-import msgpack
 from typing import Optional, Any
 from tracardi.service.adapter.cache_adaper_selector import cache_adapter
 
@@ -13,17 +12,14 @@ def _has_cache(key: str, key_namespace: str):
 
 
 def _get_cache(key: str, collection: str) -> Optional[Any]:
-    value = _cache.get(f"{collection}{key}")
-    if value is None:
-        return None
+    return _cache.get_msgpack(f"{collection}{key}")
 
-    return msgpack.unpackb(value)
 
 
 def _set_cache(key: str, value: Any, collection: str, ttl):
-    _cache.set(
+    _cache.set_msgpack(
         f"{collection}{key}",
-        msgpack.packb(value),
+        value,
         ex=ttl
     )
 

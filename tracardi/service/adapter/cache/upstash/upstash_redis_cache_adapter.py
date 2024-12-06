@@ -1,23 +1,18 @@
+import base64
+
 import msgpack
 
 from tracardi.service.adapter.cache.cache_protocol import CacheProtocol
-from tracardi.service.storage.redis.driver.redis_client import RedisClient
+from tracardi.service.adapter.cache.upstash.client.upstash_client import UpStashRedisClient
 
 
-class RedisCacheAdapter(CacheProtocol):
+class UpStashRedisCacheAdapter(CacheProtocol):
 
     def __init__(self):
-        self._client = RedisClient()
+        self._client = UpStashRedisClient()
 
     def get(self, key: str):
         return self._client.get(key)
-
-    def get_msgpack(self, key: str):
-        value = self._client.get(key)
-        if value is None:
-            return None
-
-        return msgpack.unpackb(value)
 
     def set(self, key: str, value, ex=None):
         return self._client.set(
@@ -26,10 +21,21 @@ class RedisCacheAdapter(CacheProtocol):
             ex=ex
         )
 
+    def get_msgpack(self, key: str):
+        value = self._client.get(key)
+
+        if value is None:
+            return None
+
+        value = base64.b64decode(value)
+        return msgpack.unpackb(value)
+
     def set_msgpack(self, key, value, ex=None):
-        return self._client.set(
-            name=key,
-            value=msgpack.packb(value),
+        v = msgpack.packb(value)
+        v = base64.b64encode(v).decode('utf-8')
+        return self.set(
+            key=key,
+            value=v,
             ex=ex
         )
 

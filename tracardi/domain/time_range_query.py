@@ -1,3 +1,5 @@
+from datetime import timezone
+
 from time import time
 
 import pytz
@@ -8,6 +10,7 @@ from pydantic import BaseModel
 from enum import Enum
 
 from tracardi.service.time import parse_date, parse_date_delta
+from tracardi.service.utils.date import now_in_utc
 
 
 class DatetimeType(str, Enum):
@@ -58,7 +61,7 @@ class DatetimePayload(BaseModel):
 
     @staticmethod
     def now():
-        now = datetime.utcnow()
+        now = now_in_utc()
         return DatetimePayload(year=now.year, month=now.month, date=now.day,
                                hour=now.hour, minute=now.minute, second=now.second,
                                meridiem=now.strftime("%p"))
@@ -85,7 +88,8 @@ class DatetimePayload(BaseModel):
                             day=self.date,
                             hour=self.hour,
                             minute=self.minute,
-                            second=self.second)
+                            second=self.second,
+                            tzinfo=timezone.utc)
         return None
 
     def __str__(self):
@@ -128,14 +132,14 @@ class DatePayload(BaseModel):
 
     def get_date(self) -> datetime:
         if self.absolute is None:
-            absolute_date = datetime.now()
+            absolute_date = now_in_utc()
         else:
             absolute_date = self.absolute.get_date()
 
             # If absolute date is None, Then use now
 
             if absolute_date is None:
-                absolute_date = datetime.now()
+                absolute_date = now_in_utc()
 
         # Get delta
         if self._is_delta_set():
@@ -183,11 +187,12 @@ class DatetimeRangePayload(BaseModel):
         min_date = self.minDate.get_date()
         max_date = self.maxDate.get_date()
 
-        if min_date > max_date or min_date == max_date:
+        if min_date == max_date:
+            min_date = now_in_utc(delay= -60*60*24*265*20)  # 20 years earlier
+
+        if min_date > max_date:
             raise ValueError(
-                "Incorrect time range. From date `{}` is earlier then to date `{}` or dates are equal.".format(
-                    min_date, max_date
-                ))
+                f"Incorrect time range. From date `{min_date}` is earlier then to date `{max_date}`.")
 
         return min_date, max_date
 

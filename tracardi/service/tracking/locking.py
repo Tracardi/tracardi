@@ -16,6 +16,7 @@ EXPIRED = 2
 RELEASED = 3
 DONE_WAITING = 4
 
+
 class Lock:
 
     def __init__(self, key, default_lock_ttl: float, cache: Optional[CacheProtocol] = None):
@@ -53,13 +54,14 @@ class Lock:
         self._set_lock_metadata(time.time(), mutex_name, LOCKED)
 
     def _set_lock_metadata(self, lock_time: float, mutex_name, state: int):
-        payload = msgpack.packb((
+
+        payload = (
             lock_time,
             mutex_name,
             state
-        ))
+        )
 
-        self._cache.set(self._key, payload, ex=self._lock_ttl)
+        self._cache.set_msgpack(self._key, payload, ex=self._lock_ttl)
 
     def delete(self):
         self._cache.delete(self._key)
@@ -274,6 +276,7 @@ class AsyncGlobalMutexLock(_GlobalMutexLock):
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         self._exit(exc_type)
 
+
 # TODO remove after 2025-03-01
 # class AsyncProfileMutex(_GlobalMutexLock):
 #
@@ -343,4 +346,3 @@ def async_mutex(lock: Lock,
         raise BlockingIOError(
             f"Resource {lock.key} is locked. Currently locked by (Running process): {lock.get_locked_inside()}, Waiting consumer: {name}")
     return AsyncGlobalMutexLock(lock, name, break_after_time)
-

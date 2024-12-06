@@ -59,6 +59,9 @@ SQLAlchemy==2.0.23
 speedict==0.3.12
 boto3==1.34.41
 
+# Adapters
+upstash_redis
+
 # Worker requirements
 mysql-connector-python==8.0.29
 requests

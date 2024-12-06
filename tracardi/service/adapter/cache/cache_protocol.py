@@ -32,3 +32,9 @@ class CacheProtocol(Protocol):
 
     def ping(self):
         pass
+
+    def set_msgpack(self, key, value, ex=None):
+        pass
+
+    def get_msgpack(self, key: str):
+        pass
