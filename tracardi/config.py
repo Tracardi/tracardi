@@ -283,8 +283,6 @@ class TracardiConfig(metaclass=Singleton):
         self.server_logging_level = _get_logging_level(
             env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
         self.skip_errors_on_profile_mapping = get_env_as_bool('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no')
-        self.log_stack_trace_as = env.get('LOG_STACK_TRACE_AS', 'string')
-        self.log_stack_trace_for = env.get('LOG_STACK_TRACE_AS', 'CRITICAL,ERROR').split(',')
 
         self.cache_adapter = env.get('CACHE_ADAPTER', 'upstash')
 
