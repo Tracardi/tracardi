@@ -1,5 +1,6 @@
 from typing import List
 
+from tracardi.context import get_context
 from tracardi.domain.bridge import Bridge
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.storage.mysql.mapping.bridge_mapping import map_to_bridge_table
@@ -32,14 +33,18 @@ class BridgeService(TableService):
 
     @staticmethod
     async def bootstrap(default_bridges: List[Bridge]):
+        context = get_context()
         bs = BridgeService()
         for bridge in default_bridges:
+            bridge.id = bridge.get_id_in_context_of_tenant(context)
             await bs.insert(bridge)
             logger.info(f"Bridge {bridge.name} installed.")
 
     @staticmethod
     async def reinstall(default_bridges: List[Bridge]):
+        context = get_context()
         bs = BridgeService()
         for bridge in default_bridges:
+            bridge.id = bridge.get_id_in_context_of_tenant(context)
             await bs.replace(bridge)
             logger.info(f"Bridge {bridge.name} reinstalled.")
