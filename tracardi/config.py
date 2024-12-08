@@ -284,7 +284,7 @@ class TracardiConfig(metaclass=Singleton):
             env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
         self.skip_errors_on_profile_mapping = get_env_as_bool('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no')
 
-        self.cache_adapter = env.get('CACHE_ADAPTER', 'upstash')
+        self.cache_adapter = env.get('CACHE_ADAPTER', 'redis')
 
         self._config = None
         self._unset_secrets()
