@@ -9,7 +9,7 @@ from tracardi.version import version as system_version
 from tracardi.domain.user import User
 from tracardi.service.singleton import Singleton
 from tracardi.service.tracking.tracker_profiler import TrackerProfiler
-from starlette.datastructures import QueryParams
+from urllib.parse import parse_qs
 
 ctx_id: ContextVar[str] = ContextVar("request_id", default="")
 
@@ -104,7 +104,7 @@ class Context:
 
         return {
             "path": self.metadata["path"],
-            "params": dict(QueryParams(self.metadata['params'].decode('utf-8'))),
+            "params": parse_qs(self.metadata['params'].decode('utf-8')),
             # "body": self._parse_body(self.metadata["body"].decode('utf-8')),
             "body": "",
             "headers": {key.decode("utf-8"): value.decode("utf-8") for key, value in self.metadata["headers"]}
