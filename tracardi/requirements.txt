@@ -60,7 +60,7 @@ speedict==0.3.12
 boto3==1.34.41
 
 # Adapters
-upstash_redis
+upstash_redis==1.2.0
 
 # Worker requirements
 mysql-connector-python==8.0.29

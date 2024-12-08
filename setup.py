@@ -83,6 +83,8 @@ setup(
         'pulsar-client==3.3.0',
         'aiokafka==0.8.1',
         'tabulate',
+        # Adapters
+        'upstash_redis==1.2.0',
         # Telemetry
         'opentelemetry-distro==0.45b0',
         'opentelemetry-instrumentation-wsgi==0.45b0',
