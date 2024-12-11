@@ -347,12 +347,6 @@ def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session_context: 
 
     if markets and markets != flat_profile.get('aux.geo.markets', None):
 
-        if not flat_profile.has('aux.geo'):
-            yield FieldChange(
-                field='aux.geo',
-                value={}
-            )
-
         yield FieldChange(
             field='aux.geo.markets',
             value=markets
