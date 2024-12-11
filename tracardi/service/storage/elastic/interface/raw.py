@@ -159,6 +159,13 @@ async def indices(index="*"):
     return await es.list_indices(index)
 
 
+async def get_settings():
+    es = ElasticClient.instance()
+    return await es.cluster.get_settings(
+        flat_settings=True,
+        include_defaults=True
+    )
+
 async def health():
     es = ElasticClient.instance()
     return await es.cluster.health()
