@@ -387,7 +387,14 @@ class FlatProfile(FlatEntity):
         return None
 
     def _set_changed_fields(self, dict_of_changed_fields):
+
         fields = self['metadata.fields']
+
+        # THis is only when I was checking if timestamps ar as floats. CAN BE REMOVED
+        # for key, (timestamp, old_value) in dict_of_changed_fields.items():
+        #     if not isinstance(timestamp, float):
+        #         raise ValueError(f"Timestamp for {key} is not float it is {timestamp}/{type(timestamp)}")
+
         fields.update(dict_of_changed_fields)
         self.override('metadata.fields', fields)
 
