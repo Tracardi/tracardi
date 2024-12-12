@@ -65,12 +65,14 @@ class Context:
     def context_abrv(self) -> str:
         return 'p' if self.production else 't'
 
-    def switch_context(self, production, user=None, tenant=None) -> 'Context':
+    def switch_context(self, production, user=None, tenant=None, metadata=None) -> 'Context':
         if user is None:
             user = self.user
         if tenant is None:
             tenant = self.tenant
-        return Context(production=production, user=user, tenant=tenant)
+        if metadata is None:
+            metadata = self.metadata
+        return Context(production=production, user=user, tenant=tenant, metadata=metadata)
 
     def get_user_less_context_copy(self) -> 'Context':
         return Context(

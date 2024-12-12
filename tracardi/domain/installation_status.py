@@ -44,18 +44,6 @@ async def check_installation() -> dict:
             "warning": None
         }
 
-    is_schema_ok, indices = await system.is_schema_ok()
-
-    if is_schema_ok is False:
-        logger.warning("Incorrect Elastic Schema",
-                       exc_info=ExtraInfo.exact(origin="installation", package=__name__))
-        return {
-            "schema_ok": False,
-            "admin_ok": None,
-            "form_ok": None,
-            "warning": None
-        }
-
     ts = TableService()
 
     if await ts.exists('user'):
@@ -66,6 +54,16 @@ async def check_installation() -> dict:
         admin_records = []
 
     has_admin_account = len(admin_records) > 0
+
+    is_schema_ok, indices = await system.is_schema_ok()
+
+    if is_schema_ok is False:
+        return {
+            "schema_ok": False,
+            "admin_ok": has_admin_account,
+            "form_ok": None,
+            "warning": None
+        }
 
     if tracardi.multi_tenant and (not is_schema_ok or not has_admin_account):
         if License.has_service(MULTI_TENANT):
@@ -79,8 +77,7 @@ async def check_installation() -> dict:
             except asyncio.exceptions.TimeoutError:
                 message = (f"Authorizing failed for tenant `{context.tenant}`. "
                            f"Could not reach Tenant Management Service.")
-                logger.warning(message,
-                               exc_info=ExtraInfo.exact(origin="installation", package=__name__))
+                logger.warning(message, exc_info=ExtraInfo.exact(origin="installation", package=__name__))
                 return {
                     "schema_ok": False,
                     "admin_ok": False,
