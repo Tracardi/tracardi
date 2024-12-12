@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import time
 from typing import Optional, Any, List
 from pydantic import BaseModel
@@ -11,7 +13,11 @@ class FieldChange(BaseModel):
 
     def __init__(self, /, **data: Any):
         super().__init__(**data)
-        self.ts = time.time()
+        if self.ts is None:
+            self.ts = time.time()
+
+    def __repr__(self):
+        return f"{super().__repr__()} +{datetime.fromtimestamp(self.ts)}"
 
 class ProfileFieldChanges(BaseModel):
     entity: str

@@ -43,7 +43,7 @@ async def _compute(source,
         # Profile computation
 
         for field_change in _compute_profile_properties(flat_profile, session):
-            flat_profile.set(field_change.field, field_change.value, session_id=session.id)
+            flat_profile.set(field_change.field, field_change.value, session_id=session.id, timestamp=field_change.ts)
 
         context.profiler.measure('after-profile-computation')
 

@@ -197,7 +197,9 @@ async def compute_events(events: List[EventPayload],
                     flat_profile.set(field_change.field,
                                      field_change.value,
                                      session_id=session.id,
-                                     event_type=flat_event.type)
+                                     event_type=flat_event.type,
+                                     timestamp=field_change.ts
+                                     )
 
         # Convert to event
 

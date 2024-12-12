@@ -136,6 +136,7 @@ def copy_default_event_to_profile(copy_schema: dict,
                                   flat_profile: FlatProfile,
                                   flat_event: FlatEvent) -> Generator[FieldChange, None, None]:
     if copy_schema is not None:
+        event_create_timestamp = flat_event.metadata_time.create.timestamp()
 
         for profile_path, (event_path, operation) in copy_schema.items():  # type: str, Tuple[str, str]
 
@@ -157,20 +158,23 @@ def copy_default_event_to_profile(copy_schema: dict,
                             if flat_profile.has(profile_path):
                                 yield FieldChange(
                                     field=profile_path,
-                                    value=flat_profile[profile_path]
+                                    value=flat_profile[profile_path],
+                                    ts=event_create_timestamp
                                 )
 
                         if profile_path not in flat_profile or flat_profile[profile_path] is None:
                             yield FieldChange(
                                 field=profile_path,
-                                value=_append_value(values=[], value=value_to_be_appended)
+                                value=_append_value(values=[], value=value_to_be_appended),
+                                ts=event_create_timestamp
                             )
 
                         elif flat_profile.instanceof(profile_path, list):
                             yield FieldChange(
                                 field=profile_path,
                                 value=_append_value(values=flat_profile[profile_path],
-                                                           value=value_to_be_appended)
+                                                           value=value_to_be_appended),
+                                ts=event_create_timestamp
                             )
                         else:
                             raise KeyError(
@@ -181,24 +185,29 @@ def copy_default_event_to_profile(copy_schema: dict,
                         if profile_path not in flat_profile:
                             yield FieldChange(
                                 field=profile_path,
-                                value=flat_event[event_path])
+                                value=flat_event[event_path],
+                                ts=event_create_timestamp
+                            )
                     elif operation == 'delete':
                         if profile_path in flat_profile:
                             yield FieldChange(
                                 field=profile_path,
-                                value=None)
+                                value=None,
+                                ts=event_create_timestamp
+                            )
                     elif operation == '+':
                         if profile_path in flat_profile:
                             try:
                                 if flat_profile[profile_path] is None:
                                     yield FieldChange(
-                                        field=
-                                        profile_path,
-                                        value=0
+                                        field=profile_path,
+                                        value=0,
+                                        ts=event_create_timestamp
                                     )
                                 yield FieldChange(
                                     field=profile_path,
-                                    value=flat_profile[profile_path] + float(flat_event[event_path])
+                                    value=flat_profile[profile_path] + float(flat_event[event_path]),
+                                    ts=event_create_timestamp
                                 )
                             except Exception:
                                 raise AssertionError(
@@ -210,11 +219,13 @@ def copy_default_event_to_profile(copy_schema: dict,
                                 if flat_profile[profile_path] is None:
                                     yield FieldChange(
                                         field=profile_path,
-                                        value=0
+                                        value=0,
+                                        ts=event_create_timestamp
                                     )
                                 yield FieldChange(
                                     field=profile_path,
-                                    value=flat_profile[profile_path] - float(flat_event[event_path])
+                                    value=flat_profile[profile_path] - float(flat_event[event_path]),
+                                    ts=event_create_timestamp
                                 )
                             except Exception:
                                 raise AssertionError(
@@ -231,7 +242,8 @@ def copy_default_event_to_profile(copy_schema: dict,
                                                                              append_lists=False)
                         yield FieldChange(
                             field=profile_path,
-                            value=updated_dict
+                            value=updated_dict,
+                            ts=event_create_timestamp
                         )
                         if conflicts:
                             conflicts = {
@@ -260,13 +272,15 @@ def copy_default_event_to_profile(copy_schema: dict,
                                 field='trash',
                                 value={
                                     "conflicts": trash_conflicts
-                                }
+                                },
+                                ts=event_create_timestamp
                             )
                     else:
                         # Equal
                         yield FieldChange(
                             field=profile_path,
-                            value=flat_event[event_path]
+                            value=flat_event[event_path],
+                            ts=event_create_timestamp
                         )
             elif isinstance(event_path, int) or isinstance(event_path, float):
                 if profile_path in flat_profile:
@@ -275,17 +289,21 @@ def copy_default_event_to_profile(copy_schema: dict,
                             if flat_profile[profile_path] is None:
                                 yield FieldChange(
                                     field=profile_path,
-                                    value=0)
+                                    value=0,
+                                    ts=event_create_timestamp
+                                )
 
                             if operation == 'increment':
                                 yield FieldChange(
                                     field=profile_path,
-                                    value=flat_profile[profile_path] + float(event_path)
+                                    value=flat_profile[profile_path] + float(event_path),
+                                    ts=event_create_timestamp
                                 )
                             else:
                                 yield FieldChange(
                                     field=profile_path,
-                                    value=flat_profile[profile_path] - float(event_path)
+                                    value=flat_profile[profile_path] - float(event_path),
+                                    ts=event_create_timestamp
                                 )
 
                         except Exception:

@@ -1,3 +1,4 @@
+from time import time
 from typing import List, Generator, AsyncGenerator
 
 from tracardi.domain import ExtraInfo
@@ -23,6 +24,8 @@ from tracardi.service.utils.languages import language_countries_dict
 EQUALS = 0
 EQUALS_IF_NOT_EXISTS = 1
 APPEND = 2
+EQUALS_IF_CHANGE_NEWER = 3
+EQUALS_IF_CHANGE_OLDER = 4
 
 logger = get_logger(__name__)
 
@@ -30,7 +33,7 @@ logger = get_logger(__name__)
 def update_profile_last_geo(flat_profile: FlatProfile, context: dict) -> Generator[FieldChange, None, None]:
     geo = get_geo_location(context)
 
-    if isinstance(geo, Geo) and  not geo.is_empty():
+    if isinstance(geo, Geo) and not geo.is_empty():
         _geo = geo.model_dump(mode="json")
         if not flat_profile.has('data.devices.last.geo', equal=_geo):
             yield FieldChange(
@@ -100,6 +103,7 @@ async def _custom_event_to_profile_mapping(custom_mapping_schemas,
                                            session: Session) -> AsyncGenerator[FieldChange, None]:
     if custom_mapping_schemas is not None and len(custom_mapping_schemas) > 0:
 
+        event_create_timestamp = flat_event.metadata_time.create.timestamp()
         for custom_mapping_schema in custom_mapping_schemas:
 
             # Check condition
@@ -188,19 +192,23 @@ async def _custom_event_to_profile_mapping(custom_mapping_schemas,
                             if profile_ref not in flat_profile:
                                 yield FieldChange(
                                     field=profile_ref,
-                                    value=[flat_event[event_ref]]
+                                    value=[flat_event[event_ref]],
+                                    ts=event_create_timestamp
                                 )
                             elif flat_profile.instanceof(profile_ref, list):
 
                                 yield FieldChange(
                                     field=profile_ref,
-                                    value=flat_profile[profile_ref] + [flat_event[event_ref]]
+                                    value=flat_profile[profile_ref] + [flat_event[event_ref]],
+                                    ts=event_create_timestamp
                                 )
 
                             elif not flat_profile.instanceof(profile_ref, dict):
                                 yield FieldChange(
                                     field=profile_ref,
-                                    value=[flat_profile[profile_ref], flat_event[event_ref]])
+                                    value=[flat_profile[profile_ref], flat_event[event_ref]],
+                                    ts=event_create_timestamp
+                                )
                             else:
                                 raise KeyError(
                                     f"Can not append data {flat_event[event_ref]} to {flat_profile[profile_ref]} at profile@{profile_ref}")
@@ -209,29 +217,53 @@ async def _custom_event_to_profile_mapping(custom_mapping_schemas,
                             if profile_ref not in flat_profile:
                                 yield FieldChange(
                                     field=profile_ref,
-                                    value=flat_event[event_ref]
+                                    value=flat_event[event_ref],
+                                    ts=event_create_timestamp
                                 )
                             elif flat_profile[profile_ref] is None:
                                 yield FieldChange(
                                     field=profile_ref,
-                                    value=flat_event[event_ref]
+                                    value=flat_event[event_ref],
+                                    ts=event_create_timestamp
                                 )
                             elif flat_profile.instanceof(profile_ref, str):
                                 __value = flat_profile[profile_ref].strip()
                                 if not __value:
                                     yield FieldChange(
                                         field=profile_ref,
-                                        value=flat_event[event_ref])
+                                        value=flat_event[event_ref],
+                                        ts=event_create_timestamp
+                                    )
                             elif flat_profile.instanceof(profile_ref, (list, dict)):
                                 if not flat_profile[profile_ref]:
                                     yield FieldChange(
                                         field=profile_ref,
-                                        value=flat_event[event_ref]
+                                        value=flat_event[event_ref],
+                                        ts=event_create_timestamp
                                     )
+                        elif operation == EQUALS_IF_CHANGE_NEWER:
+                            # Field in profile is older then event create date
+                            if flat_profile.is_field_older_then(profile_ref, timestamp=event_create_timestamp):
+                                yield FieldChange(
+                                    field=profile_ref,
+                                    value=flat_event[event_ref],
+                                    ts=event_create_timestamp
+                                )
+
+                        elif operation == EQUALS_IF_CHANGE_OLDER:
+                            # Field in profile is older then event create date
+                            if flat_profile.is_field_newer_then(profile_ref, timestamp=event_create_timestamp):
+                                yield FieldChange(
+                                    field=profile_ref,
+                                    value=flat_event[event_ref],
+                                    ts=event_create_timestamp
+                                )
                         else:
                             yield FieldChange(
                                 field=profile_ref,
-                                value=flat_event[event_ref])
+                                value=flat_event[event_ref],
+                                ts=event_create_timestamp
+                            )
 
                     except KeyError as e:
                         if event_ref.startswith(("properties", "traits")):
@@ -257,9 +289,11 @@ async def _custom_event_to_profile_mapping(custom_mapping_schemas,
                         )
 
 
-def _computed_event_props_to_profile(flat_profile: FlatProfile, flat_event: FlatEvent) -> Generator[FieldChange, None, None]:
-    #TODO may not be needed as flat_profile.has_changes() delivers it.
+def _computed_event_props_to_profile(flat_profile: FlatProfile, flat_event: FlatEvent) -> Generator[
+    FieldChange, None, None]:
+    # TODO may not be needed as flat_profile.has_changes() delivers it.
     profile_updated_flag = flat_profile.has_changes()
+    event_create_timestamp = flat_event.metadata_time.create.timestamp()
 
     compute_schema = get_default_mappings_for(flat_event.type, "compute")
     if compute_schema:
@@ -284,7 +318,8 @@ def _computed_event_props_to_profile(flat_profile: FlatProfile, flat_event: Flat
             if isinstance(profile_property, str):
                 yield FieldChange(
                     field=profile_property,
-                    value=computation_result
+                    value=computation_result,
+                    ts=event_create_timestamp
                 )
 
 
@@ -300,27 +335,27 @@ async def map_event_to_profile(
 
     if default_mapping_schema is not None:
         # Copy default
-        for item in  copy_default_event_to_profile(
-            default_mapping_schema,
-            flat_profile,
-            flat_event
+        for item in copy_default_event_to_profile(
+                default_mapping_schema,
+                flat_profile,
+                flat_event
         ):
             yield item
 
     # Custom event types mappings, filtered by event type
     async for item in _custom_event_to_profile_mapping(
-        custom_mapping_schemas,
-        flat_profile,
-        flat_event,
-        session):
+            custom_mapping_schemas,
+            flat_profile,
+            flat_event,
+            session):
         yield item
 
     for item in _computed_event_props_to_profile(flat_profile, flat_event):
         yield item
 
 
-
-def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session_context: dict) -> Generator[FieldChange, None, None]:
+def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session_context: dict) -> Generator[
+    FieldChange, None, None]:
     if 'language' in session_context:
         if flat_profile.instanceof('data.pii.language.spoken', list) and isinstance(session_context['language'],
                                                                                     list):
@@ -346,9 +381,7 @@ def compute_profile_aux_geo_markets(flat_profile: FlatProfile, session_context: 
                 markets += language_countries_dict[lang_code]
 
     if markets and markets != flat_profile.get('aux.geo.markets', None):
-
         yield FieldChange(
             field='aux.geo.markets',
             value=markets
         )
-

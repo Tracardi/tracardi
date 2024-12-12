@@ -19,8 +19,8 @@ class FieldUpdateLogger:
     def __init__(self):
         self._changes = FieldChanges()
 
-    def _set(self, field, value, old_value):
-        self._changes[field] = [time(), old_value]
+    def _set(self, field, value, old_value, timestamp: float):
+        self._changes[field] = [timestamp, old_value]
 
     @staticmethod
     def _changed(value, old_value) -> bool:
@@ -38,6 +38,7 @@ class FieldUpdateLogger:
             field,
             value,
             old_value,
+            timestamp,
             session_id: Optional[str] = None,
             event_type: Optional[str] = None,
             ignore: Tuple[str, ...] = None):
@@ -46,7 +47,7 @@ class FieldUpdateLogger:
             return
 
         if self._changed(value, old_value):
-            self._set(field, value, old_value)
+            self._set(field, value, old_value, timestamp)
 
     def get(self, field, default):
         return self._changes.get(field, default)

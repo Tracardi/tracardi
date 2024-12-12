@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from datetime import datetime
 
 import json
+from time import time
 
 from dotty_dict import Dotty
 from typing import Optional, TypeVar, Type, Set, List, Union
@@ -11,7 +12,7 @@ from pydantic import BaseModel, PrivateAttr
 
 from tracardi.domain import ExtraInfo
 from tracardi.domain.storage_record import RecordMetadata, StorageRecord
-from tracardi.domain.time import Time
+from tracardi.domain.time import Time, EventTime
 from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.protocol.operational import Operational
@@ -182,15 +183,18 @@ class FlatEntity(Dotty):
     def __setitem__(self, key, value):
         if self._changes:
             old_value = self.get(key, None)
-            self._changes.add(key, value, old_value, ignore=('metadata.fields', 'operation'))
+            self._changes.add(key, value, old_value, ignore=('metadata.fields', 'operation'), timestamp=time())
         super().__setitem__(key, value)
 
-    def set(self, key, value, session_id: Optional[str] = None, event_type: Optional[str] = None):
+    def set(self, key, value, session_id: Optional[str] = None, event_type: Optional[str] = None, timestamp: Optional[float] = None):
         if self._changes:
             old_value = self.get(key, None)
+            if timestamp is None:
+                timestamp = time()
             self._changes.add(key,
                               value,
                               old_value,
+                              timestamp,
                               session_id,
                               event_type,
                               ignore=('metadata.fields', 'operation')
@@ -234,6 +238,10 @@ class FlatEntity(Dotty):
 
         self['id'] = value
 
+    @property
+    def metadata_time(self) -> Optional[EventTime]:
+        return EventTime(**self.get('metadata.time', {}))
+
     def get_meta_data(self) -> Optional[RecordMetadata]:
         return self._metadata if isinstance(self._metadata, RecordMetadata) else None
 
@@ -261,6 +269,7 @@ class FlatEntity(Dotty):
             record.set_meta_data(self._metadata)
 
         return record
+
 
 
 @contextmanager

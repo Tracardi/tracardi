@@ -1,6 +1,8 @@
 import uuid
-from typing import Optional, List, Set, Dict
+from time import time
+from typing import Optional, List, Set, Dict, Tuple, Any
 from .entity import PrimaryEntity, Entity, FlatEntity
+from .metadata_field_changed import MetadataFieldChanged
 from .profile import Profile
 from .profile_data import FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
 from .storage_record import RecordMetadata, StorageRecord
@@ -221,6 +223,22 @@ class FlatProfile(FlatEntity):
 
     def update_changed_fields(self, changed_fields):
         self.set('metadata.fields', changed_fields)
+
+    def get_changed_field(self, field) -> MetadataFieldChanged:
+        changes = self.get('metadata.fields', {})
+        return MetadataFieldChanged(changes.get(field, None))
+
+    def is_field_older_then(self, field, timestamp: Optional[float] = None) -> bool:
+        if timestamp is None:
+            timestamp = time()
+        when_changed = self.get_changed_field(field)
+        return field not in self or when_changed.is_older_then(timestamp)
+
+    def is_field_newer_then(self, field, timestamp: Optional[float] = None) -> bool:
+        if timestamp is None:
+            timestamp = time()
+        when_changed = self.get_changed_field(field)
+        return field not in self or when_changed.is_newer_then(timestamp)
 
     # ToDO refactor
     def set_auto_merge_fields(self, auto_merge_ids: set):

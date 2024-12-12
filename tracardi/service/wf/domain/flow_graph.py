@@ -1,3 +1,4 @@
+from time import time
 from typing import Optional, Any, Dict
 from .flow_graph_data import FlowGraphData
 from .flow_response import FlowResponse
@@ -23,7 +24,7 @@ class FlowGraph(NamedEntity):
         self._field_changes = FieldUpdateLogger()
 
     def record_change(self, field, value, old_value):
-        self._field_changes.add(field, value, old_value)
+        self._field_changes.add(field, value, old_value, time())
 
     def get_changed_fields(self) -> FieldUpdateLogger:
         return self._field_changes
