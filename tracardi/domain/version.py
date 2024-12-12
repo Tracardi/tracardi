@@ -40,7 +40,7 @@ class Version(BaseModel):
         return other and self.version == other.version and self.name == other.name
 
     def __str__(self):
-        return f"Version {self.version}.{self.name} (db: {self.db_version})"
+        return f"Version {self.version}.{self.name} (DB: {self.db_version})"
 
     def add_upgrade(self, name: str) -> None:
         upgrades = set(self.upgrades)
