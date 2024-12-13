@@ -558,8 +558,11 @@ async def get_events_by_profile(profile_id: str, limit: int = 100) -> StorageRec
 
     query = {
         "query": {
-            "term": {
-                "profile.id": profile_id
+            "bool": {
+                "must": [
+                    {"term": {"profile.id": profile_id}},
+                    {"range": {"metadata.time.insert": {"gte": f"now-30d"}}}
+                ]
             }
         },
         "size": limit,
