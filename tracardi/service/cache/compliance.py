@@ -9,8 +9,8 @@ from tracardi.service.storage.mysql.service.event_data_compliance_service import
 
 @AsyncCache(memory_cache.data_compliance_cache_ttl,
             allow_null_values=True,
-            timeout=.5,
-            max_one_cache_fill_every=.1,
+            timeout=memory_cache.timeout_sql_query_in,
+            max_one_cache_fill_every=memory_cache.max_one_cache_fill_every,
             return_cache_on_error=True
             )
 async def load_data_compliance(event_type_id: str) -> List[EventDataCompliance]:

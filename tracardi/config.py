@@ -29,6 +29,8 @@ class MemoryCacheConfig:
     def __init__(self):
         _default_ttl = 60
 
+        self.timeout_sql_query_in = 1
+        self.max_one_cache_fill_every = .5
         self.event_to_profile_coping_ttl = _get_random_value(
             get_env_as_int('EVENT_TO_PROFILE_COPY_CACHE_TTL', _default_ttl))
         self.source_ttl = _get_random_value(get_env_as_int('SOURCE_CACHE_TTL', _default_ttl))

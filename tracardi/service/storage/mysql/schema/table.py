@@ -123,6 +123,7 @@ class WorkflowTriggerTable(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
+        Index('idx_collector', 'event_type_id', 'source_id', 'enabled', 'tenant', 'production'),
     )
 
     running: bool = False
@@ -237,6 +238,8 @@ class DestinationTable(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
+        Index('idx_collector', 'event_type_id', 'source_id', 'enabled', 'tenant', 'production'),
+
     )
 
     running: bool = False
@@ -298,6 +301,7 @@ class IdentificationPointTable(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
+        Index('idx_collector', 'tenant', 'production', 'enabled', 'event_type_id', 'source_id')
     )
 
     running: bool = False
@@ -335,6 +339,7 @@ class EventRedirectTable(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
+        Index('idx_collector', 'event_type', 'source_id', 'tenant', 'production'),
     )
 
     running: bool = False
@@ -356,6 +361,7 @@ class EventValidationTable(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
+        Index('idx_collector', 'event_type', 'enabled', 'tenant', 'production'),
     )
 
     running: bool = False
@@ -402,6 +408,7 @@ class EventReshapingTable(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
+        Index('idx_collector', 'event_type', 'tenant', 'production', 'enabled')
     )
 
     running: bool = False
@@ -425,7 +432,8 @@ class EventMappingTable(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
-        UniqueConstraint('event_type', name='uiq_event_type')
+        UniqueConstraint('event_type', name='uiq_event_type'),
+        Index('idx_collector', 'event_type', 'tenant', 'production', 'enabled')
     )
 
     running: bool = False
@@ -496,6 +504,7 @@ class EventToProfileMappingTable(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
+        Index('idx_collector', 'event_type_id', 'tenant', 'production', 'enabled')
     )
 
     running: bool = False
@@ -517,6 +526,7 @@ class EventDataComplianceTable(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
+        Index('idx_collector', 'event_type_id', 'tenant', 'production', 'enabled')
     )
 
     running: bool = False
@@ -546,27 +556,6 @@ class ActivationTable(Base):
     running: bool = False
 
 
-# class SegmentTable(Base):
-#     __tablename__ = 'segment'
-#
-#     id = Column(String(40))
-#     name = Column(Text)
-#     description = Column(Text)
-#     event_type = Column(String(64), default=None)
-#     condition = Column(Text)
-#     enabled = Column(Boolean, default=False)
-#     machine_name = Column(String(128))
-#
-#     tenant = Column(String(40))
-#     production = Column(Boolean)
-#
-#     __table_args__ = (
-#         PrimaryKeyConstraint('id', 'tenant', 'production'),
-#     )
-#
-#     running: bool = False
-
-
 class ReportTable(Base):
     __tablename__ = 'report'
 
@@ -587,31 +576,7 @@ class ReportTable(Base):
 
     running: bool = False
 
-
-# class ContentTable(Base):
-#     __tablename__ = 'content'
-#
-#     id = Column(String(48))
-#     profile_id = Column(String(40))
-#     timestamp = Column(DateTime)
-#     type = Column(String(64))
-#     url = Column(String(255))
-#     source = Column(String(128))
-#     author = Column(String(96))
-#     copyright = Column(String(128))
-#     content = Column(BLOB)
-#     text = Column(Text)
-#     properties = Column(JSON)
-#     traits = Column(JSON)
-#
-#     tenant = Column(String(40))
-#     production = Column(Boolean)
-#
-#     __table_args__ = (
-#         PrimaryKeyConstraint('id', 'tenant', 'production'),
-#     )
-
-
+# TODO probably not used
 class ImportTable(Base):
     __tablename__ = 'import'
 
@@ -637,32 +602,6 @@ class ImportTable(Base):
     running: bool = False
 
 
-# class WorkflowSegmentationTriggerTable(Base):
-#     __tablename__ = 'workflow_segmentation_trigger'
-#
-#     id = Column(String(40))
-#     timestamp = Column(DateTime)
-#     name = Column(String(128))
-#     description = Column(Text)
-#     enabled = Column(Boolean, default=False)
-#     type = Column(String(32))
-#     condition = Column(String(255))
-#     operation = Column(String(32))
-#     segment = Column(String(128))
-#     code = Column(Text)
-#     workflow_id = Column(String(40))
-#     workflow_name = Column(String(128))
-#
-#     tenant = Column(String(40))
-#     production = Column(Boolean)
-#
-#     __table_args__ = (
-#         PrimaryKeyConstraint('id', 'tenant', 'production'),
-#     )
-#
-#     running: bool = False
-
-
 class TaskTable(Base):
     __tablename__ = 'task'
 
@@ -681,6 +620,7 @@ class TaskTable(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint('id', 'tenant', 'production'),
+        Index('idx_gui', 'type', 'tenant', 'production')
     )
 
     running: bool = False

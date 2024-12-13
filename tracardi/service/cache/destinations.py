@@ -8,8 +8,8 @@ import tracardi.service.storage.mysql.interface as mysql
 
 
 @AsyncCache(memory_cache.event_destination_cache_ttl,
-            timeout=.5,
-            max_one_cache_fill_every=.1,
+            timeout=memory_cache.timeout_sql_query_in,
+            max_one_cache_fill_every=memory_cache.max_one_cache_fill_every,
             return_cache_on_error=True
             )
 async def load_event_destinations(event_type, source_id) -> List[Destination]:
