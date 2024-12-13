@@ -7,8 +7,8 @@ from tracardi.service.storage.mysql.interface import event_source_dao
 
 
 @AsyncCache(memory_cache.source_ttl,
-            timeout=1,
-            max_one_cache_fill_every=.1,
+            timeout=memory_cache.timeout_sql_query_in,
+            max_one_cache_fill_every=memory_cache.max_one_cache_fill_every,
             return_cache_on_error=True
             )
 async def load_event_source_via_cache(source_id) -> Optional[EventSource]:

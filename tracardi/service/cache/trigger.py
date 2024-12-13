@@ -12,8 +12,8 @@ def _cache_param_function(wts, event_type: str, source_id: str) -> tuple:
 
 @AsyncCache(memory_cache.trigger_rule_cache_ttl,
             key_func=_cache_param_function,
-            timeout=.5,
-            max_one_cache_fill_every=.1,
+            timeout=memory_cache.timeout_sql_query_in,
+            max_one_cache_fill_every=memory_cache.max_one_cache_fill_every,
             return_cache_on_error=True
             )
 async def load_trigger_rule(wts, event_type: str, source_id: str) -> List[Rule]:

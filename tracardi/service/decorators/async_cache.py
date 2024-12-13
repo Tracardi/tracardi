@@ -72,6 +72,7 @@ class AsyncCache:
                     f"TIMEOUT for cache {func.__qualname__} in {time.time() - t:.4f}")
                 # If no data raise error
                 if not self._is_result_cached(key):
+                    logger.warning(f"Result not cached for {key}")
                     raise e
                 # Else return from cache
                 result = self.cache[key]["result"]
