@@ -14,11 +14,12 @@ class UpStashRedisCacheAdapter(CacheProtocol):
     def get(self, key: str):
         return self._client.get(key)
 
-    def set(self, key: str, value, ex=None):
+    def set(self, key: str, value, ex=None, nx:bool=None):
         return self._client.set(
             name=key,
             value=value,
-            ex=ex
+            ex=ex,
+            nx=nx
         )
 
     def get_msgpack(self, key: str):

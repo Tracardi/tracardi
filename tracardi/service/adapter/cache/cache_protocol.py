@@ -6,7 +6,7 @@ class CacheProtocol(Protocol):
     def get(self, key: str):
         pass
 
-    def set(self, key, value, ex=None):
+    def set(self, key, value, ex=None, nx:bool=None):
         pass
 
     def mset(self, mapping):

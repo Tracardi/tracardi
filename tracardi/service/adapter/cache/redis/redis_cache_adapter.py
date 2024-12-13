@@ -19,11 +19,12 @@ class RedisCacheAdapter(CacheProtocol):
 
         return msgpack.unpackb(value)
 
-    def set(self, key: str, value, ex=None):
+    def set(self, key: str, value, ex=None, nx:bool=None):
         return self._client.set(
             name=key,
             value=value,
-            ex=ex
+            ex=ex,
+            nx=nx
         )
 
     def set_msgpack(self, key, value, ex=None):
