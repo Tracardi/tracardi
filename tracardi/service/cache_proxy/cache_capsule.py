@@ -10,6 +10,9 @@ class CacheCapsule(BaseModel):
     func_args: List[Any] = []
     func_kwargs: Dict[str, Any] = {}
 
-    def key(self) -> str:
+    def __hash__(self):
         key = (self.func, *self.func_args, frozenset(self.func_kwargs.items()))
-        return str(hash(key))
+        return hash(key)
+
+    async def run(self):
+        return await self.func(*self.func_args, **self.func_kwargs)

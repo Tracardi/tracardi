@@ -1,7 +1,6 @@
 from typing import Optional
 
 import msgpack
-import redis
 
 from tracardi.service.cache_proxy.cache_capsule import CacheCapsule
 from tracardi.service.cache_proxy.throttle import Throttler
@@ -13,10 +12,9 @@ _cache = cache_adapter()
 
 
 class RedisProxyCache:
-    def __init__(self, namespace: str, redis_url="redis://localhost:6379/0", throttle=1):
-        self.throttler = Throttler(interval=throttle)
+    def __init__(self, namespace: str, lock_expires:int=60):
+        self.lock_expires = lock_expires
         self.namespace = namespace
-        self.redis_client = redis.StrictRedis.from_url(redis_url, decode_responses=False)  # Disable decoding
 
     def _namespace(self, key: str, suffix:str=None) -> str:
         if suffix:
@@ -44,22 +42,22 @@ class RedisProxyCache:
         print('set', self._namespace(key, suffix))
 
     async def _load_and_update(self, key, func: CacheCapsule):
-        with distributed_lock(_cache, self._namespace(key), expires=10) as locked:
+        with distributed_lock(_cache, self._namespace(key), expires=self.lock_expires) as locked:
             if locked:
-                fresh_data = await self.throttler.call(func.func, *func.func_args, **func.func_kwargs)
+                fresh_data = await func.run()
                 self._set(key, fresh_data, ttl=func.ttl)  # Update main cache
                 self._set(key, fresh_data, suffix='stale')  # Update stale cache
 
     async def get(self, func: CacheCapsule):
-        key = func.key()
+        key = str(hash(func))
         cached_data = self._get(key)
         if cached_data:
             print("returned cached", cached_data)
             # Data exists, return it immediately
             return cached_data
 
-        # Update cache, lock and fetch data
-        await self._load_and_update(key, func)
+        throttler = Throttler(interval=func.throttle)
+        await throttler.call(self._load_and_update, key, func)
 
         print('Returns old value', self._get(f"{key}:stale"))
         # Return stale data or None if no stale data is available

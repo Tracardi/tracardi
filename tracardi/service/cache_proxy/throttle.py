@@ -26,9 +26,8 @@ class Throttler:
         # Create a unique key based on function arguments
         key = (func, args, frozenset(kwargs.items()))
         current_time = time.time()
-
         # Check if the function can be executed
-        if key not in self.last_run_time or current_time - self.last_run_time[key] >= self.interval:
+        if key not in Throttler.last_run_time or current_time - Throttler.last_run_time[key] >= self.interval:
             # Run the function and store the result
             result = await func(*args, **kwargs)
             Throttler.cached_results[key] = result
