@@ -7,7 +7,7 @@ from tracardi.service.storage.mysql.interface import event_source_dao
 
 
 @AsyncCache(memory_cache.source_ttl,
-            timeout=.5,
+            timeout=1,
             max_one_cache_fill_every=.1,
             return_cache_on_error=True
             )

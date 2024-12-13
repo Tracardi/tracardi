@@ -46,7 +46,6 @@ class MemoryCacheConfig:
         logger.info(f"EVENT_TO_PROFILE_COPY_CACHE_TTL={self.event_to_profile_coping_ttl}")
         logger.info(f"SOURCE_CACHE_TTL={self.source_ttl}")
 
-
 class MysqlConfig:
 
     def __init__(self, env):
