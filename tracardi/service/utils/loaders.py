@@ -26,5 +26,6 @@ def pre_config_file_loader(file_path):
         except json.decoder.JSONDecodeError as e:
             logger.warning(f"Predefined {file_path} exists but could not be parsed as JSON file. Details: {str(e)}")
             return None
-    logger.info(f"Preconfiguration file `{file_path}` loaded with {len(content) if content else 'no'} definitions.")
+    if content:
+        logger.info(f"Preconfiguration file `{file_path}` loaded with {len(content)} definitions.")
     return content
