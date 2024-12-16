@@ -801,6 +801,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
             }, 
             resource=None),
     ),
+
     
     "tracardi.process_engine.action.v1.genai_action": PluginMetadata(
         test=PluginTest(init={
@@ -817,7 +818,17 @@ installed_plugins: Dict[str, PluginMetadata] = {
     ),
     
 
-}
+
+
+    "tracardi.process_engine.action.v1.beautifulsoup_action": PluginMetadata(
+        test=PluginTest(
+            init={
+                'HTML': '',
+                'method': 'get_text',
+                
+            }, 
+            resource=None),
+    ),
 
 if License.has_service(SCHEDULER):
 
