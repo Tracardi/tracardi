@@ -1,6 +1,6 @@
 git+https://github.com/elasticemail/elasticemail-python.git@4.0.20
 
-pydantic>=2.3.0
+pydantic==2.10.3
 aiohttp[speedups]
 redis
 aioredis
@@ -57,7 +57,7 @@ faker-commerce==1.0.3
 SQLAlchemy==2.0.23
 speedict==0.3.12
 boto3==1.34.41
-langchain-core-0.3.15
+langchain==0.3.12
 
 # Worker requirements
 mysql-connector-python==8.0.29

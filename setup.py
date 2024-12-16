@@ -16,7 +16,7 @@ setup(
     packages=['tracardi'],
     install_requires=[
         'pip>=21.2.4',
-        'pydantic>=2.3.0',
+        'pydantic==2.10.3',
         'aiohttp[speedups]',
         'redis',
         'aioredis',
@@ -73,6 +73,7 @@ setup(
         'SQLAlchemy==2.0.23',
         'speedict==0.3.12',
         'boto3==1.34.41',
+        'langchain==0.3.12',
         # Worker requirements
         'mysql-connector-python==8.0.29',
         'requests',
