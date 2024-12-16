@@ -328,6 +328,14 @@ system_settings = [
     ),
     SystemSettings(
         **{
+            "label": "SERVER_LOGGING_LEVEL",
+            "value": server.server_logging_level,
+            "desc": "Default WARNING. Sets logging level of uvicorn server. It may be useful to set it to INFO when"
+                    " debugging Tracardi."
+        }
+    ),
+    SystemSettings(
+        **{
             "label": "REDIS_HOST",
             "value": redis_config.redis_host,
             "desc": "Default: redis://localhost:6379. This setting is used only when SYNC_PROFILE_TRACKS is equal to "
