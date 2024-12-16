@@ -282,8 +282,6 @@ class TracardiConfig(metaclass=Singleton):
         self.dispatch_log_partitioning = env.get('DISPATCH_LOG_PARTITIONING', 'month')
         self.console_log_partitioning = env.get('CONSOLE_LOG_PARTITIONING', 'month')
         self.item_partitioning = env.get('ITEM_PARTITIONING', 'year')
-        self.server_logging_level = _get_logging_level(
-            env['SERVER_LOGGING_LEVEL']) if 'SERVER_LOGGING_LEVEL' in env else logging.WARNING
         self.skip_errors_on_profile_mapping = get_env_as_bool('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no')
 
         self.cache_adapter = env.get('CACHE_ADAPTER', 'redis')
@@ -343,6 +341,7 @@ class ServerConfig:
         self.x_forwarded_ip_header = env.get('USE_X_FORWARDED_IP', None)
         self.api_docs = (env['API_DOCS'].lower() == "yes") if 'API_DOCS' in env else True
         self.performance_tracking = env.get('PERFORMANCE_TRACKING', None)
+        self.server_logging_level = env.get('SERVER_LOGGING_LEVEL', 'warning')
 
 
 server = ServerConfig(os.environ)
