@@ -817,6 +817,9 @@ installed_plugins: Dict[str, PluginMetadata] = {
         })
     ),
     
+
+
+
     "tracardi.process_engine.action.v1.beautifulsoup_action": PluginMetadata(
         test=PluginTest(
             init={
@@ -826,7 +829,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
             }, 
             resource=None),
     ),
-}
 
 if License.has_service(SCHEDULER):
 
