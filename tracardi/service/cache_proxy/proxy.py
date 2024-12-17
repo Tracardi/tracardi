@@ -11,7 +11,7 @@ from tracardi.service.adapter.cache_adaper_selector import cache_adapter
 _cache = cache_adapter()
 
 
-class RedisProxyCache:
+class CacheProxy:
     def __init__(self, namespace: str, lock_expires:int=60):
         self.lock_expires = lock_expires
         self.namespace = namespace
@@ -56,8 +56,11 @@ class RedisProxyCache:
             # Data exists, return it immediately
             return cached_data
 
-        throttler = Throttler(interval=func.throttle)
-        await throttler.call(self._load_and_update, key, func)
+        await self._load_and_update(key, func)
+        # throttler = Throttler('cache',
+        #                       max_wait_between_calls=func.max_wait_between_calls,
+        #                       max_no_execution=func.max_no_exec_time)
+        # await throttler.call(self._load_and_update, key, func)
 
         print('Returns old value', self._get(f"{key}:stale"))
         # Return stale data or None if no stale data is available

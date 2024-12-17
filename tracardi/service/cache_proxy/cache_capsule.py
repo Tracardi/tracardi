@@ -5,7 +5,8 @@ from pydantic import BaseModel
 
 class CacheCapsule(BaseModel):
     ttl: int
-    throttle: Optional[float] = 0
+    max_wait_between_calls: Optional[float] = 0
+    max_no_exec_time: Optional[float] = 0
     func: Callable[..., Awaitable[Any]]
     func_args: List[Any] = []
     func_kwargs: Dict[str, Any] = {}
