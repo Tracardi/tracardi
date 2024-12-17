@@ -2,6 +2,7 @@ from typing import Optional
 
 from tracardi.config import memory_cache
 from tracardi.domain.event_source import EventSource
+from tracardi.service.cache_change_tagger.change_tagger import validate_cache_on_load
 from tracardi.service.decorators.async_cache import AsyncCache
 from tracardi.service.storage.mysql.interface import event_source_dao
 
@@ -12,4 +13,5 @@ from tracardi.service.storage.mysql.interface import event_source_dao
             return_cache_on_error=True
             )
 async def load_event_source_via_cache(source_id) -> Optional[EventSource]:
-    return await event_source_dao.load_event_source_by_id(source_id)
+    with validate_cache_on_load('tracardi', 'event_source'):
+        return await event_source_dao.load_event_source_by_id(source_id)

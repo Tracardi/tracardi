@@ -1,4 +1,5 @@
-from functools import wraps
+from contextlib import contextmanager
+
 from time import time
 
 from tracardi.service.adapter.cache_adaper_selector import cache_adapter
@@ -7,35 +8,29 @@ _cache = cache_adapter()
 
 
 def _get_key(database: str, table: str):
-    return f"db:{database}:table:{table}:change"
+    return f"db:{database}.{table}:change"
 
 
-def table_cache_updated(database: str, table: str):
-    _cache.delete(_get_key(database, table))
+@contextmanager
+def invalidate_cache_on_update(database: str, table: str):
+    try:
+        yield  # Execute the function
+        _cache.set(_get_key(database, table), time())  # Call table_changed on success
+    except Exception as e:
+        raise e  # Re-raise exception
 
 
-def on_table_change(database: str, table: str):
-    """
-    Decorator to call table_changed after successful execution of the decorated function.
-    """
+@contextmanager
+def validate_cache_on_load(database: str, table: str):
+    try:
+        yield  # Execute the function
+        _cache.delete(_get_key(database, table))
+    except Exception as e:
+        raise e  # Re-raise exception
 
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                result = func(*args, **kwargs)  # Execute the function
-                _cache.set(_get_key(database, table), time())  # Call table_changed on success
-                return result
-            except Exception as e:
-                raise e  # Re-raise exception
+# Example usage:
 
-        return wrapper
-
-    return decorator
-
-# # Example usage:
-#
-# @on_table_change(database="my_db", table="my_table")
+# from tracardi.context import ServerContext, Context
 # def my_function():
 #     print("Executing my_function...")
 #     # Simulating some logic
@@ -45,4 +40,5 @@ def on_table_change(database: str, table: str):
 # # Test the decorators
 # if __name__ == "__main__":
 #     with ServerContext(Context(production=False)):
-#         print(my_function())  # Should execute successfully and trigger table_changed
+#         with on_table_change(database="my_db", table="my_table"):
+#             print(my_function())  # Should execute successfully and trigger table_changed

@@ -7,7 +7,7 @@ from typing import Optional, Union, Tuple
 from uuid import uuid4
 
 from tracardi.domain.api_instance import ApiInstance
-from tracardi.domain.entity import Entity, PrimaryEntity
+from tracardi.domain.entity import Entity
 from tracardi.domain.enum.event_status import COLLECTED
 from tracardi.domain.event_session import EventSession
 from tracardi.domain.flat_event import EventDict
@@ -22,7 +22,7 @@ def _get_event_session(session: Union[Session, Entity]) -> Optional[EventSession
     if session is None:
         return None
 
-    tz = session.context.get_time_zone()
+    tz = session.get_time_zone()
     event_session = EventSession(
         id=session.id,
         tz=tz
@@ -74,6 +74,7 @@ def _get_hit(event_payload: EventPayload) -> dict:
 
     return hit
 
+
 def _update_event_from_request(request: dict, event: EventDict):
     if request:
         if 'request' not in event or not isinstance(event['request'], dict):
@@ -92,7 +93,6 @@ def event_payload_to_event(
         session: Union[Optional[Entity], Optional[Session]],
         profile_id: Optional[str],
         profile_less: bool) -> Tuple[EventDict, bool]:
-
     id = str(uuid4()) if not event_payload.id else event_payload.id
     event_type = event_payload.type.strip()
     event_name = capitalize_event_type_id(event_type)
