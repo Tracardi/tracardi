@@ -1,6 +1,8 @@
 from typing import Optional, Tuple, List
 
 from tracardi.domain.event_reshaping_schema import EventReshapingSchema
+from tracardi.service.cache.cache_tags import EVENT_RESHAPING_TAG
+from tracardi.service.cache_change_tagger.change_tagger import invalidate_cache_on_update
 from tracardi.service.storage.mysql.mapping.event_reshaping_mapping import map_to_event_reshaping
 from tracardi.service.storage.mysql.service.event_reshaping_service import EventReshapingService
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
@@ -26,11 +28,13 @@ async def load_event_reshaping_by_id(event_reshaping_id: str) -> Optional[EventR
 
 
 async def delete_event_reshaping_by_id(event_reshaping_id: str) -> Tuple[bool, Optional[EventReshapingSchema]]:
-    return await ers.delete_by_id(event_reshaping_id)
+    with invalidate_cache_on_update(*EVENT_RESHAPING_TAG):
+        return await ers.delete_by_id(event_reshaping_id)
 
 
 async def insert_event_reshaping(event_reshaping: EventReshapingSchema):
-    return await ers.insert(event_reshaping)
+    with invalidate_cache_on_update(*EVENT_RESHAPING_TAG):
+        return await ers.insert(event_reshaping)
 
 
 async def load_event_reshaping_by_event_type(event_type: str, only_enabled: bool = True):

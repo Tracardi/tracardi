@@ -1,6 +1,8 @@
 from typing import Optional, Tuple, List
 
 from tracardi.domain.event_validator import EventValidator
+from tracardi.service.cache.cache_tags import EVENT_VALIDATION_TAG
+from tracardi.service.cache_change_tagger.change_tagger import invalidate_cache_on_update
 from tracardi.service.storage.mysql.mapping.event_validation_mapping import map_to_event_validation
 from tracardi.service.storage.mysql.service.event_validation_service import EventValidationService
 
@@ -25,11 +27,13 @@ async def load_by_id(event_validation_id: str) -> Optional[EventValidator]:
 
 
 async def delete_by_id(event_validation_id: str) -> Tuple[bool, Optional[EventValidator]]:
-    return await evs.delete_by_id(event_validation_id)
+    with invalidate_cache_on_update(*EVENT_VALIDATION_TAG):
+        return await evs.delete_by_id(event_validation_id)
 
 
 async def insert(event_validation: EventValidator):
-    return await evs.insert(event_validation)
+    with invalidate_cache_on_update(*EVENT_VALIDATION_TAG):
+        return await evs.insert(event_validation)
 
 
 async def load_by_event_type(event_type: str, only_enabled: bool = True):

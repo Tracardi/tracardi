@@ -1,6 +1,8 @@
 from typing import Tuple, Optional, List
 
 from tracardi.domain.event_type_metadata import EventTypeMetadata
+from tracardi.service.cache.cache_tags import EVENT_MAPPING_TAG
+from tracardi.service.cache_change_tagger.change_tagger import invalidate_cache_on_update
 from tracardi.service.storage.mysql.mapping.event_to_event_mapping import map_to_event_mapping
 from tracardi.service.storage.mysql.service.event_mapping_service import EventMappingService
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
@@ -24,11 +26,13 @@ async def load_by_id(event_mapping_id: str) -> Optional[EventTypeMetadata]:
 
 
 async def delete_by_id(event_mapping_id: str) -> Tuple[bool, Optional[EventTypeMetadata]]:
-    return await ems.delete_by_id(event_mapping_id)
+    with invalidate_cache_on_update(*EVENT_MAPPING_TAG):
+        return await ems.delete_by_id(event_mapping_id)
 
 
 async def insert(event_type_metadata: EventTypeMetadata):
-    return await ems.insert(event_type_metadata)
+    with invalidate_cache_on_update(*EVENT_MAPPING_TAG):
+        return await ems.insert(event_type_metadata)
 
 
 async def load_by_event_type(event_type: str, only_enabled: bool = True) ->  Tuple[List[EventTypeMetadata], int]:

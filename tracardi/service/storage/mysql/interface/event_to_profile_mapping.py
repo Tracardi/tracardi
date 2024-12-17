@@ -1,5 +1,7 @@
 from typing import Optional, Tuple, List
 from tracardi.domain.event_to_profile import EventToProfile
+from tracardi.service.cache.cache_tags import PROFILE_MAPPING_TAG
+from tracardi.service.cache_change_tagger.change_tagger import invalidate_cache_on_update
 from tracardi.service.storage.mysql.mapping.event_to_profile_mapping import map_to_event_to_profile
 from tracardi.service.storage.mysql.service.event_to_profile_service import EventToProfileMappingService
 
@@ -27,11 +29,13 @@ async def load_event_to_profile_mapping_by_id(mapping_id: str) -> SelectResult:
 
 
 async def delete_event_to_profile_mapping_by_id(mapping_id: str) -> Tuple[bool, Optional[EventToProfile]]:
-    return await etpms.delete_by_id(mapping_id)
+    with invalidate_cache_on_update(*PROFILE_MAPPING_TAG):
+        return await etpms.delete_by_id(mapping_id)
 
 
 async def insert_event_to_profile_mapping(mapping: EventToProfile):
-    return await etpms.insert(mapping)
+    with invalidate_cache_on_update(*PROFILE_MAPPING_TAG):
+        return await etpms.insert(mapping)
 
 
 async def load_event_to_profile_mapping_by_type(event_type: str, enabled_only: bool = False) -> Tuple[List[EventToProfile], int]:

@@ -3,9 +3,7 @@ from typing import List
 from tracardi.config import memory_cache
 from tracardi.domain.consent_field_compliance import EventDataCompliance
 from tracardi.service.decorators.async_cache import AsyncCache
-from tracardi.service.storage.mysql.mapping.event_data_compliance_mapping import map_to_event_data_compliance
-from tracardi.service.storage.mysql.service.event_data_compliance_service import ConsentDataComplianceService
-
+import tracardi.service.storage.mysql.interface.data_compliance as data_compliance_dao
 
 @AsyncCache(memory_cache.data_compliance_cache_ttl,
             allow_null_values=True,
@@ -14,8 +12,5 @@ from tracardi.service.storage.mysql.service.event_data_compliance_service import
             return_cache_on_error=True
             )
 async def load_data_compliance(event_type_id: str) -> List[EventDataCompliance]:
-    cdcs = ConsentDataComplianceService()
-    records = await cdcs.load_by_event_type(event_type_id, enabled_only=True)
-    if not records.exists():
-        return []
-    return list(records.map_to_objects(map_to_event_data_compliance))
+    records, _ = await data_compliance_dao.load_by_event_type(event_type_id, enabled_only=True)
+    return records

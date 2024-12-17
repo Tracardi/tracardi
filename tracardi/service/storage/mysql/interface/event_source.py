@@ -2,6 +2,8 @@ from typing import List, Tuple, Optional, Dict
 
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.named_entity import NamedEntity
+from tracardi.service.cache.cache_tags import EVENT_SOURCE_TAG
+from tracardi.service.cache_change_tagger.change_tagger import invalidate_cache_on_update
 from tracardi.service.storage.mysql.mapping.event_source_mapping import map_to_event_source
 from tracardi.service.storage.mysql.service.event_source_service import EventSourceService
 
@@ -73,8 +75,10 @@ async def load_event_source_entities(add_current: bool = False, type: Optional[s
 
 
 async def delete_event_source(source_id: str):
-    await ess.delete_by_id_in_deployment_mode(source_id)
+    with invalidate_cache_on_update(*EVENT_SOURCE_TAG):
+        await ess.delete_by_id_in_deployment_mode(source_id)
 
 
 async def insert_event_source(event_source: EventSource):
-    return await ess.save(event_source)
+    with invalidate_cache_on_update(*EVENT_SOURCE_TAG):
+        return await ess.save(event_source)
