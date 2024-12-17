@@ -1,6 +1,8 @@
 from typing import List, Tuple, Optional
 
 from tracardi.domain.destination import Destination
+from tracardi.service.cache.cache_tags import DESTINATION_TAG
+from tracardi.service.cache_change_tagger.change_tagger import invalidate_cache_on_update
 from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination
 from tracardi.service.storage.mysql.service.destination_service import DestinationService
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
@@ -40,8 +42,10 @@ async def load_destinations_for_profile():
 
 
 async def insert_destination(destination: Destination):
-    return await ds.insert(destination)
+    with invalidate_cache_on_update(*DESTINATION_TAG):
+        return await ds.insert(destination)
 
 
 async def delete_destination(id: str):
-    await ds.delete_by_id(id)
+    with invalidate_cache_on_update(*DESTINATION_TAG):
+        await ds.delete_by_id(id)

@@ -1,6 +1,8 @@
 from typing import Tuple, List, Optional
 
 from tracardi.domain.resource import Resource
+from tracardi.service.cache.cache_tags import RESOURCE_TAG
+from tracardi.service.cache_change_tagger.change_tagger import invalidate_cache_on_update
 from tracardi.service.license import License
 from tracardi.service.storage.mysql.map_to_named_entity import map_to_named_entity
 from tracardi.service.storage.mysql.mapping.resource_mapping import map_to_resource
@@ -62,8 +64,10 @@ async def list_resources_with_destinations():
 
 
 async def insert_resource(resource: Resource):
-    return await rs.insert(resource)
+    with invalidate_cache_on_update(*RESOURCE_TAG):
+        return await rs.insert(resource)
 
 
 async def delete_resource_by_id(resource_id: str):
-    await rs.delete_by_id(resource_id)
+    with invalidate_cache_on_update(*RESOURCE_TAG):
+        await rs.delete_by_id(resource_id)
