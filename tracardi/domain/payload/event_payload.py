@@ -15,8 +15,7 @@ from ..event import Event, EventSession, Tags
 from ..event_metadata import EventMetadata
 from ..event_metadata import EventPayloadMetadata
 from ..metadata import Hit
-from ..session import Session
-from ..session_context import SessionContext
+from ..session import Session, SessionContext
 from ..time import Time
 from ..value_object.operation import RecordFlag
 from ...service.string_manager import capitalize_event_type_id
@@ -228,9 +227,9 @@ class EventPayload(BaseModel):
     def _get_event_session(session: Union[Session, Entity]) -> Optional[EventSession]:
         if session is not None:
             if isinstance(session, Session) and isinstance(session.context, dict):
-                session_context = SessionContext(session.context)
+                session.context = SessionContext(session.context)
 
-                tz = session_context.get_time_zone()
+                tz = session.context.get_time_zone()
                 event_session = EventSession(
                     id=session.id,
                     tz=tz

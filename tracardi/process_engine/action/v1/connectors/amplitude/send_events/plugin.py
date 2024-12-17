@@ -2,8 +2,6 @@ import asyncio
 import json
 from datetime import datetime
 import aiohttp
-
-from tracardi.domain.session_context import SessionContext
 from tracardi.service.tracardi_http_client import HttpClient
 from aiohttp import ClientConnectorError
 from tracardi.config import tracardi
@@ -63,8 +61,6 @@ class AmplitudeSendEvent(ActionRunner):
                 event_type = self._get_value(dot, self.config.event_type)
                 ip = self._get_value(dot, self.config.ip, allow_custom_value=True)
 
-                session_context = SessionContext(self.session.context)
-
                 event = {
                     "app_version": str(tracardi.version),
                     "insert_id": self.event.id if self.debug is False else None,
@@ -94,7 +90,7 @@ class AmplitudeSendEvent(ActionRunner):
                     "device_brand": self._get_value(dot, self.config.device_brand),
                     "os_version": self._get_value(dot, self.config.os_version),
                     "os_name": self._get_value(dot, self.config.os_name),
-                    "platform": session_context.get_platform() if platform is None else platform,
+                    "platform": self.session.context.get_platform() if platform is None else platform,
                 }
 
                 params = {

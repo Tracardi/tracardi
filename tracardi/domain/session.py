@@ -3,9 +3,9 @@ import uuid
 from datetime import datetime
 from typing import Optional, Any
 
-from pydantic import BaseModel, PrivateAttr
+from pydantic import ConfigDict, BaseModel, PrivateAttr
 
-from .entity import Entity
+from .entity import Entity, PrimaryEntity
 from .marketing import UTM
 from .metadata import OS, Device, Application
 from .time import Time
@@ -47,6 +47,27 @@ class SessionMetadata(BaseModel):
         return SessionMetadata(time=SessionTime.new())
 
 
+class SessionContext(dict):
+
+    def get_time_zone(self) -> Optional[str]:
+        try:
+            return self['time']['tz']
+        except KeyError:
+            return None
+
+    def get_platform(self):
+        try:
+            return self['browser']['local']['device']['platform']
+        except KeyError:
+            return None
+
+    def get_browser_name(self):
+        try:
+            return self['browser']['local']['browser']['name']
+        except KeyError:
+            return None
+
+
 class Session(Entity):
     metadata: SessionMetadata
     operation: Operation = Operation()
@@ -58,14 +79,20 @@ class Session(Entity):
 
     utm: Optional[UTM] = UTM()
 
-    context: Optional[dict] = {}
+    context: Optional[SessionContext] = {}
     properties: Optional[dict] = {}
     traits: Optional[dict] = {}
     aux: Optional[dict] = {}
 
     _updated_in_workflow: bool = PrivateAttr(False)
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     def __init__(self, **data: Any):
+
+        if 'context' in data and not isinstance(data['context'], SessionContext):
+            data['context'] = SessionContext(data['context'])
+
         super().__init__(**data)
 
 
