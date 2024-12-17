@@ -15,6 +15,7 @@ def _get_key(database: str, table: str):
 def invalidate_cache_on_update(database: str, table: str):
     try:
         yield  # Execute the function
+        print(_get_key(database, table))
         _cache.set(_get_key(database, table), time())  # Call table_changed on success
     except Exception as e:
         raise e  # Re-raise exception
