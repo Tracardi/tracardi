@@ -1,4 +1,3 @@
-import pytest
 from datetime import datetime
 from uuid import uuid4
 
@@ -7,11 +6,9 @@ from tracardi.domain.flat_event import EventDict
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.event_source import EventSource
-from tracardi.domain.session import Session, SessionMetadata, SessionContext
-from tracardi.domain.entity import PrimaryEntity
+from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.time import Time
 from tracardi.service.tracking.compute.event.event_construction import event_payload_to_event
-from tracardi.domain.event import Event
 
 
 def test_event_payload_to_event():
@@ -41,7 +38,7 @@ def test_event_payload_to_event():
     session = Session(
         id=str(uuid4()),
         metadata=SessionMetadata(),
-        context=SessionContext({"time_zone": "UTC"})
+        context={"time_zone": "UTC"}
     )
 
     # Call the function under test

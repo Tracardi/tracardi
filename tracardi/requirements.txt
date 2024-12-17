@@ -1,7 +1,7 @@
 git+https://github.com/elasticemail/elasticemail-python.git@4.0.20
 
 numpy==1.24.4  # Required only because of elasticsearch[async]==7.10.1
-pydantic>=2.3.0
+pydantic==2.10.3
 aiohttp[speedups]
 redis
 aioredis

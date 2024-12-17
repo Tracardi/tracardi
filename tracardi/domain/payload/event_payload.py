@@ -12,7 +12,7 @@ from ..api_instance import ApiInstance
 from ..entity import Entity
 from ..event import Event
 from tracardi.domain.event_session import EventSession
-from ..session import Session, SessionContext
+from ..session import Session
 from ..time import Time
 from ...service.utils.getters import get_entity_id
 
@@ -154,9 +154,7 @@ class EventPayload(BaseModel):
     def _get_event_session(session: Union[Session, Entity]) -> Optional[EventSession]:
         if session is not None:
             if isinstance(session, Session) and isinstance(session.context, dict):
-                session.context = SessionContext(session.context)
-
-                tz = session.context.get_time_zone()
+                tz = session.get_time_zone()
                 event_session = EventSession(
                     id=session.id,
                     tz=tz

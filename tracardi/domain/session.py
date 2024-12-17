@@ -49,27 +49,6 @@ class SessionMetadata(BaseModel):
         return SessionMetadata(time=SessionTime.new())
 
 
-class SessionContext(dict):
-
-    def get_time_zone(self) -> Optional[str]:
-        try:
-            return self['time']['tz']
-        except KeyError:
-            return None
-
-    def get_platform(self):
-        try:
-            return self['browser']['local']['device']['platform']
-        except KeyError:
-            return None
-
-    def get_browser_name(self):
-        try:
-            return self['browser']['local']['browser']['name']
-        except KeyError:
-            return None
-
-
 class Session(Entity):
     metadata: SessionMetadata
     operation: Operation = Operation()
@@ -81,22 +60,17 @@ class Session(Entity):
 
     utm: Optional[UTM] = UTM()
 
-    context: Optional[SessionContext] = SessionContext({})
+    context: Optional[dict] = {}
     properties: Optional[dict] = {}
     traits: Optional[dict] = {}
     aux: Optional[dict] = {}
 
     _updated_in_workflow: bool = PrivateAttr(False)
 
-    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=False)
+    model_config = ConfigDict(frozen=False)
 
     def __init__(self, **data: Any):
-
-        if 'context' in data and not isinstance(data['context'], SessionContext):
-            data['context'] = SessionContext(data['context'])
-
         super().__init__(**data)
-
         self._is_frozen = False  # Internal flag to manage mutability
 
     def freeze(self):
@@ -167,6 +141,24 @@ class Session(Entity):
             ips = self.device.ip.split(',')
             return ips[0]
         except Exception:
+            return None
+
+    def get_time_zone(self) -> Optional[str]:
+        try:
+            return self.context['time']['tz']
+        except KeyError:
+            return None
+
+    def get_platform(self):
+        try:
+            return self.context['browser']['local']['device']['platform']
+        except KeyError:
+            return None
+
+    def get_browser_name(self):
+        try:
+            return self.context['browser']['local']['browser']['name']
+        except KeyError:
             return None
 
     def get_user_agent(self) -> Optional[str]:

@@ -3,7 +3,19 @@ from tracardi.service.license import License, SCHEDULER
 from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, PluginTest
 
 installed_plugins: Dict[str, PluginMetadata] = {
-
+    "tracardi.process_engine.action.v1.genai_action": PluginMetadata(
+        test=PluginTest(init={
+            'provider': '',
+            'model': '',
+            'prompt_template': '',
+            'max_tokens': '',
+            'temperature': '',
+        },
+        resource={
+            "api_url": "<api-url>",
+            "api_key": "<api-key>"
+        })
+    ),
     "tracardi.process_engine.action.v1.ux.question_popup.plugin": PluginMetadata(
         test=PluginTest(
             init={'api_url': 'http://localhost:8686', 'content': None, 'dark_theme': False, 'event_type': None,
