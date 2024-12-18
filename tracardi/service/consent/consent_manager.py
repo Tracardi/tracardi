@@ -24,8 +24,7 @@ async def add_consent(data: CustomerConsent, all: Optional[bool] = False):
         raise PermissionError("Access denied")
 
     if all:
-        consent_types = await consent_type_dao.load_all()
-        for consent_type in consent_types:
+        for consent_type in await consent_type_dao.load_all():
             if consent_type.auto_revoke:
                 try:
                     seconds = timeparse(consent_type.auto_revoke)
