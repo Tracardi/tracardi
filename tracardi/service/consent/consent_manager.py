@@ -1,19 +1,17 @@
 from datetime import timedelta
 from typing import Optional
 
-from fastapi import HTTPException
 from pytimeparse.timeparse import timeparse
 
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.service.storage.elastic.interface.collector.load.flat_profile import load_flat_profile
-from tracardi.service.storage.mysql.mapping.consent_type_mapping import map_to_consent_type
 from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
 from tracardi.service.tracking.storage.session_storage import load_session
 from tracardi.service.utils.date import now_in_utc
 from tracardi.domain.payload.customer_consent import CustomerConsent
 from tracardi.domain.consent_revoke import ConsentRevoke
-from tracardi.service.storage.mysql.service.consent_type_service import ConsentTypeService
 from tracardi.service.storage.mysql.interface import event_source_dao
+import tracardi.service.storage.mysql.interface.consent_type as consent_type_dao
 
 
 async def add_consent(data: CustomerConsent, all: Optional[bool] = False):
@@ -23,12 +21,11 @@ async def add_consent(data: CustomerConsent, all: Optional[bool] = False):
     flat_profile: FlatProfile = await load_flat_profile(data.profile.id)
 
     if not source or not flat_profile or not session:
-        raise HTTPException(status_code=403, detail="Access denied")
+        raise PermissionError("Access denied")
 
     if all:
-        cts = ConsentTypeService()
-        consent_type_records = await cts.load_all()
-        for consent_type in consent_type_records.map_to_objects(map_to_consent_type):
+        consent_types = await consent_type_dao.load_all()
+        for consent_type in consent_types:
             if consent_type.auto_revoke:
                 try:
                     seconds = timeparse(consent_type.auto_revoke)

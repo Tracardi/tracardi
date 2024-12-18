@@ -2,12 +2,11 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.storage.mysql.mapping.consent_type_mapping import map_to_consent_type
-from tracardi.service.storage.mysql.service.consent_type_service import ConsentTypeService
 from .model.payload import Configuration
 from pytimeparse import parse
 from datetime import datetime
 from tracardi.domain.consent_revoke import ConsentRevoke
+import tracardi.service.storage.mysql.interface.consent_type as consent_type_dao
 
 
 def validate(config: dict):
@@ -36,11 +35,9 @@ class ConsentAdder(ActionRunner):
             # consents = Consents(__root__=)
             for consent_id, granted in consents_data.items():
                 if granted is True:
-                    cts = ConsentTypeService()
-                    consent_type_record = await cts.load_by_id(consent_id)
+                    consent_type = await consent_type_dao.load_by_id(consent_id)
 
-                    if consent_type_record.exists():
-                        consent_type = consent_type_record.map_to_object(map_to_consent_type)
+                    if consent_type:
                         if consent_type.revokable is False:
                             self.profile.consents[consent_id] = ConsentRevoke(revoke=None)
                         else:
@@ -48,7 +45,7 @@ class ConsentAdder(ActionRunner):
 
                             if revoke_offset is None:
                                 raise ValueError(f"Error while adding consent type {consent_id}: consent is marked "
-                                                     f"as revokable, but has no auto revoke property, or auto revoke "
+                                                     f"as revocable, but has no auto revoke property, or auto revoke "
                                                      f"property is incorrect.")
 
                             self.profile.consents[consent_id] = ConsentRevoke(revoke=datetime.fromtimestamp(

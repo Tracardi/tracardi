@@ -24,9 +24,8 @@ from ..domain.session import Session
 from ..domain.rule import Rule
 from ..exceptions.exception_service import get_traceback
 from ..exceptions.log_handler import get_logger
-from ..service.storage.mysql.mapping.workflow_mapping import map_to_workflow_record
-from ..service.storage.mysql.service.workflow_service import WorkflowService
 from ..service.utils.getters import get_entity_id
+from tracardi.service.storage.mysql.interface import workflow_dao
 
 logger = get_logger(__name__)
 
@@ -118,8 +117,7 @@ class RulesEngine:
 
                     # Loads flow for given rule
 
-                    ws = WorkflowService()
-                    flow_record = (await ws.load_by_id(rule.flow.id)).map_to_object(map_to_workflow_record)
+                    flow_record = await workflow_dao.load_by_id(rule.flow.id)
 
                     if not flow_record:
                         raise ValueError("Could not find flow `{}`".format(rule.flow.id))

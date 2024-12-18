@@ -6,7 +6,6 @@ from tracardi.domain import ExtraInfo
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
 
-from tracardi.config import tracardi
 from tracardi.process_engine.debugger import Debugger
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.exceptions.exception_service import get_traceback
@@ -16,9 +15,9 @@ from tracardi.domain.session import Session
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.merging.facade_old import merge_profile_by_merging_keys, get_merging_keys_and_values
-from tracardi.service.storage.mysql.service.workflow_trigger_service import WorkflowTriggerService
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
+from tracardi.service.storage.mysql.interface import workflow_trigger_dao
 
 logger = get_logger(__name__)
 
@@ -117,8 +116,7 @@ class WorkflowManagerAsync:
                 f"This is scheduled event. Will load flow {self.tracker_payload.scheduled_event_config.flow_id}")
         else:
             # Routing rules are subject to caching
-            wts = WorkflowTriggerService()
-            event_rules = await wts.load_by_source_and_events(self.tracker_payload.source.id, events)
+            event_rules = await workflow_trigger_dao.load_by_source_and_events(self.tracker_payload.source.id, events)
 
         return event_rules
 

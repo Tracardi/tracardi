@@ -129,13 +129,13 @@ class WorkflowTriggerService(TableService):
             where=where,
             limit=limit)
 
-    async def load_by_segment(self, segment_id: str, limit: int = 100) -> SelectResult:
-        where = where_tenant_and_mode_context(
-            WorkflowTriggerTable,
-            WorkflowTriggerTable.segment_id == segment_id
-        )
-
-        return await self._select_in_deployment_mode(
-            WorkflowTriggerTable,
-            where=where,
-            limit=limit)
+    # async def load_by_segment(self, segment_id: str, limit: int = 100) -> SelectResult:
+    #     where = where_tenant_and_mode_context(
+    #         WorkflowTriggerTable,
+    #         WorkflowTriggerTable.segment_id == segment_id
+    #     )
+    #
+    #     return await self._select_in_deployment_mode(
+    #         WorkflowTriggerTable,
+    #         where=where,
+    #         limit=limit)
