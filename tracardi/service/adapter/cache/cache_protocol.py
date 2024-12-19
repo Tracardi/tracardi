@@ -12,7 +12,7 @@ class CacheProtocol(Protocol):
     def mset(self, mapping):
         pass
 
-    def delete(self, key):
+    def delete(self, key, skip_tenant: bool = False):
         pass
 
     def exists(self, key: str):
@@ -37,4 +37,7 @@ class CacheProtocol(Protocol):
         pass
 
     def get_msgpack(self, key: str):
+        pass
+
+    def scan(self, match=None, count=None):
         pass

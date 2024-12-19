@@ -26,7 +26,9 @@ class UpStashRedisClient(metaclass=Singleton):
         logger.info(f"UpStash Redis at {host} connected.")
 
     @staticmethod
-    def get_tenant_prefix(name):
+    def get_tenant_prefix(name, skip_tenant=False):
+        if skip_tenant:
+            return name
         return f"{get_context().tenant}:{name}"
 
     def hexists(self, name: str, key: str) -> Union[Awaitable[bool], bool]:
@@ -79,8 +81,10 @@ class UpStashRedisClient(metaclass=Singleton):
         return self.client.set(self.get_tenant_prefix(name), value,
                                ex=ex, px=px, nx=nx, xx=xx, keepttl=keepttl, get=get, exat=exat, pxat=pxat)
 
-    def delete(self, name):
-        return self.client.delete(self.get_tenant_prefix(name))
+    def delete(self, name: str, skip_tenant: bool = False):
+        if isinstance(name, list):
+            return self.client.delete(*[self.get_tenant_prefix(item, skip_tenant) for item in name])
+        return self.client.delete(self.get_tenant_prefix(name, skip_tenant))
 
     def incr(self, name, amount: int = 1):
         return self.client.incrby(self.get_tenant_prefix(name), amount)
@@ -110,6 +114,9 @@ class UpStashRedisClient(metaclass=Singleton):
 
     def persist(self, key):
         return self.client.persist(key)
+
+    def scan(self, match=None, count=None):
+        return self.client.scan_iter(self.get_tenant_prefix(match), count)
 
 
 upstash_redis_connection = UpStashRedisClient()

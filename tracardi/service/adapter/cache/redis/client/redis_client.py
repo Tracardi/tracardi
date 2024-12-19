@@ -19,7 +19,9 @@ class RedisClient(metaclass=Singleton):
         logger.info(f"Redis at {redis_config.redis_host} connected.")
 
     @staticmethod
-    def get_tenant_prefix(name):
+    def get_tenant_prefix(name, skip_tenant=False):
+        if skip_tenant:
+            return name
         return f"{get_context().tenant}:{name}"
 
     def hexists(self, name: str, key: str) -> Union[Awaitable[bool], bool]:
@@ -71,10 +73,12 @@ class RedisClient(metaclass=Singleton):
     ):
         return self.client.set(self.get_tenant_prefix(name), value, ex, px, nx, xx, keepttl, get, exat, pxat)
 
-    def delete(self, name):
-        return self.client.delete(self.get_tenant_prefix(name))
+    def delete(self, name: str, skip_tenant: bool = False):
+        if isinstance(name, list):
+            return self.client.delete(*[self.get_tenant_prefix(item, skip_tenant) for item in name])
+        return self.client.delete(self.get_tenant_prefix(name, skip_tenant))
 
-    def incr(self, name, amount: int = 1):
+    def incr(self, name: str, amount: int = 1):
         return self.client.incr(self.get_tenant_prefix(name), amount)
 
     def expire(
@@ -102,5 +106,9 @@ class RedisClient(metaclass=Singleton):
 
     def persist(self, key):
         return self.client.persist(key)
+
+    def scan(self, match=None, count=None):
+        return self.client.scan_iter(self.get_tenant_prefix(match), count)
+
 
 redis_connection = RedisClient()

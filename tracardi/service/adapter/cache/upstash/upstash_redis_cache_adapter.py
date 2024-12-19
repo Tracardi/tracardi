@@ -43,8 +43,8 @@ class UpStashRedisCacheAdapter(CacheProtocol):
     def mset(self, mapping):
         return self._client.mset(mapping)
 
-    def delete(self, key: str):
-        return self._client.delete(key)
+    def delete(self, key: str, skip_tenant: bool = False):
+        return self._client.delete(key, skip_tenant)
 
     def exists(self, key: str):
         return self._client.exists(key)
@@ -63,3 +63,6 @@ class UpStashRedisCacheAdapter(CacheProtocol):
 
     def ping(self):
         return self._client.ping()
+
+    def scan(self, match=None, count=None):
+        return self._client.scan(match, count)
