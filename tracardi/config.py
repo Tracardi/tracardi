@@ -22,7 +22,7 @@ def _get_random_value(value) -> float:
     _span = 0.50
     lower_limit = max(value - (value * _span), value) if value < 5 else value - (value * _span)
     upper_limit = value + (value * _span)
-    return uniform(lower_limit, upper_limit)
+    return int(uniform(lower_limit, upper_limit))
 
 
 class MemoryCacheConfig:
