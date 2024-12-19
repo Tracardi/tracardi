@@ -6,7 +6,6 @@ from tracardi.domain.entity import PrimaryEntity
 from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.field_change import FieldChange
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.cache.event_to_profile_mapping import load_event_to_profile
 from tracardi.service.tracking.compute.event.event_construction import event_payload_to_event
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
 from tracardi.domain.event_source import EventSource
@@ -17,6 +16,8 @@ from tracardi.domain.session import Session
 from tracardi.domain.flat_event import EventDict, FlatEvent
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracking.utils.function_call import default_event_call_function
+
+from tracardi.service.storage.mysql.interface import event_to_profile_dao
 
 logger = get_logger(__name__)
 
@@ -187,7 +188,7 @@ async def compute_events(events: List[EventPayload],
 
             # Skip mapping to profile if none
             if flat_profile:
-                custom_event_to_profile_mapping_schemas = await load_event_to_profile(event_type_id=flat_event['type'])
+                custom_event_to_profile_mapping_schemas = await event_to_profile_dao.load_event_to_profile(event_type_id=flat_event['type'])
                 async for field_change in event_properties_to_profile(
                     custom_event_to_profile_mapping_schemas,
                     flat_event,

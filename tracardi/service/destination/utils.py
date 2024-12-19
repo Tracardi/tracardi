@@ -5,12 +5,13 @@ from tracardi.domain.destination import Destination
 from tracardi.domain.destination_work_package import DestinationWorkPackage
 
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.cache.resource import load_resource_via_cache
 from tracardi.service.notation.dict_traverser import DictTraverser
 
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.setup.setup_resources import get_resource_types
+
+from tracardi.service.storage.mysql.interface import resource_dao
 
 logger = get_logger(__name__)
 
@@ -37,7 +38,7 @@ async def get_destination_data(destinations: List[Destination], dot: DotAccessor
 
         # Load resource from cache
         try:
-            resource = await load_resource_via_cache(destination.resource.id)
+            resource = await resource_dao.load_resource_via_cache(destination.resource.id)
             if resource.enabled is False:
                 raise ConnectionError(f"Can't connect to disabled resource: {resource.name}.")
 

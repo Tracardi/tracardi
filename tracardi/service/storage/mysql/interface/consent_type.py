@@ -1,7 +1,5 @@
 from typing import Tuple, Optional, List, Generator
 from tracardi.domain.consent_type import ConsentType
-from tracardi.service.cache.cache_tags import CONSENT_TYPE_TAG
-from tracardi.service.cache_change_tagger.change_tagger import invalidate_cache_on_update
 from tracardi.service.storage.mysql.mapping.consent_type_mapping import map_to_consent_type
 from tracardi.service.storage.mysql.service.consent_type_service import ConsentTypeService
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
@@ -16,13 +14,15 @@ def _records(records: SelectResult) -> Tuple[List[ConsentType], int]:
     return list(records.map_to_objects(map_to_consent_type)), records.count()
 
 
-async def load_all(search: Optional[str] = None, limit: int = None, offset: int = None) -> Generator[ConsentType, None, None]:
+async def load_all(search: Optional[str] = None, limit: int = None, offset: int = None) -> Generator[
+    ConsentType, None, None]:
     records = await cts.load_all(search, limit, offset)
     return records.map_to_objects(map_to_consent_type)
 
 
 async def load(search: Optional[str] = None, limit: int = None, offset: int = None) -> Tuple[List[ConsentType], int]:
     return _records(await cts.load_all(search, limit, offset))
+
 
 async def load_by_id(consent_type_id: str) -> Optional[ConsentType]:
     record = await cts.load_by_id(consent_type_id)
@@ -31,15 +31,12 @@ async def load_by_id(consent_type_id: str) -> Optional[ConsentType]:
     return record.map_to_object(map_to_consent_type)
 
 
-
 async def delete_by_id(consent_type_id: str) -> Tuple[bool, Optional[ConsentType]]:
-    with invalidate_cache_on_update(*CONSENT_TYPE_TAG):
-        return await cts.delete_by_id(consent_type_id)
+    return await cts.delete_by_id(consent_type_id)
 
 
 async def insert(consent_type: ConsentType):
-    with invalidate_cache_on_update(*CONSENT_TYPE_TAG):
-        return await cts.insert(consent_type)
+    return await cts.insert(consent_type)
 
 
 async def load_enabled(limit: int = None, offset: int = None) -> Tuple[List[ConsentType], int]:

@@ -11,10 +11,10 @@ from tracardi.domain.session import Session
 from tracardi.exceptions.exception_service import get_traceback
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.destination.destination_interface import DestinationInterface
-from tracardi.service.cache.destinations import load_profile_destinations, load_event_destinations
 from tracardi.domain.destination import Destination
 from tracardi.service.destination.utils import get_destination_data
 from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.service.storage.mysql.interface import destination_dao
 from tracardi.service.utils.getters import get_entity_id
 
 logger = get_logger(__name__)
@@ -29,7 +29,7 @@ async def yield_event_destination_work_package(flat_events: List[FlatEvent],
 
         try:
             # Reads from cache
-            destinations: List[Destination] = await load_event_destinations(
+            destinations: List[Destination] = await destination_dao.load_event_destinations(
                 flat_event.type,
                 flat_event.get('source.id')
             )
@@ -69,7 +69,7 @@ async def event_destination_dispatch(flat_profile: Optional[FlatProfile],
 
         try:
             # Reads from cache
-            destinations: List[Destination] = await load_event_destinations(
+            destinations: List[Destination] = await destination_dao.load_event_destinations(
                 flat_event.type,
                 flat_event.get('source.id')
             )

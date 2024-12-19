@@ -1,4 +1,4 @@
-from tracardi.service.cache.event_source import load_event_source_via_cache
+from tracardi.service.storage.mysql.interface import event_source_dao
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
@@ -7,7 +7,7 @@ from tracardi.service.plugin.domain.result import Result
 class EventSourceFetcherAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-        source = await load_event_source_via_cache(self.event.source.id)
+        source = await event_source_dao.load_event_source_via_cache(self.event.source.id)
         if source is None:
             return Result(port="error", value={"message": "Source `{}` does not exist.".format(self.event.source.id)})
         return Result(port="source", value=source.model_dump())

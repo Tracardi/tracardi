@@ -1,12 +1,13 @@
 from typing import Tuple, List, Optional
 
 from tracardi.domain.resource import Resource
-from tracardi.service.cache.cache_tags import RESOURCE_TAG
-from tracardi.service.cache_change_tagger.change_tagger import invalidate_cache_on_update
 from tracardi.service.license import License
 from tracardi.service.storage.mysql.map_to_named_entity import map_to_named_entity
 from tracardi.service.storage.mysql.mapping.resource_mapping import map_to_resource
 from tracardi.service.storage.mysql.service.resource_service import ResourceService
+
+from tracardi.config import memory_cache
+from tracardi.service.decorators.async_cache import AsyncCache
 
 rs = ResourceService()
 
@@ -63,11 +64,19 @@ async def list_resources_with_destinations():
     return result
 
 
+# Cache
+@AsyncCache(memory_cache.resource_load_cache_ttl,
+            timeout=memory_cache.timeout_sql_query_in,
+            max_one_cache_fill_every=memory_cache.max_one_cache_fill_every,
+            return_cache_on_error=True
+            )
+async def load_resource_via_cache(resource_id: str) -> Resource:
+    return await load_resource_by_id_with_error(resource_id)
+
+
 async def insert_resource(resource: Resource):
-    with invalidate_cache_on_update(*RESOURCE_TAG):
-        return await rs.insert(resource)
+    return await rs.insert(resource)
 
 
 async def delete_resource_by_id(resource_id: str):
-    with invalidate_cache_on_update(*RESOURCE_TAG):
-        await rs.delete_by_id(resource_id)
+    await rs.delete_by_id(resource_id)

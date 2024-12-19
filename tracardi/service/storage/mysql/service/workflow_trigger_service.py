@@ -1,11 +1,10 @@
 from typing import List, Optional, Tuple, Dict, Set
 
-from tracardi.domain.entity import Entity
 from tracardi.domain.event import Event
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.rule import Rule
 from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.cache.trigger import load_trigger_rule
+
 from tracardi.service.storage.mysql.mapping.workflow_trigger_mapping import map_to_workflow_trigger_table, \
     map_to_workflow_trigger_rule
 from tracardi.service.storage.mysql.schema.table import WorkflowTriggerTable
@@ -81,7 +80,8 @@ class WorkflowTriggerService(TableService):
         has_routes = False
         for event_type in event_types:
 
-            routes: List[Rule] = await load_trigger_rule(self, event_type, source_id)
+            records = await self.load_rule(event_type, source_id)
+            routes: List[Rule] = list(records.map_to_objects(map_to_workflow_trigger_rule))
 
             if not has_routes and routes:
                 has_routes = True

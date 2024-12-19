@@ -11,10 +11,11 @@ from tracardi.config import tracardi
 from tracardi.domain.profile_data import FLAT_PROFILE_FIELD_MAPPING
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.tql.utils.dictonary import flatten
-from tracardi.service.cache.event_to_profile_mapping import load_event_to_profile
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.hasher import uuid4_from_md5, hash_id
+
+from tracardi.service.storage.mysql.interface import event_to_profile_dao
 
 logger = get_logger(__name__)
 
@@ -35,7 +36,7 @@ class ConfigurableBridge(NamedEntity):
 
             # Check if in custom event to profile mapping for current event type, there is a mapping for merging keys
 
-            custom_event_to_profile_mappings: List[EventToProfile] = await load_event_to_profile(
+            custom_event_to_profile_mappings: List[EventToProfile] = await event_to_profile_dao.load_event_to_profile(
                 event_type_id=event_type)
 
             for custom_mapping_schema in custom_event_to_profile_mappings:

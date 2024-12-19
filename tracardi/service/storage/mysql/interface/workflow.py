@@ -1,7 +1,5 @@
 from typing import Optional, Tuple, List
 from tracardi.domain.flow import FlowRecord
-from tracardi.service.cache.cache_tags import WORKFLOW_TAG
-from tracardi.service.cache_change_tagger.change_tagger import invalidate_cache_on_update
 from tracardi.service.storage.mysql.map_to_named_entity import map_to_named_entity
 from tracardi.service.storage.mysql.mapping.workflow_mapping import map_to_workflow_record
 from tracardi.service.storage.mysql.service.workflow_service import WorkflowService
@@ -59,15 +57,12 @@ async def load_by_id(workflow_id: str) -> Optional[FlowRecord]:
 # Mutations
 
 async def update_by_id(workflow_id: str, new_data: dict) -> Optional[str]:
-    with invalidate_cache_on_update(*WORKFLOW_TAG):
-        return await ws.update_by_id(workflow_id, new_data=new_data)
+    return await ws.update_by_id(workflow_id, new_data=new_data)
 
 
 async def delete_by_id(workflow_id: str) -> Tuple[bool, Optional[FlowRecord]]:
-    with invalidate_cache_on_update(*WORKFLOW_TAG):
-        return await ws.delete_by_id(workflow_id)
+    return await ws.delete_by_id(workflow_id)
 
 
 async def insert(workflow: FlowRecord):
-    with invalidate_cache_on_update(*WORKFLOW_TAG):
-        return await ws.insert(workflow)
+    return await ws.insert(workflow)

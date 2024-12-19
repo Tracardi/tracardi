@@ -2,10 +2,10 @@ from typing import List, Tuple, Optional, Dict
 
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.service.cache.cache_tags import EVENT_SOURCE_TAG
-from tracardi.service.cache_change_tagger.change_tagger import invalidate_cache_on_update
 from tracardi.service.storage.mysql.mapping.event_source_mapping import map_to_event_source
 from tracardi.service.storage.mysql.service.event_source_service import EventSourceService
+from tracardi.config import memory_cache
+from tracardi.service.decorators.async_cache import AsyncCache
 
 ess = EventSourceService()
 
@@ -74,11 +74,20 @@ async def load_event_source_entities(add_current: bool = False, type: Optional[s
     return result, total
 
 
+# Cache
+
+@AsyncCache(memory_cache.source_ttl,
+            timeout=memory_cache.timeout_sql_query_in,
+            max_one_cache_fill_every=memory_cache.max_one_cache_fill_every,
+            return_cache_on_error=True
+            )
+async def load_event_source_via_cache(source_id) -> Optional[EventSource]:
+    return await load_event_source_by_id(source_id)
+
+
 async def delete_event_source(source_id: str):
-    with invalidate_cache_on_update(*EVENT_SOURCE_TAG):
-        await ess.delete_by_id_in_deployment_mode(source_id)
+    await ess.delete_by_id_in_deployment_mode(source_id)
 
 
 async def insert_event_source(event_source: EventSource):
-    with invalidate_cache_on_update(*EVENT_SOURCE_TAG):
-        return await ess.save(event_source)
+    return await ess.save(event_source)

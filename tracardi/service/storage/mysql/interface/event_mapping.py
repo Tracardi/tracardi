@@ -1,19 +1,21 @@
 from typing import Tuple, Optional, List
 
 from tracardi.domain.event_type_metadata import EventTypeMetadata
-from tracardi.service.cache.cache_tags import EVENT_MAPPING_TAG
-from tracardi.service.cache_change_tagger.change_tagger import invalidate_cache_on_update
 from tracardi.service.storage.mysql.mapping.event_to_event_mapping import map_to_event_mapping
 from tracardi.service.storage.mysql.service.event_mapping_service import EventMappingService
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
+from tracardi.config import memory_cache
+from tracardi.service.decorators.async_cache import AsyncCache
 
 ems = EventMappingService()
+
 
 def _records(records: SelectResult) -> Tuple[List[EventTypeMetadata], int]:
     if not records.exists():
         return [], 0
 
     return list(records.map_to_objects(map_to_event_mapping)), records.count()
+
 
 async def load_all(search: str = None, limit: int = None, offset: int = None) -> Tuple[List[EventTypeMetadata], int]:
     records = await ems.load_all(search, limit, offset)
@@ -25,17 +27,7 @@ async def load_by_id(event_mapping_id: str) -> Optional[EventTypeMetadata]:
     return record.map_to_object(map_to_event_mapping)
 
 
-async def delete_by_id(event_mapping_id: str) -> Tuple[bool, Optional[EventTypeMetadata]]:
-    with invalidate_cache_on_update(*EVENT_MAPPING_TAG):
-        return await ems.delete_by_id(event_mapping_id)
-
-
-async def insert(event_type_metadata: EventTypeMetadata):
-    with invalidate_cache_on_update(*EVENT_MAPPING_TAG):
-        return await ems.insert(event_type_metadata)
-
-
-async def load_by_event_type(event_type: str, only_enabled: bool = True) ->  Tuple[List[EventTypeMetadata], int]:
+async def load_by_event_type(event_type: str, only_enabled: bool = True) -> Tuple[List[EventTypeMetadata], int]:
     records = await ems.load_by_event_type(event_type, only_enabled)
     return _records(records)
 
@@ -45,6 +37,29 @@ async def load_by_event_types(event_types: List[str], only_enabled: bool = True)
     return _records(records)
 
 
-async def load_by_event_type_id(event_type_id: str, only_enabled: bool = True) ->  Optional[EventTypeMetadata]:
+async def load_by_event_type_id(event_type_id: str, only_enabled: bool = True) -> Optional[EventTypeMetadata]:
     record = await ems.load_by_event_type_id(event_type_id, only_enabled)
     return record.map_first_to_object(map_to_event_mapping)
+
+
+# Cached
+
+@AsyncCache(memory_cache.event_mapping_cache_ttl,
+            timeout=memory_cache.timeout_sql_query_in,
+            max_one_cache_fill_every=memory_cache.max_one_cache_fill_every,
+            allow_null_values=True,
+            return_cache_on_error=True
+            )
+async def load_event_mapping(event_type_id: str) -> Optional[EventTypeMetadata]:
+    mappings = await load_by_event_type_id(event_type_id, only_enabled=True)
+    if not mappings:
+        return None
+    return mappings
+
+
+async def delete_by_id(event_mapping_id: str) -> Tuple[bool, Optional[EventTypeMetadata]]:
+    return await ems.delete_by_id(event_mapping_id)
+
+
+async def insert(event_type_metadata: EventTypeMetadata):
+    return await ems.insert(event_type_metadata)
