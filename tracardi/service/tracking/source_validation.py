@@ -28,7 +28,8 @@ async def _check_source_id(allowed_bridges, source_id) -> Optional[EventSource]:
         )
 
     source: Optional[EventSource] = await event_source_dao.load_event_source_via_cache(source_id)
-
+    if not source:
+        raise ValueError("1 missing")
     if source is not None:
 
         if not source.enabled:
