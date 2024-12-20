@@ -123,7 +123,7 @@ class Tracker:
         finally:
             global _measures
             context.profiler.measure('tracker-ends')
-            if len(_measures) > 100:
+            if len(_measures) > 5000:
 
                 if License.has_license():
                     # Calculate and print statistics
