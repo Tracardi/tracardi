@@ -94,7 +94,7 @@ class Tracker:
             if tracker_payload.source.transitional is True:
                 tracker_payload.set_ephemeral()
 
-            context.profiler.measure('tracker-bridge')
+            context.profiler.measure('tracker')
 
             if not License.has_license():
                 return await os_tracker(
@@ -123,7 +123,7 @@ class Tracker:
         finally:
             global _measures
             context.profiler.measure('tracker-ends')
-            if len(_measures) > 10000:
+            if len(_measures) > 100:
 
                 if License.has_license():
                     # Calculate and print statistics
