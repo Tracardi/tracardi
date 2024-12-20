@@ -27,7 +27,7 @@ async def _check_source_id(allowed_bridges, source_id) -> Optional[EventSource]:
             transitional=False  # ephemeral
         )
 
-    source: Optional[EventSource] = await event_source_dao.load_event_source_via_cache(source_id=source_id)
+    source: Optional[EventSource] = await event_source_dao.load_event_source_via_cache(source_id)
 
     if source is not None:
 

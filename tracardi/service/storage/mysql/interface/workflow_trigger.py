@@ -41,7 +41,9 @@ async def load_rule(event_type_id, source_id):
 
 
 async def has_rules_for_events(source_id: str, events: List[FlatEvent]) -> bool:
-    return await wts.has_rules_for_events(source_id, events)
+    # Get event types for valid events
+    event_types = {event.type for event in events if event.is_valid()}
+    return await wts.has_rules_for_events(source_id, event_types)
 
 # Cached
 async def load_by_source_and_events(source_id: str, events: List[Event]) -> Optional[

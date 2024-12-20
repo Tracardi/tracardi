@@ -71,7 +71,7 @@ class WorkflowTriggerService(TableService):
     def _get_cache_key(source_id, event_type):
         return f"rules-{source_id}-{event_type}"
 
-    async def _get_rules_for_source_and_event_type(self, source_id: str, event_types: Set[str]) -> Tuple[
+    async def get_rules_for_source_and_event_type(self, source_id: str, event_types: Set[str]) -> Tuple[
         Dict[str, List[Rule]], bool]:
 
         # Cache rules per event types
@@ -97,12 +97,8 @@ class WorkflowTriggerService(TableService):
 
         return rules[event_type_id]
 
-    async def has_rules_for_events(self, source_id: str, events: List[FlatEvent]) -> bool:
-        # Get event types for valid events
-        event_types = {event.type for event in events if event.is_valid()}
-
-        _, has_routing_rules = await self._get_rules_for_source_and_event_type(source_id, event_types)
-
+    async def has_rules_for_events(self, source_id: str, event_types: Set[str]) -> bool:
+        _, has_routing_rules = await self.get_rules_for_source_and_event_type(source_id, event_types)
         return has_routing_rules
 
     async def load_by_source_and_events(self, source_id: str, events: List[Event]) -> Optional[
@@ -111,7 +107,7 @@ class WorkflowTriggerService(TableService):
         # Get event types for valid events
         event_types = {event.type for event in events if event.metadata.valid}
 
-        rules, has_routing_rules = await self._get_rules_for_source_and_event_type(source_id, event_types)
+        rules, has_routing_rules = await self.get_rules_for_source_and_event_type(source_id, event_types)
 
         if not has_routing_rules:
             return None

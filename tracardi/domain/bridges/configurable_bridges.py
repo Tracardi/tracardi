@@ -36,8 +36,7 @@ class ConfigurableBridge(NamedEntity):
 
             # Check if in custom event to profile mapping for current event type, there is a mapping for merging keys
 
-            custom_event_to_profile_mappings: List[EventToProfile] = await event_to_profile_dao.load_event_to_profile(
-                event_type_id=event_type)
+            custom_event_to_profile_mappings: List[EventToProfile] = await event_to_profile_dao.load_event_to_profile(event_type_id=event_type)
 
             for custom_mapping_schema in custom_event_to_profile_mappings:
                 for event_to_profile_mapping in custom_mapping_schema.event_to_profile:
