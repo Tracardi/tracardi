@@ -117,7 +117,7 @@ class RulesEngine:
 
                     # Loads flow for given rule
 
-                    flow_record = await workflow_dao.load_by_id(rule.flow.id)
+                    flow_record = await workflow_dao.load_cached_by_id(rule.flow.id)
 
                     if not flow_record:
                         raise ValueError("Could not find flow `{}`".format(rule.flow.id))

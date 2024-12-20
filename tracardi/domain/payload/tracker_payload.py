@@ -36,10 +36,6 @@ from ...service.utils.hasher import get_shadow_session_id
 logger = get_logger(__name__)
 
 
-def _identification_list_key(source_id: str, flat_events):
-    return source_id
-
-
 class ScheduledEventConfig:
 
     def __init__(self, flow_id: Optional[str], node_id: Optional[str]):

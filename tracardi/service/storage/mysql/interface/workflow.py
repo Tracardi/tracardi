@@ -56,6 +56,9 @@ async def load_by_id(workflow_id: str) -> Optional[FlowRecord]:
 
 # Mutations
 
+async def load_cached_by_id(workflow_id: str) -> Optional[FlowRecord]:
+    return await load_by_id(workflow_id)
+
 async def update_by_id(workflow_id: str, new_data: dict) -> Optional[str]:
     return await ws.update_by_id(workflow_id, new_data=new_data)
 

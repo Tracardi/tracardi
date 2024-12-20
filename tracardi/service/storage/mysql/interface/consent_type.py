@@ -31,13 +31,13 @@ async def load_by_id(consent_type_id: str) -> Optional[ConsentType]:
     return record.map_to_object(map_to_consent_type)
 
 
+async def load_enabled(limit: int = None, offset: int = None) -> Tuple[List[ConsentType], int]:
+    return _records(await cts.load_enabled(limit, offset))
+
+
 async def delete_by_id(consent_type_id: str) -> Tuple[bool, Optional[ConsentType]]:
     return await cts.delete_by_id(consent_type_id)
 
 
 async def insert(consent_type: ConsentType):
     return await cts.insert(consent_type)
-
-
-async def load_enabled(limit: int = None, offset: int = None) -> Tuple[List[ConsentType], int]:
-    return _records(await cts.load_enabled(limit, offset))
