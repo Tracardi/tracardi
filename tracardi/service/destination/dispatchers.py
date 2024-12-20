@@ -109,7 +109,7 @@ async def profile_destination_dispatch(flat_profile: Optional[FlatProfile],
                                        metadata: dict = None):  # debug is used to find out which resource to use.
 
     dot = DotAccessor(flat_profile)
-    destinations: List[Destination] = await load_profile_destinations()
+    destinations: List[Destination] = await destination_dao.load_profile_destinations()
 
     async for destination_work_package in get_destination_data(destinations, dot):
         try:

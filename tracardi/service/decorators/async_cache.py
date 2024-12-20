@@ -6,6 +6,7 @@ from typing import Callable
 from functools import wraps
 from collections import deque, defaultdict
 
+from tracardi.config import tracardi
 from tracardi.context import get_context
 from tracardi.exceptions.log_handler import get_logger
 
@@ -99,7 +100,11 @@ class AsyncCache:
     def __call__(self, func: Callable) -> Callable:
         @wraps(func)
         async def wrapper(*args, **kwargs):
+
             key = self._generate_key(func, args, kwargs)
+
+            if not tracardi.enable_async_caching:
+                return await func(*args, **kwargs)
 
             # Check if the result is cached and not expired or if the function is throttled
             if self.is_result_cached_and_valid(key):
