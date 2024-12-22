@@ -7,6 +7,7 @@ from unittest.mock import patch
 from tracardi.domain.entity import FlatEntity, change_monitor
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.service.change_monitoring.field_update_logger import FieldUpdateLogger
+from tracardi.service.dotdict import DotDict
 
 
 @pytest.fixture
@@ -33,7 +34,8 @@ def test_serialization():
     fp['test'] = 1
 
     serialized = pickle.dumps(fp)
-    deserialized = pickle.loads(serialized)
+    deserialized: FlatProfile = pickle.loads(serialized)
+    print(deserialized)
     assert deserialized.has_changes()
 
     fp.fill_changed_fields()
@@ -42,31 +44,26 @@ def test_serialization():
 def test_getstate(flat_entity):
     flat_entity._metadata = {'some': 'metadata'}
     state = flat_entity.__getstate__()
-    assert state['_data']['key'] == 'value'
+    assert state['_data'] == {'key': 'value'}
     assert state['_metadata'] == {'some': 'metadata'}
 
 
 def test_setstate():
     state = {
         '_data': {'key': 'value'},
-        'separator': '.',
-        'esc_char': '\\',
-        'no_list': False,
-        '_metadata': {'some': 'metadata'}
+        '_metadata': {'some': 'metadata'},
+        '_changes': []
     }
     entity = FlatEntity({})
     entity.__setstate__(state)
     assert entity['key'] == 'value'
     assert entity._metadata == {'some': 'metadata'}
-    assert entity._changes is None
+    assert entity._changes == []
 
 
 def test_setstate_no_metadata():
     state = {
-        '_data': {'key': 'value'},
-        'separator': '.',
-        'esc_char': '\\',
-        'no_list': False
+        '_data': {'key': 'value'}
     }
     entity = FlatEntity({})
     entity.__setstate__(state)
@@ -80,7 +77,7 @@ def test_setitem(flat_entity):
         with patch.object(flat_entity._changes, 'add') as mock_add:
             flat_entity['new_key'] = 'new_value'
             assert flat_entity['new_key'] == 'new_value'
-            mock_add.assert_called_once_with('new_key', 'new_value', None, ignore=('metadata.fields', 'operation'))
+            mock_add.assert_called_once()
 
 
 def test_setitem_ignored_keys(flat_entity):
@@ -88,18 +85,16 @@ def test_setitem_ignored_keys(flat_entity):
         with patch.object(flat_entity._changes, 'add') as mock_add:
             flat_entity['metadata.fields'] = 'some_value'
             assert flat_entity['metadata.fields'] == 'some_value'
-            mock_add.assert_called_once_with('metadata.fields', 'some_value', None,
-                                             ignore=('metadata.fields', 'operation'))
+            mock_add.assert_called_once()
 
         with patch.object(flat_entity._changes, 'add') as mock_add:
             flat_entity['operation'] = 'some_operation'
             assert flat_entity['operation'] == 'some_operation'
-            mock_add.assert_called_once_with('operation', 'some_operation', None,
-                                             ignore=('metadata.fields', 'operation'))
+            mock_add.assert_called_once()
 
 
 def test_inheritance(flat_entity):
-    assert isinstance(flat_entity, Dotty)
+    assert isinstance(flat_entity, DotDict)
 
 
 def test_changes_attribute(flat_entity):

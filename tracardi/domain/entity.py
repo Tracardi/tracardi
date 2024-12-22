@@ -168,13 +168,29 @@ class FlatEntity(DotDict):
             self._changes = None
         return self
 
+    def __getstate__(self):
+        # Here, you should retrieve the state, not set it.
+        state = {
+            '_data':super().__getstate__(),
+            '_metadata':  self._metadata,
+            '_changes':  self._changes
+        }
+        return state
+
+    def __setstate__(self, state):
+        # Here, you should call the base class' setstate, not getstate.
+        super().__setstate__(state.get('_data', {}))
+        self._metadata = state.get('_metadata', None)
+        self._changes = state.get('_changes', None)
+
     def __setitem__(self, key, value):
         if self._changes:
             old_value = self.get(key, None)
             self._changes.add(key, value, old_value, ignore=('metadata.fields', 'operation'), timestamp=time())
         super().__setitem__(key, value)
 
-    def set(self, key, value, session_id: Optional[str] = None, event_type: Optional[str] = None, timestamp: Optional[float] = None):
+    def set(self, key, value, session_id: Optional[str] = None, event_type: Optional[str] = None,
+            timestamp: Optional[float] = None):
         if self._changes:
             old_value = self.get(key, None)
             if timestamp is None:
@@ -257,7 +273,6 @@ class FlatEntity(DotDict):
             record.set_meta_data(self._metadata)
 
         return record
-
 
 
 @contextmanager

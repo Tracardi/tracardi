@@ -49,11 +49,25 @@ def test_dotdict_set_get_delete_check():
 def test_dotdict_get():
     d = {
         "a": {"b": ["c", 0]},
+        "b": [{"$c": "here"}]
     }
 
     data = DotDict(d)
     with pytest.raises(TypeError):
         x = data['a.b[]']
+
+    assert data["b.0['$c']"] == 'here'
+
+def test_dotdict_has():
+    d = {
+        "a": {"b": ["c", 0]},
+    }
+
+    data = DotDict(d)
+    assert 'a.b' in data
+    assert 'a.d' not in data
+    assert 'a[1].d' not in data
+    assert 'a[]' not in data
 
 def test_dotdict_set():
     data = DotDict({})

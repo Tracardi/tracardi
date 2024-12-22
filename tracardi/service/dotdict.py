@@ -20,6 +20,14 @@ class DotDict:
             data = data[item]
         return data
 
+    def _has_reference(self, keys) -> bool:
+        data = self.root
+        for key in keys:
+            if key not in data:
+                return False
+            data = data[key]
+        return True
+
     def _reference(self, keys):
         data = self.root
         for key in keys:
@@ -50,19 +58,15 @@ class DotDict:
     def to_json(self, default=None):
         return json.dumps(self.root, default=default)
 
-    def __getattr__(self, item) -> 'DotDict':
-        try:
-            return DotDict(self.root[item])
-        except TypeError:
-            return getattr(self.root, item)
+    # def __getattr__(self, item) -> 'DotDict':
+    #     try:
+    #         return DotDict(self.root[item])
+    #     except TypeError:
+    #         return getattr(self.root, item)
 
     def __contains__(self, item):
         keys = dotdict_parser.parse_unified_path(item)
-        path, key = self._path_key(keys)
-        data = self._reference(path)
-        if isinstance(key, int):
-            return len(data) >= key
-        return key in data
+        return self._has_reference(keys)
 
     def __getitem__(self, item):
         if isinstance(item, int):

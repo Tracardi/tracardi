@@ -20,8 +20,8 @@ def test_should_return_spread_data():
 
 def test_should_return_object_with_dollar():
     template = {
-        "s": "profile@$a",
-        "a": "profile@b.1.$c"
+        "s": "profile@['$a']",
+        "a": "profile@b.1['$c']"
     }
 
     dot = DotAccessor(profile={"$a": [1, 2], "b": [1, {"$c": 10}]}, session={"b": 2}, event={})
