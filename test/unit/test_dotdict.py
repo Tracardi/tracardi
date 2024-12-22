@@ -1,0 +1,98 @@
+import pytest
+
+from tracardi.service.dotdict import DotDict
+
+
+# Define tests for DotDict functionality
+def test_dotdict_set_get_delete_check():
+    d = {
+        "a": {"b": ["c", 0]},
+        "a1": {"b": ["c", 0]},
+        "a2": {"b": ["c", 0]},
+        "a3": {"b": ["c", 0, {"c"}, ("x", 10)]}
+    }
+
+    cd = DotDict(d)
+
+    # Test setting and getting using unified path notation
+    cd['a3.b[3]'] = "new_value"
+    assert cd['a3.b[3]'] == "new_value", "Failed to set or get value using unified path notation"
+    assert cd.a3.b[3] == "new_value", "Failed to set or get value using unified path notation"
+
+    # Test setting and getting using attribute-style notation
+    cd.a3.b.append("another_value")
+    assert cd.a3.b[4] == "another_value", "Failed to set or get value using attribute-style notation"
+    assert cd['a3.b[4]'] == "another_value"
+    print(cd.a3.b)
+    # Test deletion using unified path notation
+
+    # assert cd.a3.b == DotDict(['c', 0, {'c'}, 'new_value', 'another_value'])
+    assert cd['a3.b'] == ['c', 0, {'c'}, 'new_value', 'another_value']
+
+    del cd['a3.b[2]']
+    assert cd['a3.b'] == ['c', 0, 'new_value', 'another_value']
+
+    # Test deletion using attribute-style notation
+    del cd.a3.b[3]
+    assert cd['a3.b'] == ['c', 0, 'new_value']
+    assert len(cd.a3.b) == 3, "Failed to delete value using attribute-style notation"
+
+    # Test no bracket list
+    print(cd['a3.b.2'])
+    # Test checking existence using unified path notation
+    assert 'a3.b[1]' in cd, "Membership test for 'a3.b[1]' failed"
+    assert 'a3.b[10]' not in cd, "Non-membership test for 'a3.b[10]' failed"
+
+    # Test checking existence using attribute-style notation
+    assert hasattr(cd.a3, 'b'), "Failed to confirm existence of attribute 'b' in 'a3'"
+
+def test_dotdict_get():
+    d = {
+        "a": {"b": ["c", 0]},
+    }
+
+    data = DotDict(d)
+    with pytest.raises(TypeError):
+        x = data['a.b[]']
+
+def test_dotdict_set():
+    data = DotDict({})
+
+    # Test setting and getting using unified path notation
+    data['a.b[]'] = 123
+    assert data['a.b[0]'] == 123
+    data['a.b'].append("1")
+    data['a.b'].append("2")
+    assert data['a.b'] == [123, "1", "2"]
+    data['a.b[0].c'] = 123
+    assert data['a.b'] == [{"c": 123}, "1", "2"]
+
+
+# Define tests for invalid data paths
+def test_invalid_paths_handling():
+    d = {
+        "a": {"b": ["c", 0]},
+        "a3": {"b": ["c", 0, {"c"}, ("x", 10)]}
+    }
+
+    cd = DotDict(d)
+
+    invalid_paths = [
+        ".leadingDot",  # Leading dot
+        "trailingDot.",  # Trailing dot
+        "a..b",  # Multiple consecutive dots
+        "a[\"b-\"c0\"]",  # Invalid string key in bracket
+        "a[\"b-\"c0\"][0]",
+        "a[\"b-\"c0\"].ala.",
+        "",
+        "a[\"b-\"c0\".ala",  # Unclosed bracket
+    ]
+
+    for path in invalid_paths:
+        with pytest.raises((ValueError, KeyError)):
+            _ = cd[path]
+
+
+# Run all tests when executed via pytest
+if __name__ == "__main__":
+    pytest.main()
