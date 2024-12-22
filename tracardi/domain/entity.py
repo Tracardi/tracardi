@@ -18,6 +18,7 @@ from tracardi.exceptions.log_handler import get_logger
 from tracardi.protocol.operational import Operational
 from tracardi.service.change_monitoring.field_update_logger import FieldUpdateLogger
 from tracardi.service.dot_notation_converter import dotter
+from tracardi.service.dotdict import DotDict
 from tracardi.service.storage.index import Resource
 
 logger = get_logger(__name__)
@@ -151,11 +152,11 @@ class DottyEncoder(json.JSONEncoder):
             return str(obj)
 
 
-class FlatEntity(Dotty):
+class FlatEntity(DotDict):
 
     def __init__(self, dictionary):
-        self._changes: Optional[FieldUpdateLogger] = None
         super().__init__(dictionary)
+        self._changes: Optional[FieldUpdateLogger] = None
         self._metadata = None
         # Keeps current changes
         self._changes: Optional[FieldUpdateLogger] = None
@@ -166,19 +167,6 @@ class FlatEntity(Dotty):
         else:
             self._changes = None
         return self
-
-    def __getstate__(self):
-        # Here, you should retrieve the state, not set it.
-        state = super().__getstate__()
-        state['_metadata'] = self._metadata
-        state['_changes'] = self._changes
-        return state
-
-    def __setstate__(self, state):
-        # Here, you should call the base class' setstate, not getstate.
-        super().__setstate__(state)
-        self._metadata = state.get('_metadata', None)
-        self._changes = state.get('_changes', None)
 
     def __setitem__(self, key, value):
         if self._changes:

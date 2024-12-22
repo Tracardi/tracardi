@@ -1,8 +1,9 @@
 import re
 from typing import Union
 
-from dotty_dict import dotty, Dotty
 from pydantic import BaseModel
+
+from tracardi.service.dotdict import DotDict
 
 dot_notation_regex = re.compile(
     r"(?:payload|profile|event|session|flow|memory)@([\[\]0-9a-zA-a_\-\.]+(?<![\.\[])|\.\.\.)")
@@ -22,17 +23,17 @@ class DotAccessor:
         if data is None:
             return {}
         elif isinstance(data, dict):
-            return dotty(data)
+            return DotDict(data)
         elif isinstance(data, BaseModel):
-            return dotty(data.model_dump(mode="json"))
-        elif isinstance(data, Dotty):
+            return DotDict(data.model_dump(mode="json"))
+        elif isinstance(data, DotDict):
             return data
         else:
-            raise ValueError("Could not convert {} to dict. Expected: None, dict or BaseModel got {}.".format(
+            raise ValueError("Could not convert {} to dict. Expected: None, dict, DotDict, or BaseModel got {}.".format(
                 label, type(data)
             ))
 
-    def convert_to_dict(self, object: Union[dict, dotty]) -> dict:
+    def convert_to_dict(self, object: Union[dict, DotDict]) -> dict:
         if isinstance(object, dict):
             return object
 

@@ -5,8 +5,20 @@ import dotdict_parser
 
 
 class DotDict:
-    def __init__(self, dictionary: Union[dict|list]):
+    def __init__(self, dictionary: Union[dict | list]):
         self.root = dictionary
+
+    def _set_reference(self, path, is_leaf_a_list_item: bool):
+        data = self.root
+        last_item = len(path) - 1
+        for item_no, item in enumerate(path):
+            if item not in data:
+                if last_item == item_no and is_leaf_a_list_item:
+                    data[item] = []
+                else:
+                    data[item] = {}
+            data = data[item]
+        return data
 
     def _reference(self, keys):
         data = self.root
@@ -24,25 +36,10 @@ class DotDict:
         keys = dotdict_parser.parse_unified_path(key)
         try:
             return self._reference(keys)
-        except ValueError as e:
+        except (ValueError, KeyError) as e:
             if args:
                 return args[0]
             raise e
-
-    def set(self, key, value):
-        keys = dotdict_parser.parse_unified_path(key)
-        path, key = self._path_key(keys)
-        _pointer = self._reference(path)
-        _pointer[key] = value
-
-    def delete(self, key):
-        if isinstance(key, int):
-            del self.root[key]
-        else:
-            keys = dotdict_parser.parse_unified_path(key)
-            path, key = self._path_key(keys)
-            data = self._reference(path)
-            del data[key]
 
     def copy(self):
         return DotDict(self.root.copy())
@@ -57,7 +54,6 @@ class DotDict:
         try:
             return DotDict(self.root[item])
         except TypeError:
-            print(type(self.root))
             return getattr(self.root, item)
 
     def __contains__(self, item):
@@ -74,10 +70,26 @@ class DotDict:
         return self.get(item)
 
     def __setitem__(self, key, value):
-        self.set(key, value)
+        keys = dotdict_parser.parse_unified_path(key)
+        path, key = self._path_key(keys)
+        is_leaf_a_list_item = key == ''
+        _pointer = self._set_reference(path, is_leaf_a_list_item)
+        try:
+            if is_leaf_a_list_item:
+                _pointer.append(value)
+            else:
+                _pointer[key] = value
+        except Exception as e:
+            raise KeyError(f"Error at path {path} for key {key}: {str(e)}")
 
     def __delitem__(self, key):
-        self.delete(key)
+        if isinstance(key, int):
+            del self.root[key]
+        else:
+            keys = dotdict_parser.parse_unified_path(key)
+            path, key = self._path_key(keys)
+            data = self._reference(path)
+            del data[key]
 
     def __repr__(self):
         return f'DotDict({self.root})'
