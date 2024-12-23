@@ -1,3 +1,4 @@
+import copy
 import json
 from typing import Union
 
@@ -54,6 +55,9 @@ class DotDict:
 
     def copy(self):
         return DotDict(self.root.copy())
+
+    def deep_copy(self):
+        return DotDict(copy.deepcopy(self.root))
 
     def to_dict(self) -> dict:
         return self.root
@@ -119,3 +123,11 @@ class DotDict:
     def __iter__(self):
         # Return an iterator over the keys
         return self.root.__iter__()
+
+    def __eq__(self, other):
+        if isinstance(other, DotDict):
+            return other.to_dict() == self.to_dict()
+        elif isinstance(other, dict):
+            return other == self.to_dict()
+        else:
+            return False

@@ -74,6 +74,11 @@ def test_dotdict_set():
     assert data['a.b'] == [{"c": 123}, "1", "2"]
 
 
+def test_equal():
+    x = DotDict({'id': '1', 'active': True, 'metadata': {'time': {'insert': '2025-01-10T17:13:28.620880+00:00', 'create': '2004-01-12T17:13:28.620880+00:00', 'update': '2025-03-20T10:53:41.924819+00:00'}}, 'operation': {'new': False, 'update': False}, 'ids': []})
+    y = DotDict({'id': '1', 'active': True, 'metadata': {'time': {'insert': '2025-01-10T17:13:28.620880+00:00', 'create': '2004-01-12T17:13:28.620880+00:00', 'update': '2025-03-20T10:53:41.924819+00:00'}}, 'operation': {'new': False, 'update': False}, 'ids': []})
+    assert x == y
+
 # Define tests for invalid data paths
 def test_invalid_paths_handling():
     d = {
