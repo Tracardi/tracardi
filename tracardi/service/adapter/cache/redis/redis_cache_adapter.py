@@ -30,7 +30,7 @@ class RedisCacheAdapter(CacheProtocol):
     def set_msgpack(self, key, value, ex=None):
         return self._client.set(
             name=key,
-            value=msgpack.packb(value),
+            value=msgpack.packb(value, default=str),
             ex=ex
         )
 
