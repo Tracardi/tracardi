@@ -1,7 +1,6 @@
 from typing import List, Optional, Tuple, Dict, Set
 
 from tracardi.domain.event import Event
-from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.rule import Rule
 from tracardi.exceptions.log_handler import get_logger
 
