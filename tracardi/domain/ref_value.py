@@ -1,9 +1,8 @@
 from typing import Any, Optional
-
-from dotty_dict import dotty, Dotty
 from pydantic import BaseModel
 
 from tracardi.exceptions.log_handler import get_logger
+from tracardi.service.dotdict import DotDict
 
 logger = get_logger(__name__)
 
@@ -23,13 +22,13 @@ class RefValue(BaseModel):
                 value = self.value.strip()
             else:
                 # It is a reference to the event type in payload
-                if isinstance(payload, Dotty):
+                if isinstance(payload, DotDict):
                     dot = payload
                 elif isinstance(payload, dict):
-                    dot = dotty(payload)
+                    dot = DotDict(payload)
                 else:
                     raise ValueError(
-                        f"Could not read value from {type(payload)}. Values can be read from dict or Dotty.")
+                        f"Could not read value from {type(payload)}. Values can be read from dict or DotDict.")
                 try:
                     value = dot[self.value.strip()]
                 except KeyError:

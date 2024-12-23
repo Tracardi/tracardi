@@ -2,7 +2,7 @@ from tracardi.domain.flat_profile import FlatProfile
 from tracardi.service.notation.dot_accessor import DotAccessor
 
 
-def test_should_access_object_with_dotty():
+def test_should_access_object_with_flat_profile():
     dot = DotAccessor(profile=FlatProfile({"a": {"$id": 10, "$c": {"d": 20}}}))
     assert dot["profile@a['$id']"] == 10
     assert dot["profile@a['$c'].d"] == 20

@@ -1,7 +1,6 @@
 import pickle
 
 import pytest
-from dotty_dict import Dotty
 from unittest.mock import patch
 
 from tracardi.domain.entity import FlatEntity, change_monitor

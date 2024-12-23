@@ -22,7 +22,7 @@ _predefined_event_types = {}
 logger = get_logger(__name__)
 
 
-# def call_function(call_string, event: Dotty, profile: Dotty):
+# def call_function(call_string, event: DotDict, profile: DotDict):
 #     state = call_string[5:]
 #     module, function = state.split(',')
 #     module = import_package(module)

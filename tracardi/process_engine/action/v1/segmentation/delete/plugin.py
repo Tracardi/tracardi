@@ -35,7 +35,7 @@ class DeleteSegmentAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         if isinstance(self.profile, Profile):
             dot = self._get_dot_accessor(payload)
-            profile = Profile(**dot.profile)
+            profile = self.dot_to_profile(dot)
             if self.config.segment in self.profile.segments:
                 profile.metadata.time.segmentation = now_in_utc()
 

@@ -60,14 +60,14 @@ class HashTraitsAction(ActionRunner):
             dot[trait] = result.hexdigest()
 
         if dot.profile:
-            profile = Profile(**dot.profile)
+            profile = self.dot_to_profile(dot)
             self.profile.replace(profile)
 
         if dot.session:
-            session = Session(**dot.session)
+            session = self.dot_to_session(dot)
             self.session.replace(session)
 
-        event = Event(**dot.event)
+        event = self.dot_to_event(dot)
         self.event.replace(event)
 
         return Result(port='payload', value=payload)

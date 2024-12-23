@@ -8,4 +8,4 @@ def test_to_dict():
         "date": now
     })
     as_dict = event.to_dict()
-    assert as_dict['date'] == now.strftime('%Y-%m-%d %H:%M:%S')
+    assert as_dict['date'] == now

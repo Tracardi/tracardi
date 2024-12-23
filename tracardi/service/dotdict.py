@@ -22,8 +22,11 @@ class DotDict:
 
     def _has_reference(self, keys) -> bool:
         data = self.root
-        for key in keys:
-            if key not in data:
+        last = len(keys) - 1
+        for pos, key in enumerate(keys):
+            if pos == last and isinstance(key, int):
+                return len(data) >= key
+            elif key not in data:
                 return False
             data = data[key]
         return True
@@ -52,11 +55,11 @@ class DotDict:
     def copy(self):
         return DotDict(self.root.copy())
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return self.root
 
-    def to_json(self, default=None):
-        return json.dumps(self.root, default=default)
+    def to_json(self, default=None, cls=None):
+        return json.dumps(self.root, default=default, cls=cls)
 
     # def __getattr__(self, item) -> 'DotDict':
     #     try:
@@ -112,3 +115,7 @@ class DotDict:
 
     def __setstate__(self, state):
         self.root = state
+
+    def __iter__(self):
+        # Return an iterator over the keys
+        return self.root.__iter__()

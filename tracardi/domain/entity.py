@@ -5,7 +5,6 @@ from datetime import datetime
 import json
 from time import time
 
-from dotty_dict import Dotty
 from typing import Optional, TypeVar, Type, Set, List, Union
 from uuid import uuid4
 from pydantic import BaseModel, PrivateAttr
@@ -130,20 +129,18 @@ class PrimaryEntity(Entity):
     ids: Optional[List[str]] = None
 
 
-class DottyEncoder(json.JSONEncoder):
-    """Helper class for encoding of nested Dotty dicts into standard dict
+class DotDictEncoder(json.JSONEncoder):
+    """Helper class for encoding of nested DotDict dicts into standard dict
     """
 
     def default(self, obj):
-        """Return dict data of Dotty when possible or encode with standard format
+        """Return dict data of DotDict when possible or encode with standard format
 
         :param object: Input object
         :return: Serializable data
         """
         try:
-            if hasattr(obj, '_data'):
-                return obj._data
-            elif isinstance(obj, datetime):
+            if isinstance(obj, datetime):
                 # Convert datetime to an ISO formatted string
                 return obj.strftime('%Y-%m-%d %H:%M:%S')
             else:
@@ -218,12 +215,12 @@ class FlatEntity(DotDict):
     def clear_changes(self):
         self._changes = FieldUpdateLogger()
 
-    def to_json(self):
+    def to_json(self, default=None, cls=None):
         """Return wrapped dictionary as json string.
         This method does not copy wrapped dictionary.
         :return str: Wrapped dictionary as json string
         """
-        return json.dumps(self._data, cls=DottyEncoder)
+        return super().to_json(cls=DotDictEncoder)
 
     def instanceof(self, field: str, instance: Union[type, tuple]) -> bool:
         if field not in self:

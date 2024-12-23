@@ -1,7 +1,7 @@
 from typing import List
-from dotty_dict import dotty
 from tracardi.process_engine.tql.parser import Parser
 from tracardi.process_engine.tql.transformer.calc_transformer import CalcTransformer
+from tracardi.service.dotdict import DotDict
 from tracardi.service.notation.dot_accessor import DotAccessor
 
 grammar = Parser.read('grammar/math_expr.lark')
@@ -28,7 +28,7 @@ class MathEquation:
 
     def get_variables(self):
         if self.parser.transformer.vars:
-            dot = dotty()
+            dot = DotDict({})
             for key, value in self.parser.transformer.vars.items():
                 dot[key] = value
             return dot.to_dict()

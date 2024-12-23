@@ -78,7 +78,7 @@ class AppendTraitAction(ActionRunner):
                                  "E.g. `name`: `{}`".format(dot.profile['traits'],
                                                             dot.profile['traits']))
             try:
-                profile = Profile(**dot.profile)
+                profile = self.dot_to_profile(dot)
             except ValidationError as e:
                 self.console.error(f"Profile could not be updated. Some values where set incorrectly. "
                                    f"Please see the error {str(e)}")
@@ -92,7 +92,7 @@ class AppendTraitAction(ActionRunner):
 
         if 'id' in dot.session:
             try:
-                session = Session(**dot.session)
+                session = self.dot_to_session(dot)
             except ValidationError as e:
                 self.console.error(f"Session could not be updated. Some values where set incorrectly. "
                                    f"Please see the error {str(e)}")

@@ -37,7 +37,7 @@ class ProfileSegmentAction(ActionRunner):
         if self.event.metadata.profile_less is False:
             dot = self._get_dot_accessor(payload)
             condition = Condition()
-            profile = Profile(**dot.profile)
+            profile = self.dot_to_profile(dot)
             try:
                 if await condition.evaluate(self.config.condition, dot):
                     self._update(profile, self.config.true_segment, self.config.true_action)

@@ -25,7 +25,7 @@ class AssignConditionResultPlugin(ActionRunner):
         for key, value in self.config.conditions.items():
             dot[key] = await condition.evaluate(value, dot)
 
-        profile = Profile(**dot.profile)
+        profile = self.dot_to_profile(dot)
         self.profile.replace(profile)
 
         return Result(port="payload", value=payload)

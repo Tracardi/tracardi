@@ -44,11 +44,11 @@ class DeleteTraitAction(ActionRunner):
                 self.console.warning(f"Could not delete value {value}, it is missing, details: {repr(e)}")
 
         if self.event.metadata.profile_less is False:
-            profile = Profile(**dot.profile)
+            profile = self.dot_to_profile(dot)
             self.profile.replace(profile)
 
         if 'id' in dot.session:
-            session = Session(**dot.session)
+            session = self.dot_to_session(dot)
             self.session.replace(session)
 
         self.update_profile()

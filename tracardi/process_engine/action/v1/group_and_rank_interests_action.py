@@ -47,7 +47,7 @@ class GroupAndRankInterestsAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
         dot = self._get_dot_accessor(payload)
-        profile = Profile(**dot.profile)
+        profile = self.dot_to_profile(dot)
 
         try:
             segment_mapping = json.loads(dot[self.config.segment_mapping])

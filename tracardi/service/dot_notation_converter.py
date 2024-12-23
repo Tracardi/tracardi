@@ -1,11 +1,11 @@
-from dotty_dict import dotty
+from tracardi.service.dotdict import DotDict
 
 
 class DotNotationConverter:
 
     def __init__(self, profile):
         self.profile = profile
-        self.flat_profile = dotty(self.profile.dict())
+        self.flat_profile = DotDict(self.profile.dict())
 
     def get_profile_file_value_pair(self, dot_notation):
         if dot_notation.startswith('profile@'):

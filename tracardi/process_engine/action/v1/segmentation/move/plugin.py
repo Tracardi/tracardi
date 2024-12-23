@@ -43,7 +43,7 @@ class MoveSegmentAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
         if isinstance(self.profile, Profile):
             dot = self._get_dot_accessor(payload)
-            profile = Profile(**dot.profile)
+            profile = self.dot_to_profile(dot)
             profile.segments = list(set(profile.segments))
             if self.config.from_segment in profile.segments:
                 profile.segments.remove(self.config.from_segment)

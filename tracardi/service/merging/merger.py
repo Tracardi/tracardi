@@ -5,7 +5,8 @@ from pydantic import BaseModel
 from typing import List, Optional, Any
 from deepdiff import DeepDiff
 from deepdiff.model import DiffLevel
-from dotty_dict import dotty
+
+from tracardi.service.dotdict import DotDict
 
 
 class MergingStrategy(BaseModel):
@@ -182,7 +183,7 @@ def universal_merger(base: Any, delta: any, strategy: MergingStrategy):
 
 def get_conflicted_values(old_dict: dict, new_dict: dict) -> dict:
     diff_result = DeepDiff(old_dict, new_dict, ignore_order=True, view="tree")
-    changed_values = dotty()
+    changed_values = DotDict({})
     for change in diff_result.get("type_changes", []):  # type: DiffLevel
         path = [str(item) for item in change.path(output_format='list')]
         key = ".".join(path)
@@ -194,7 +195,7 @@ def get_conflicted_values(old_dict: dict, new_dict: dict) -> dict:
 
 def get_changed_values(old_dict: dict, new_dict: dict) -> dict:
     diff_result = DeepDiff(old_dict, new_dict, ignore_order=True, view="tree")
-    changed_values = dotty()
+    changed_values = DotDict({})
     for change in diff_result.get("values_changed", []):  # type: DiffLevel
         path = [str(item) for item in change.path(output_format='list')]
         key = ".".join(path)
@@ -204,7 +205,7 @@ def get_changed_values(old_dict: dict, new_dict: dict) -> dict:
     return changed_values.to_dict()
 
 
-def get_modifications(old_dict: dotty, new_dict: dotty) -> dict:
+def get_modifications(old_dict: DotDict, new_dict: DotDict) -> dict:
     print(old_dict)
     print(new_dict)
     diff_result = DeepDiff(old_dict, new_dict, ignore_order=True, view="tree")
@@ -226,7 +227,7 @@ def get_modifications(old_dict: dotty, new_dict: dotty) -> dict:
 
 def get_added_values(old_dict: dict, new_dict: dict) -> dict:
     diff_result = DeepDiff(old_dict, new_dict, ignore_order=True, view="tree")
-    changed_values = dotty()
+    changed_values = DotDict({})
     for change in diff_result.get("dictionary_item_added", []):  # type: DiffLevel
         path = [str(item) for item in change.path(output_format='list')]
         key = ".".join(path)

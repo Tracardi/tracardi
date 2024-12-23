@@ -78,10 +78,10 @@ class CopyTraitAction(ActionRunner):
                 self.console.error(message)
                 return Result(port="error", value={"message": message})
 
-            profile = Profile(**dot.profile)
+            profile = self.dot_to_profile(dot)
 
             flat_profile = flatten(profile.model_dump(mode='json'))
-            flat_dot_profile = flatten(Profile(**dot.profile).model_dump(mode='json'))
+            flat_dot_profile = flatten(self.dot_to_profile(dot).model_dump(mode='json'))
             diff_result = DeepDiff(flat_dot_profile, flat_profile, exclude_paths=["root['metadata.time.insert']"])
 
             if diff_result and 'dictionary_item_removed' in diff_result:
@@ -99,7 +99,7 @@ class CopyTraitAction(ActionRunner):
                                      "less so there is no profile.")
 
         if 'id' in dot.session:
-            session = Session(**dot.session)
+            session = self.dot_to_session(dot)
             self.session.replace(session)
 
         return Result(port="payload", value=payload)

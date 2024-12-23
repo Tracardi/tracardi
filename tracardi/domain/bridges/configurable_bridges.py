@@ -2,8 +2,6 @@ from hashlib import md5
 from typing import Optional, Tuple, List
 from uuid import uuid4
 
-from dotty_dict import Dotty
-
 from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -11,6 +9,7 @@ from tracardi.config import tracardi
 from tracardi.domain.profile_data import FLAT_PROFILE_FIELD_MAPPING
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.process_engine.tql.utils.dictonary import flatten
+from tracardi.service.dotdict import DotDict
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.utils.hasher import uuid4_from_md5, hash_id
@@ -31,7 +30,7 @@ class ConfigurableBridge(NamedEntity):
     async def _get_hashed_id(tracker_payload: TrackerPayload) -> Optional[str]:
 
         for event in tracker_payload.events:
-            flat_properties = Dotty({"properties": event.properties})
+            flat_properties = DotDict({"properties": event.properties})
             event_type = event.type.lower()
 
             # Check if in custom event to profile mapping for current event type, there is a mapping for merging keys

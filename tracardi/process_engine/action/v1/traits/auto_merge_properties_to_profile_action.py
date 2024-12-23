@@ -1,4 +1,5 @@
-from dotty_dict import dotty
+
+from tracardi.service.dotdict import DotDict
 from tracardi.service.plugin.domain.result import Result
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -24,10 +25,10 @@ class AutoMergePropertiesToProfileAction(ActionRunner):
     def _update(self, source, value) -> dict:
         path = self.config.sub_traits.strip()
         if path:
-            dotty_source = dotty(source)
+            dotdict_source = DotDict(source)
             try:
                 # get value to update
-                dict_to_update = dotty_source[path]
+                dict_to_update = dotdict_source[path]
 
                 if isinstance(dict_to_update, dict):
                     # update
@@ -37,11 +38,11 @@ class AutoMergePropertiesToProfileAction(ActionRunner):
                     dict_to_update = value
 
                 # assign
-                dotty_source[path] = dict_to_update
+                dotdict_source[path] = dict_to_update
             except KeyError:
-                dotty_source[path] = value
+                dotdict_source[path] = value
 
-            return dotty_source.to_dict()
+            return dotdict_source.to_dict()
 
         else:
             source.update(value)

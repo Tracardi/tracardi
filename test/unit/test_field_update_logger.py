@@ -73,9 +73,9 @@ def test_multiple_updates():
     logger = FieldUpdateLogger()
     logger.add('field1', 'value1', None, time())
     sleep(0.01)
-    logger.add('field1', 'value2', 'value1')
+    logger.add('field1', 'value2', 'value1', time())
     sleep(0.01)
-    logger.add('field1', 'value3', 'value2')
+    logger.add('field1', 'value3', 'value2', time())
     assert len(logger._changes) == 1
     assert logger._changes['field1'][1] == 'value2'
 

@@ -247,7 +247,7 @@ def test_tql_fail():
 
 
 def test_tql_no_value_should_make_condition_not_met():
-    tree = parser.parse("payload@no-value.b > 1")
+    tree = parser.parse("payload@no_value.b > 1")
     result = ExprTransformer(dot=dot).transform(tree)
     assert result is False
 

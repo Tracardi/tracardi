@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from tracardi.domain.event import Event
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
+from tracardi.domain.session import Session
 from tracardi.service.notation.dot_accessor import DotAccessor
 from tracardi.service.plugin.domain.console import Console
 from tracardi.service.plugin.domain.result import Result
@@ -96,3 +97,16 @@ class ActionRunner:
         return Result(port=port, value={
             "message": message
         })
+
+    @staticmethod
+    def dot_to_session(dot: DotAccessor) -> Session:
+        return Session(**dot.session.to_dict())
+
+    @staticmethod
+    def dot_to_profile(dot: DotAccessor) -> Profile:
+        return Profile(**dot.profile.to_dict())
+
+    @staticmethod
+    def dot_to_event(dot: DotAccessor) -> Event:
+        return Event(**dot.event.to_dict())
+

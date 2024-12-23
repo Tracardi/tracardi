@@ -380,27 +380,27 @@ class Event(NamedEntity):
             }
         }
 
-
-class DottyEncoder(json.JSONEncoder):
-    """Helper class for encoding of nested Dotty dicts into standard dict
-    """
-
-    def default(self, obj):
-        """Return dict data of Dotty when possible or encode with standard format
-
-        :param object: Input object
-        :return: Serializable data
-        """
-        try:
-            if hasattr(obj, '_data'):
-                return obj._data
-            elif isinstance(obj, datetime):
-                # Convert datetime to an ISO formatted string
-                return obj.strftime('%Y-%m-%d %H:%M:%S')
-            else:
-                return json.JSONEncoder.default(self, obj)
-        except TypeError:
-            return str(obj)
+#
+# class DotDictEncoder(json.JSONEncoder):
+#     """Helper class for encoding of nested DotDict dicts into standard dict
+#     """
+#
+#     def default(self, obj):
+#         """Return dict data of DotDict when possible or encode with standard format
+#
+#         :param object: Input object
+#         :return: Serializable data
+#         """
+#         try:
+#             if hasattr(obj, '_data'):
+#                 return obj._data
+#             elif isinstance(obj, datetime):
+#                 # Convert datetime to an ISO formatted string
+#                 return obj.strftime('%Y-%m-%d %H:%M:%S')
+#             else:
+#                 return json.JSONEncoder.default(self, obj)
+#         except TypeError:
+#             return str(obj)
 
 
 def flat_events_to_event(flat_events: List[FlatEvent]) -> List[Event]:

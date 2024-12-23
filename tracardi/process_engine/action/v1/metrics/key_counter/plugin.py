@@ -48,7 +48,7 @@ class KeyCounterAction(ActionRunner):
         dot[self.config.save_in] = counter.counts
 
         if isinstance(self.profile, Profile):
-            self.profile.replace(Profile(**dot.profile))
+            self.profile.replace(self.dot_to_profile(dot))
 
         return Result(port='payload', value=payload)
 

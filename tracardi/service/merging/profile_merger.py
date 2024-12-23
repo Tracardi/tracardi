@@ -1,5 +1,4 @@
-from dotty_dict import Dotty
-
+from tracardi.service.dotdict import DotDict
 from tracardi.service.merging.storage.loaders import load_duplicated_profiles_with_merge_key
 from tracardi.service.merging.storage.mutation import save_flat_profile, delete_multiple_profiles, \
     move_profile_events_and_sessions
@@ -136,7 +135,7 @@ class ProfileMerger:
         conflicts_aux = get_conflicted_values(old_value, new_value)
 
         # This is the fix for merging error on location
-        flat_new_values = Dotty(new_value)
+        flat_new_values = DotDict(new_value)
         if 'data.devices.last.geo.location' in flat_new_values:
             del (flat_new_values['data.devices.last.geo.location'])
             if 'data.devices.last.geo.latitude' in flat_new_values and 'data.devices.last.geo.longitude' in flat_new_values:

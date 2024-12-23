@@ -163,7 +163,7 @@ def test_should_reshape_event_properties():
                 "prop6": {
                     "key": ["event@properties.prop3"]
                 },
-                "prop7": ["event@properties.does-not-exist"]
+                "prop7": ["event@properties.does_not_exist"]
             },
             session={
                 "context": "event@properties.sess1",

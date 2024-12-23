@@ -29,7 +29,7 @@ class AddInterestAction(ActionRunner):
             return Result(value={"message": msg}, port="error")
 
         dot = self._get_dot_accessor(payload)
-        profile = Profile(**dot.profile)
+        profile = self.dot_to_profile(dot)
         if self.config.interest not in self.profile.interests:
             profile.set_updated()
 

@@ -11,7 +11,6 @@ from hashlib import sha1
 from typing import Union, Optional, List, Any, Tuple, Generator, Set
 from uuid import uuid4
 
-from dotty_dict import dotty
 from pydantic import PrivateAttr, BaseModel, ConfigDict
 from user_agents import parse
 
@@ -28,6 +27,7 @@ from ..session import Session
 from ..time import Time
 from ..entity import Entity, PrimaryEntity, DefaultEntity
 from tracardi.domain.flat_profile import FlatProfile
+from ...service.dotdict import DotDict
 from ...service.storage.elastic.interface.collector.load.flat_profile import load_flat_profile
 
 from ...service.utils.getters import get_entity_id
@@ -399,7 +399,7 @@ class TrackerPayload(BaseModel):
             # Get first event type and match identification point for it
             _identification = valid_identification_points[0]
             event_payload = next(self.get_event_payloads_by_type(_identification.event_type.id))
-            flat_properties = dotty({"properties": event_payload.properties})
+            flat_properties = DotDict({"properties": event_payload.properties})
             find_profile_by_fields = []
             for field in _identification.fields:
                 if field.event_property.ref and field.profile_trait.ref:
