@@ -73,7 +73,7 @@ setup(
         'SQLAlchemy==2.0.23',
         'speedict==0.3.12',
         'boto3==1.34.41',
-        'dotdict_parser>=0.6.1',
+        'dotdict_parser>=0.7.1',
         # Worker requirements
         'mysql-connector-python==8.0.29',
         'requests',
