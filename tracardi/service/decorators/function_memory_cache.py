@@ -158,32 +158,32 @@ async def _run_async_function(
     return await _async_exec(ttl, func, func_key, timeout, args_key, args, kwargs)
 
 
-def async_cache_for(ttl: float, max_size=1000, allow_null_values=False, key_func: Callable = None,
-                    use_context: bool = True, lock: bool = True, timeout: float = 0):
-    def decorator(func):
-        if not inspect.iscoroutinefunction(func):
-            raise TypeError(f"Incorrect cache type for async function {func.__module__}.{func.__qualname__}. "
-                            f"Expected `cache_for`, got `async_cache_for` for not async function. "
-                            f"Use `cache_for`.")
-
-        @functools.wraps(func)
-        async def async_wrapper(*args, **kwargs):
-            result, func_key, args_key = await _run_async_function(
-                ttl,
-                func, args, kwargs,
-                max_size, allow_null_values,
-                lock,
-                key_func,
-                use_context,
-                timeout
-            )
-
-            return result
-
-        return async_wrapper
-
-    return decorator
-
+# def async_cache_for(ttl: float, max_size=1000, allow_null_values=False, key_func: Callable = None,
+#                     use_context: bool = True, lock: bool = True, timeout: float = 0):
+#     def decorator(func):
+#         if not inspect.iscoroutinefunction(func):
+#             raise TypeError(f"Incorrect cache type for async function {func.__module__}.{func.__qualname__}. "
+#                             f"Expected `cache_for`, got `async_cache_for` for not async function. "
+#                             f"Use `cache_for`.")
+#
+#         @functools.wraps(func)
+#         async def async_wrapper(*args, **kwargs):
+#             result, func_key, args_key = await _run_async_function(
+#                 ttl,
+#                 func, args, kwargs,
+#                 max_size, allow_null_values,
+#                 lock,
+#                 key_func,
+#                 use_context,
+#                 timeout
+#             )
+#
+#             return result
+#
+#         return async_wrapper
+#
+#     return decorator
+#
 
 def cache_for(ttl, max_size=1000, allow_null_values=False, key_func: Callable = None, use_context: bool = True):
     def decorator(func):
@@ -207,20 +207,20 @@ def cache_for(ttl, max_size=1000, allow_null_values=False, key_func: Callable = 
     return decorator
 
 
-def delete_cache(func, *args, **kwargs):
-    args_key = _args_key(args, kwargs)
-    func_key = _func_key(func, True)
-    try:
-        cache_item = cache[func_key]
-        cache_item.delete(args_key)
-    except KeyError:
-        pass
-
-
-def has_cache(func, *args, **kwargs) -> bool:
-    args_key = _args_key(args, kwargs)
-    func_key = _func_key(func, True)
-    if func_key not in cache:
-        return False
-    cache_item = cache[func_key]
-    return args_key in cache_item
+# def delete_cache(func, *args, **kwargs):
+#     args_key = _args_key(args, kwargs)
+#     func_key = _func_key(func, True)
+#     try:
+#         cache_item = cache[func_key]
+#         cache_item.delete(args_key)
+#     except KeyError:
+#         pass
+#
+#
+# def has_cache(func, *args, **kwargs) -> bool:
+#     args_key = _args_key(args, kwargs)
+#     func_key = _func_key(func, True)
+#     if func_key not in cache:
+#         return False
+#     cache_item = cache[func_key]
+#     return args_key in cache_item
