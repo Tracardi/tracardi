@@ -49,6 +49,18 @@ def test_dotdict_get():
     assert data["b.0['$c']"] == 'here'
     assert data['A["a b c"]'] == 1
 
+
+def test_dotdict_get_default():
+    d = {}
+
+    data = DotDict(d)
+    x = data.get('xx.xx', "default")
+    assert x == 'default'
+    x = data.get('xx.xx', None)
+    assert x is None
+
+
+
 def test_dotdict_has():
     d = {
         "a": {"b": ["c", 0]},

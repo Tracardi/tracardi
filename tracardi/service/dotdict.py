@@ -45,13 +45,13 @@ class DotDict:
         return path, key
 
     def get(self, key, *args):
-        keys = dotdict_parser.parse_unified_path(key)
         try:
+            keys = dotdict_parser.parse_unified_path(key)
             return self._reference(keys)
         except (ValueError, KeyError) as e:
             if args:
                 return args[0]
-            raise e
+            raise KeyError(f"Could not get DotDict value for {key}. Default value: {args}. Details: {str(e)}")
 
     def copy(self):
         return DotDict(self.root.copy())
