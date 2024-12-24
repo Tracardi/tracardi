@@ -71,7 +71,7 @@ def test_primary_id():
             "a": 1
         }
     })
-    assert flat_profile.get('primary_id', None) is None
+    assert flat_profile.get('data.identifier.pk', None) is None
     flat_profile = FlatProfile({
         "id": "1",
         "primary_id": 2,
