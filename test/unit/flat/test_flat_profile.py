@@ -64,6 +64,23 @@ def test_id():
         fp.id = 1
 
 
+def test_primary_id():
+    flat_profile = FlatProfile({
+        "id": "1",
+        "prop": {
+            "a": 1
+        }
+    })
+    assert flat_profile.get('primary_id', None) is None
+    flat_profile = FlatProfile({
+        "id": "1",
+        "primary_id": 2,
+        "prop": {
+            "a": 1
+        }
+    })
+    assert flat_profile.get('primary_id', None) == 2
+
 def test_ids():
     fp = FlatProfile({
         "id": "1",
