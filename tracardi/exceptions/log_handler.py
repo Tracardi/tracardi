@@ -119,7 +119,7 @@ class ElasticLogHandler(Handler):
     def emit(self, record: LogRecord):
 
         # Skip info and debug.
-        if record.levelno <= 25:
+        if record.levelno <= logging.INFO:
             return
 
         _trace = stack_trace(record.levelname)
