@@ -27,7 +27,7 @@ def _get_random_value(value) -> float:
 
 class MemoryCacheConfig:
     def __init__(self):
-        _default_ttl = 10  # Check every 60 sec
+        _default_ttl = 180  # Check every 60 sec
 
         self.timeout_sql_query_in = 1
         self.max_one_cache_fill_every = .5
