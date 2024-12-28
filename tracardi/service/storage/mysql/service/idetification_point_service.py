@@ -1,4 +1,7 @@
 from typing import Optional, Tuple
+
+from sqlalchemy import and_
+
 from tracardi.domain.identification_point import IdentificationPoint
 from tracardi.service.storage.mysql.mapping.identification_point_mapping import map_to_identification_point_table, \
     map_to_identification_point
@@ -44,3 +47,18 @@ class IdentificationPointService(TableService):
             IdentificationPointTable,
             where=where
         )
+
+    async def load_enabled_by_event_type_and_source(self, source_id: str, event_type_id: str) -> SelectResult:
+        where = where_tenant_and_mode_context(
+            IdentificationPointTable,
+            and_(
+                IdentificationPointTable.event_type_id == event_type_id,
+                IdentificationPointTable.enabled == True,
+                IdentificationPointTable.source_id == source_id
+            )
+        )
+        return await self._select_in_deployment_mode(
+            IdentificationPointTable,
+            where=where
+        )
+

@@ -38,6 +38,13 @@ async def load_enabled(limit: int) -> Generator[IdentificationPoint, None, None]
     return records.map_to_objects(map_to_identification_point)
 
 
+# Cache
+
+async def load_by_event_type_and_source(source_id: str, event_type_id: str) -> Generator[IdentificationPoint, None, None]:
+    records = await ips.load_enabled_by_event_type_and_source(source_id, event_type_id)
+    return records.map_to_objects(map_to_identification_point)
+
+
 async def delete_by_id(identification_point_id: str):
     await ips.delete_by_id(identification_point_id)
 
