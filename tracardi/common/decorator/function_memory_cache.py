@@ -2,7 +2,6 @@ import asyncio
 import inspect
 from collections import defaultdict
 
-from time import time
 from typing import Dict, Tuple, Any, Callable
 
 import functools
@@ -11,8 +10,7 @@ from tracardi.context import get_context
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
 from contextlib import asynccontextmanager
 
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.time_converters import pretty_time_format
+from tracardi.common.logging.log_handler import get_logger
 
 # Cache DB
 cache: Dict[str, MemoryCache] = {}
@@ -92,70 +90,70 @@ def _run_function(ttl: float, func, args, kwargs, max_size, allow_null_values, k
     return result, func_key, args_key
 
 
-async def _async_exec(ttl, func, func_key, timeout: float, args_key, args, kwargs):
-    # Check cache again it may be filled already
+# async def _async_exec(ttl, func, func_key, timeout: float, args_key, args, kwargs):
+#     # Check cache again it may be filled already
+#
+#     if args_key in cache[func_key]:
+#         # 2nd attempt to check cache.When being locked the cache could have been filled.
+#         return cache[func_key][args_key].data, func_key, args_key
+#
+#     # Check lock is it is not already loading data.
+#     t = time()
+#
+#     if timeout:
+#         try:
+#             result = await asyncio.wait_for(
+#                 func(*args, **kwargs),
+#                 timeout=timeout  # Timeout in seconds
+#             )
+#         except asyncio.exceptions.TimeoutError as e:
+#             logger.warning(
+#                 f"TIMEOUT for cache {func_key}{args_key}: ttl: {pretty_time_format(ttl)}s: [Timeout in: {time() - t:.3f}]")
+#             # If no data raise error
+#             _expired = cache[func_key].get_expired(args_key)
+#             if _expired is None:
+#                 raise e
+#             # Else return from cache
+#             return _expired.data, func_key, args_key
+#     else:
+#         result = func(*args, **kwargs)
+#         if asyncio.iscoroutine(result):
+#             result = await result
+#
+#     logger.warning(f"Filling cache {func_key}{args_key}: ttl: {pretty_time_format(ttl)}s: [Filled in: {time() - t:.3f}]")
+#     # Update cache
+#     cache[func_key][args_key] = CacheItem(data=result, ttl=ttl)
+#
+#     return result, func_key, args_key
 
-    if args_key in cache[func_key]:
-        # 2nd attempt to check cache.When being locked the cache could have been filled.
-        return cache[func_key][args_key].data, func_key, args_key
 
-    # Check lock is it is not already loading data.
-    t = time()
-
-    if timeout:
-        try:
-            result = await asyncio.wait_for(
-                func(*args, **kwargs),
-                timeout=timeout  # Timeout in seconds
-            )
-        except asyncio.exceptions.TimeoutError as e:
-            logger.warning(
-                f"TIMEOUT for cache {func_key}{args_key}: ttl: {pretty_time_format(ttl)}s: [Timeout in: {time() - t:.3f}]")
-            # If no data raise error
-            _expired = cache[func_key].get_expired(args_key)
-            if _expired is None:
-                raise e
-            # Else return from cache
-            return _expired.data, func_key, args_key
-    else:
-        result = func(*args, **kwargs)
-        if asyncio.iscoroutine(result):
-            result = await result
-
-    logger.warning(f"Filling cache {func_key}{args_key}: ttl: {pretty_time_format(ttl)}s: [Filled in: {time() - t:.3f}]")
-    # Update cache
-    cache[func_key][args_key] = CacheItem(data=result, ttl=ttl)
-
-    return result, func_key, args_key
-
-
-async def _run_async_function(
-        ttl: float, func, args, kwargs, max_size, allow_null_values,
-        locked: bool,
-        key_func: Callable = None,
-        use_context: bool = True,
-        timeout: float = None
-
-) -> Tuple[Any, str, str]:
-    # Construct a unique cache key from the function's module name,
-    # function name, args, and kwargs to avoid collisions.
-
-    global cache
-
-    func_key = _func_key(func, use_context)
-    args_key = _func_params_key(key_func, args, kwargs)
-
-    # Create cache
-    cache = _init_funct_cache(func_key, max_size, allow_null_values)
-    if args_key in cache[func_key]:
-        # First attempt to check cache. It may be in memory already
-        return cache[func_key][args_key].data, func_key, args_key
-
-    if locked:
-        async with _lock_for_loading(func_key, args_key):
-            return await _async_exec(ttl, func, func_key, timeout, args_key, args, kwargs)
-
-    return await _async_exec(ttl, func, func_key, timeout, args_key, args, kwargs)
+# async def _run_async_function(
+#         ttl: float, func, args, kwargs, max_size, allow_null_values,
+#         locked: bool,
+#         key_func: Callable = None,
+#         use_context: bool = True,
+#         timeout: float = None
+#
+# ) -> Tuple[Any, str, str]:
+#     # Construct a unique cache key from the function's module name,
+#     # function name, args, and kwargs to avoid collisions.
+#
+#     global cache
+#
+#     func_key = _func_key(func, use_context)
+#     args_key = _func_params_key(key_func, args, kwargs)
+#
+#     # Create cache
+#     cache = _init_funct_cache(func_key, max_size, allow_null_values)
+#     if args_key in cache[func_key]:
+#         # First attempt to check cache. It may be in memory already
+#         return cache[func_key][args_key].data, func_key, args_key
+#
+#     if locked:
+#         async with _lock_for_loading(func_key, args_key):
+#             return await _async_exec(ttl, func, func_key, timeout, args_key, args, kwargs)
+#
+#     return await _async_exec(ttl, func, func_key, timeout, args_key, args, kwargs)
 
 
 # def async_cache_for(ttl: float, max_size=1000, allow_null_values=False, key_func: Callable = None,

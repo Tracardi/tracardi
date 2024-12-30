@@ -6,7 +6,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from .model.config import Config
 from tracardi.service.domain import resource as resource_db
 from tracardi.process_engine.action.v1.connectors.slack.slack_client import SlackClient
-from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.common.template.dot_template import DotTemplate
 
 
 def validate(config: dict) -> Config:

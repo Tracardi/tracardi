@@ -2,7 +2,7 @@ import os
 os.environ['TZ'] = 'Europe/Berlin'
 from tracardi.domain.event_metadata import EventMetadata
 from tracardi.domain.time import EventTime
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from tracardi.domain.profile import Profile
 from tracardi.domain.event import Event
 from tracardi.domain.event_session import EventSession

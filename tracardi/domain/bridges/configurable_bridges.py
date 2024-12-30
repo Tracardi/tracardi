@@ -7,11 +7,11 @@ from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.config import tracardi
 from tracardi.domain.profile_data import FLAT_PROFILE_FIELD_MAPPING
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.process_engine.tql.utils.dictonary import flatten
-from tracardi.service.dotdict import DotDict
+from tracardi.common.dot_notation.dotdict import DotDict
 from tracardi.service.events import get_default_mappings_for
-from tracardi.service.tracker_config import TrackerConfig
+from tracardi.domain.tracker_config import TrackerConfig
 from tracardi.service.utils.hasher import uuid4_from_md5, hash_id
 
 from tracardi.service.storage.mysql.interface import event_to_profile_dao

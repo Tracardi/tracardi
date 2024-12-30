@@ -2,7 +2,7 @@ import asyncio
 
 from tracardi.domain.profile import Profile
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 
 
 def test_if_condition_for_equal():

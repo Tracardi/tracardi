@@ -1,7 +1,7 @@
 from typing import Optional
 
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.service.dotdict import DotDict
+from tracardi.common.dot_notation.dotdict import DotDict
 
 
 def _get_interest_and_value(event: DotDict):

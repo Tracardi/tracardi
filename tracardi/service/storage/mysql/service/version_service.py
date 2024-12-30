@@ -1,7 +1,7 @@
 from typing import Optional
 
 from tracardi.domain.version import Version
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.mysql.mapping.version_mapping import map_to_version_table, map_to_version
 from tracardi.service.storage.mysql.schema.table import VersionTable
 from tracardi.service.storage.mysql.service.table_service import TableService

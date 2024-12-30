@@ -1,6 +1,6 @@
 import pytest
 
-from tracardi.service.dotdict import DotDict
+from tracardi.common.dot_notation.dotdict import DotDict
 
 
 # Define tests for DotDict functionality

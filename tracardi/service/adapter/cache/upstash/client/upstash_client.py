@@ -4,8 +4,8 @@ from typing import Optional, Awaitable, Union, List
 from upstash_redis import Redis
 
 from tracardi.context import get_context
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.singleton import Singleton
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.common.singleton import Singleton
 
 logger = get_logger(__name__)
 

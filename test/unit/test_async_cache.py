@@ -1,6 +1,6 @@
 import asyncio
 import pytest
-from tracardi.service.decorators.async_cache import AsyncCache
+from tracardi.common.decorator.async_cache import AsyncCache
 
 @pytest.mark.asyncio
 async def test_async_cache_basic():

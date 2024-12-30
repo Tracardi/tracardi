@@ -3,8 +3,8 @@ from typing import Optional, Awaitable, Union, List
 import redis
 
 from tracardi.context import get_context
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.singleton import Singleton
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.common.singleton import Singleton
 from tracardi.config import redis_config
 from tracardi.service.adapter.cache.redis.client.redis_connection_pool import get_redis_connection_pool
 

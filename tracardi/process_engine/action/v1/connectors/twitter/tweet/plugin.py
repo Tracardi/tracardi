@@ -1,5 +1,5 @@
 from tracardi.domain.resources.twitter_resrouce import TwitterResourceCredentials
-from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.common.template.dot_template import DotTemplate
 from tracardi.service.plugin.domain.register import Plugin, Spec, Form, FormGroup, FormComponent, FormField, MetaData, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result

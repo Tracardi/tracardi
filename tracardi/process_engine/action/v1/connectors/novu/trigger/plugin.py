@@ -6,7 +6,7 @@ from typing import Optional
 import aiohttp
 
 from tracardi.domain.resources.api_url_with_token import ApiUrlToken
-from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 from tracardi.service.tracardi_http_client import HttpClient
 from tracardi.service.domain import resource as resource_db

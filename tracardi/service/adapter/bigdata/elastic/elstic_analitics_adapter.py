@@ -1,12 +1,11 @@
 from typing import List, Dict
 
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from tracardi.service.adapter.bigdata.elastic.helpers.analytics_helper import aggregate_event_type, \
     aggregate_source_by_type, aggregate_source_by_tags, aggregate_event_tag, get_avg_process_time, \
     aggregate_event_status, aggregate_event_device_geo, aggregate_event_os_name, aggregate_event_channels, \
     aggregate_event_resolution, aggregate_events_by_source
-from tracardi.service.storage.driver.elastic import event as event_db
 
 logger = get_logger(__name__)
 

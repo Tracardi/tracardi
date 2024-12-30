@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 from tracardi.cluster_config import is_save_logs_on
 from tracardi.config import tracardi
-from tracardi.exceptions.log_handler import ElasticLogHandler
+from tracardi.common.logging.log_handler import ElasticLogHandler
 
 
 @asynccontextmanager

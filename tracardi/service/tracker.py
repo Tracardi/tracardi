@@ -2,14 +2,14 @@ from typing import Optional
 
 from tracardi.context import get_context
 from tracardi.domain.bridges.configurable_bridges import WebHookBridge, RestApiBridge, ConfigurableBridge
-from tracardi.exceptions.exception import InvalidBotTrafficException
+from tracardi.common.exception.exception import InvalidBotTrafficException
 from tracardi.service.license import License
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.tracking.source_validation import validate_source
-from tracardi.service.tracker_config import TrackerConfig
+from tracardi.domain.tracker_config import TrackerConfig
 from tracardi.config import tracardi
 from tracardi.domain.event_source import EventSource
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 
 if License.has_license():
     from com_tracardi.workers.collector import run_com_tracker_worker, run_com_tracker

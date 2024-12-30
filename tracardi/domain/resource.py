@@ -9,7 +9,7 @@ from .entity import Entity
 from .named_entity import NamedEntityInContext
 from .pro_service_form_data import ProService
 from ..context import get_context
-from ..service.secrets import encrypt, decrypt
+from tracardi.common.security.encrypt.secrets import encrypt, decrypt
 from ..service.utils.date import now_in_utc
 
 T = TypeVar("T")

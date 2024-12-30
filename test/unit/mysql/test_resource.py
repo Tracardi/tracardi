@@ -3,7 +3,7 @@ from datetime import datetime
 from tracardi.context import ServerContext, Context
 from tracardi.domain.destination import DestinationConfig
 from tracardi.domain.resource import Resource, ResourceCredentials
-from tracardi.service.secrets import encrypt
+from tracardi.common.security.encrypt.secrets import encrypt
 from tracardi.service.storage.mysql.mapping.resource_mapping import map_to_resource_table, map_to_resource
 from tracardi.service.storage.mysql.schema.table import ResourceTable
 

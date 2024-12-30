@@ -9,7 +9,7 @@ from typing import Optional, Tuple
 from pydantic import BaseModel
 from enum import Enum
 
-from tracardi.service.time import parse_date, parse_date_delta
+from tracardi.common.time.time import parse_date, parse_date_delta
 from tracardi.service.utils.date import now_in_utc
 
 

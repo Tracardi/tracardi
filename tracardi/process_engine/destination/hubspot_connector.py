@@ -6,7 +6,7 @@ from ...domain.destination import Destination
 from tracardi.domain.flat_profile import FlatProfile
 from ...domain.flat_event import FlatEvent
 from ...domain.resource import Resource
-from ...exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.elastic.interface.integration_id import load_integration_id, save_integration_id
 
 logger = get_logger(__name__)

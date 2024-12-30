@@ -1,7 +1,7 @@
 import json
 from json import JSONDecodeError
 from pydantic import field_validator
-from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner

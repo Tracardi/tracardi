@@ -9,13 +9,13 @@ import sys
 from tracardi.context import get_context, ContextError
 from tracardi.logging import log_stack_trace_as, log_stack_trace_for, log_bulk_size
 from tracardi.service.adapter.logger.logger_adapter import log_format_adapter
-from tracardi.service.logging.tools import _get_logging_level
+from tracardi.common.logging.log_level import get_logging_level
 from tracardi.service.utils.date import now_in_utc
 from logging import Handler, LogRecord
 from time import time
 
 _env = os.environ
-_logging_level = _get_logging_level(_env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in _env else logging.WARNING
+_logging_level = get_logging_level(_env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in _env else logging.WARNING
 
 
 def stack_trace(level):

@@ -8,10 +8,10 @@ from tracardi.context import ServerContext, get_context
 from tracardi.domain.field_change import FieldChange
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.license import License
 from tracardi.service.storage.elastic.interface.event import load_unique_field_value
-from tracardi.service.string_manager import capitalize_event_type_id
+from tracardi.common.tools.string_manager import capitalize_event_type_id
 
 if License.has_license():
     from com_tracardi.service.traits_update import update_dict_with_conflicts

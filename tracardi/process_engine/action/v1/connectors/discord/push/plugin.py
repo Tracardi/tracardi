@@ -4,7 +4,7 @@ from aiohttp import ClientConnectorError
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.common.template.dot_template import DotTemplate
 from tracardi.service.domain import resource as resource_db
 from tracardi.service.tracardi_http_client import HttpClient
 from tracardi.domain.resources.discord_resource import DiscordCredentials

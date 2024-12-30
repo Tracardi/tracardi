@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, Optional
 
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.service.secrets import b64_encoder, b64_decoder
+from tracardi.common.security.encrypt.secrets import b64_encoder, b64_decoder
 
 
 class ValueThreshold(NamedEntity):

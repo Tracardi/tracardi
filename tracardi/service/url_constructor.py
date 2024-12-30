@@ -1,6 +1,6 @@
 import urllib.parse
-from tracardi.service.notation.dot_accessor import DotAccessor
-from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
+from tracardi.common.template.dot_template import DotTemplate
 from pydantic import BaseModel
 from typing import Optional, Tuple
 

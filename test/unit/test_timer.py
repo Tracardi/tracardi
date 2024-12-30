@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from time import sleep, time
 import pytest
-from tracardi.service.timer import Timer
+from tracardi.common.time.timer import Timer
 
 
 @pytest.fixture

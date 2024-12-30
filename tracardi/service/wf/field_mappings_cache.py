@@ -6,7 +6,7 @@ from tracardi.domain.entity import Entity
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi.service.adapter.cache_adaper_selector import mcache_adapter
-from tracardi.service.singleton import Singleton
+from tracardi.common.singleton import Singleton
 from tracardi.service.storage.redis.collections import Collection
 
 batch = 3

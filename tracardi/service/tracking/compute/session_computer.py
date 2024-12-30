@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import ValidationError
 
 from tracardi.config import tracardi
-from tracardi.exceptions.exception import BlockedException
+from tracardi.common.exception.exception import BlockedException
 from tracardi.service.tracking.bot import _has_google_bot_header
 from tracardi.service.tracking.user_agent import _get_user_agent
 from tracardi.service.tracking.utils.languages import get_spoken_languages
@@ -12,8 +12,8 @@ from tracardi.domain.marketing import UTM
 from tracardi.domain.session import Session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.geo import Geo
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.tracker_config import TrackerConfig
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.domain.tracker_config import TrackerConfig
 
 logger = get_logger(__name__)
 

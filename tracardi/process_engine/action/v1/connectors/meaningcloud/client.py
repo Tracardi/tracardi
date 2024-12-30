@@ -1,6 +1,6 @@
 from aiohttp import ClientTimeout
 from tracardi.service.tracardi_http_client import HttpClient
-from tracardi.exceptions.exception import TracardiException
+from tracardi.common.exception.exception import TracardiException
 
 
 class MeaningCloudClient:

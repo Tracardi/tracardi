@@ -1,5 +1,5 @@
 from tracardi.domain.destination import DestinationConfig
-from tracardi.service.secrets import encrypt, decrypt
+from tracardi.common.security.encrypt.secrets import encrypt, decrypt
 
 
 def test_encrypt_base_model_object():

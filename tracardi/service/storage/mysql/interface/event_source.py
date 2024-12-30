@@ -5,7 +5,7 @@ from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.storage.mysql.mapping.event_source_mapping import map_to_event_source
 from tracardi.service.storage.mysql.service.event_source_service import EventSourceService
 from tracardi.config import memory_cache
-from tracardi.service.decorators.async_cache import AsyncCache
+from tracardi.common.decorator.async_cache import AsyncCache
 
 ess = EventSourceService()
 

@@ -7,7 +7,7 @@ from tracardi.service.storage.mysql.mapping.resource_mapping import map_to_resou
 from tracardi.service.storage.mysql.service.resource_service import ResourceService
 
 from tracardi.config import memory_cache
-from tracardi.service.decorators.async_cache import AsyncCache
+from tracardi.common.decorator.async_cache import AsyncCache
 
 rs = ResourceService()
 

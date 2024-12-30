@@ -8,7 +8,7 @@ from .model.config import Config
 from tracardi.process_engine.action.v1.connectors.civi_crm.client import CiviCRMClient, CiviCRMClientException, \
     CiviClientCredentials
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
 
 
 def validate(config: dict) -> Config:

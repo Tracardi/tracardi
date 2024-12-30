@@ -5,7 +5,7 @@ from .model.config import Config, EndpointConfig
 from tracardi.service.domain import resource as resource_db
 from tracardi.process_engine.action.v1.connectors.active_campaign.client import ActiveCampaignClient, \
     ActiveCampaignClientException
-from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.plugin_endpoint import PluginEndpoint
 

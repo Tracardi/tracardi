@@ -1,10 +1,9 @@
-import logging
 from typing import Optional, Tuple
 
 from sqlalchemy import Integer, func
 
 from tracardi.domain.setting import Setting
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.mysql.mapping.setting_mapping import map_to_settings_table, map_to_setting
 from tracardi.service.storage.mysql.schema.table import SettingTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult

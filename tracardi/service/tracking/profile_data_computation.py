@@ -1,4 +1,3 @@
-from time import time
 from typing import List, Generator, AsyncGenerator
 
 from tracardi.domain import ExtraInfo
@@ -9,11 +8,11 @@ from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.geo import Geo
 from tracardi.domain.session import Session
-from tracardi.exceptions.exception_service import get_traceback
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.exception.exception_service import get_traceback
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.events import get_default_mappings_for
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from tracardi.service.tracking.compute.geo_location_computer import get_geo_location
 from tracardi.service.tracking.utils.function_call import default_event_call_function
 from tracardi.service.utils.date import now_in_utc

@@ -1,7 +1,7 @@
 import aiohttp
 from aiohttp import ContentTypeError
 
-from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
 from json import JSONDecodeError
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent

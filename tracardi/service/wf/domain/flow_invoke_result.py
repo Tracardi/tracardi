@@ -3,7 +3,7 @@ from typing import Optional, List
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.plugin.domain.console import Log
 from tracardi.service.wf.domain.debug_info import DebugInfo
 from tracardi.service.wf.domain.flow_graph import FlowGraph

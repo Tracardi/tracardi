@@ -5,8 +5,8 @@ from typing import Dict, Optional
 from pydantic import BaseModel
 from time import time
 
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.secrets import b64_decoder
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.common.security.encrypt.secrets import b64_decoder
 
 logger = get_logger(__name__)
 

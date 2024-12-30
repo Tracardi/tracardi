@@ -10,10 +10,10 @@ from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from typing import Optional
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 # from tracardi.domain.query_result import QueryResult
 # from tracardi.domain.time_range_query import DatetimeRangePayload
-from tracardi.exceptions.exception import StorageException
+from tracardi.common.exception.exception import StorageException
 from tracardi.service.storage.elastic.driver.elastic_storage import ElasticStorage
 # from tracardi.service.storage.elastic.driver.search_engine import SqlSearchQueryEngine
 

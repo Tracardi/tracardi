@@ -2,7 +2,7 @@ from typing import List
 
 from tracardi.context import get_context
 from tracardi.domain.bridge import Bridge
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.mysql.mapping.bridge_mapping import map_to_bridge_table
 from tracardi.service.storage.mysql.schema.table import BridgeTable
 from tracardi.service.storage.mysql.service.table_service import TableService

@@ -8,12 +8,12 @@ from tracardi.domain.destination_work_package import DestinationWorkPackage
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.session import Session
-from tracardi.exceptions.exception_service import get_traceback
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.exception.exception_service import get_traceback
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.process_engine.destination.destination_interface import DestinationInterface
 from tracardi.domain.destination import Destination
 from tracardi.service.destination.utils import get_destination_data
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from tracardi.service.storage.mysql.interface import destination_dao
 from tracardi.service.utils.getters import get_entity_id
 

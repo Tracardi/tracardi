@@ -1,7 +1,7 @@
 from typing import List, Dict, Union
 
 from dotty_dict import Dotty
-from .dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 
 
 class DictTraverser:

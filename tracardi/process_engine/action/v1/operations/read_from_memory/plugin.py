@@ -12,7 +12,7 @@ from tracardi.service.storage.redis.collections import Collection
 from .model.config import Config
 from tracardi.service.adapter.cache.redis.client.redis_client import RedisClient
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.secrets import b64_decoder
+from tracardi.common.security.encrypt.secrets import b64_decoder
 
 
 def validate(config: dict) -> Config:

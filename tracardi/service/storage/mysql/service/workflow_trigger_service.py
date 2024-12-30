@@ -1,8 +1,7 @@
 from typing import List, Optional, Tuple, Dict, Set
 
-from tracardi.domain.event import Event
 from tracardi.domain.rule import Rule
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 
 from tracardi.service.storage.mysql.mapping.workflow_trigger_mapping import map_to_workflow_trigger_table, \
     map_to_workflow_trigger_rule

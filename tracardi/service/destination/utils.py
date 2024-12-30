@@ -4,11 +4,11 @@ from tracardi.domain import ExtraInfo
 from tracardi.domain.destination import Destination
 from tracardi.domain.destination_work_package import DestinationWorkPackage
 
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
 
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from tracardi.service.setup.setup_resources import get_resource_types
 
 from tracardi.service.storage.mysql.interface import resource_dao

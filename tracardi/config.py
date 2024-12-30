@@ -8,9 +8,9 @@ import yaml
 
 from tracardi.domain import ExtraInfo
 from tracardi.domain.yaml_config import YamlConfig
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.logging.tools import _get_logging_level
-from tracardi.service.singleton import Singleton
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.common.logging.log_level import get_logging_level
+from tracardi.common.singleton import Singleton
 from tracardi.service.utils.environment import get_env_as_int, get_env_as_bool
 from tracardi.service.utils.validators import is_valid_url
 from tracardi.version import version
@@ -152,7 +152,7 @@ class ElasticConfig:
         self.http_auth_password = self.env.get('ELASTIC_HTTP_AUTH_PASSWORD', None)
         self.scheme = self.env.get('ELASTIC_SCHEME', 'http')
         self.query_timeout = get_env_as_int('ELASTIC_QUERY_TIMEOUT', 60)
-        self.logging_level = _get_logging_level(env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env else logging.ERROR
+        self.logging_level = get_logging_level(env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env else logging.ERROR
 
         if self.unset_credentials:
             self._unset_credentials()
@@ -253,7 +253,7 @@ class TracardiConfig(metaclass=Singleton):
         self.identification_event_property = env.get('IDENTIFICATION_EVENT_PROPERTY',
                                                      'data.identifier.pk,data.identifier.id,data.contact.email.business,data.contact.email.main,data.contact.email.private,data.contact.phone.business,data.contact.phone.main,data.contact.phone.mobile,data.contact.phone.whatsapp')
 
-        self.logging_level = _get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
+        self.logging_level = get_logging_level(env['LOGGING_LEVEL']) if 'LOGGING_LEVEL' in env else logging.WARNING
 
         self.multi_tenant = version.multi_tenant
         self.multi_tenant_manager_url = env.get('MULTI_TENANT_MANAGER_URL', None)

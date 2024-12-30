@@ -2,7 +2,7 @@ import asyncio
 
 from tracardi.context import ServerContext, Context
 from tracardi.service.storage.mysql.interface import event_source_dao
-from tracardi.service.decorators.async_cache import AsyncCache
+from tracardi.common.decorator.async_cache import AsyncCache
 
 
 @AsyncCache(0, allow_null_values=False, lock=False, timeout=.001)

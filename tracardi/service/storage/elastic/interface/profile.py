@@ -1,8 +1,7 @@
-from typing import List, AsyncGenerator, Any, Optional
+from typing import Optional
 
-from tracardi.domain.profile import Profile
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 

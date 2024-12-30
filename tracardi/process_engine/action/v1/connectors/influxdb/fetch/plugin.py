@@ -5,7 +5,7 @@ from tracardi.service.domain import resource as resource_db
 from .model.config import Config, InfluxCredentials
 from influxdb_client import InfluxDBClient
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
 
 
 def validate(config: dict) -> Config:

@@ -1,5 +1,5 @@
 from tracardi.domain.flow_action_plugin import FlowActionPlugin
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.mysql.mapping.plugin_mapping import map_to_plugin_table
 from tracardi.service.storage.mysql.schema.table import PluginTable
 from tracardi.service.storage.mysql.service.table_service import TableService

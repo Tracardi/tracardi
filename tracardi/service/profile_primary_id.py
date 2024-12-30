@@ -2,7 +2,7 @@ from tracardi.domain.profile_data import PREFIX_IDENTIFIER_PK, PREFIX_IDENTIFIER
     PREFIX_PHONE_MAIN
 
 from typing import Optional, List
-from ..exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 
 logger = get_logger(__name__)
 

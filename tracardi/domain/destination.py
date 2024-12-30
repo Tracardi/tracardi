@@ -3,7 +3,7 @@ from pydantic import field_validator, BaseModel
 from tracardi.domain.entity import Entity
 from tracardi.domain.named_entity import NamedEntity, NamedEntityInContext
 from tracardi.process_engine.tql.condition import Condition
-from tracardi.service.secrets import b64_decoder, b64_encoder
+from tracardi.common.security.encrypt.secrets import b64_decoder, b64_encoder
 from tracardi.service.module_loader import load_callable, import_package
 
 

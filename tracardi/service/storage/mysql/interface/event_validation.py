@@ -4,7 +4,7 @@ from tracardi.domain.event_validator import EventValidator
 from tracardi.service.storage.mysql.mapping.event_validation_mapping import map_to_event_validation
 from tracardi.service.storage.mysql.service.event_validation_service import EventValidationService
 from tracardi.config import memory_cache
-from tracardi.service.decorators.async_cache import AsyncCache
+from tracardi.common.decorator.async_cache import AsyncCache
 
 evs = EventValidationService()
 

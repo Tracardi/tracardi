@@ -1,6 +1,6 @@
 import re
 
-from ..singleton import Singleton
+from tracardi.common.singleton import Singleton
 
 
 class EventDescriptionTemplate(metaclass=Singleton):

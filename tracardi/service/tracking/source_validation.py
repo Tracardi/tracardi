@@ -5,11 +5,11 @@ from tracardi.context import get_context
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.exceptions.exception import BlockedException
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.exception.exception import BlockedException
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.mysql.interface import event_source_dao
 from tracardi.service.setup.setup_bridges import open_rest_source_bridge
-from tracardi.service.tracker_config import TrackerConfig
+from tracardi.domain.tracker_config import TrackerConfig
 from tracardi.service.utils.date import now_in_utc
 
 logger = get_logger(__name__)

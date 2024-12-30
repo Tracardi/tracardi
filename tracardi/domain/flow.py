@@ -9,8 +9,8 @@ from tracardi.service.wf.domain.flow_graph_data import FlowGraphData, EdgeBundle
 from tracardi.service.plugin.domain.register import MetaData, Plugin, Spec, NodeEvents, MicroserviceConfig
 
 from ..config import tracardi
-from ..exceptions.log_handler import get_logger
-from ..service.secrets import decrypt, encrypt, b64_encoder, b64_decoder
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.common.security.encrypt.secrets import decrypt, encrypt, b64_encoder, b64_decoder
 
 from ..service.utils.date import now_in_utc
 

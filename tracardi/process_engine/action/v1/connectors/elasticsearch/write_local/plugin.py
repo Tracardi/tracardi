@@ -1,7 +1,6 @@
 import json
 
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.service.notation.dict_traverser import DictTraverser
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent

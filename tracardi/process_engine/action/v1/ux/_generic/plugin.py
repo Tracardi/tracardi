@@ -3,7 +3,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from pydantic import field_validator
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.config import PluginConfig
 
 

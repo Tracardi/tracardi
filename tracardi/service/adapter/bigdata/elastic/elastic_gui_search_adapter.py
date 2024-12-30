@@ -2,7 +2,7 @@ from typing import Set, List
 
 from tracardi.domain.query_result import QueryResult
 from tracardi.domain.time_range_query import DatetimeRangePayload
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.adapter.bigdata.elastic.cache.field_mapping import load_cached_field_names, \
     load_cached_column_values
 from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter

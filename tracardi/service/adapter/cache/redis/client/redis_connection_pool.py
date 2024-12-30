@@ -1,7 +1,7 @@
 from tracardi.config import RedisConfig
 from redis import ConnectionPool
 
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 
 logger = get_logger(__name__)
 

@@ -3,7 +3,7 @@ from aiohttp import ContentTypeError
 from json import JSONDecodeError
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.resources.telegram import TelegramResource
-from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.common.template.dot_template import DotTemplate
 from tracardi.service.tracardi_http_client import HttpClient
 from tracardi.service.domain import resource as resource_db
 from tracardi.service.plugin.domain.config import PluginConfig

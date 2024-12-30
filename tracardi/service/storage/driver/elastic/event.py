@@ -7,7 +7,7 @@ from tracardi.domain.named_entity import NamedEntity
 
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.elastic.driver.factory import storage_manager, StorageForBulk
 from typing import List, Optional, Dict, Tuple, Union, Set

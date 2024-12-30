@@ -1,4 +1,4 @@
-from tracardi.service.dotdict import DotDict
+from tracardi.common.dot_notation.dotdict import DotDict
 from tracardi.service.merging.storage.loaders import load_duplicated_profiles_with_merge_key
 from tracardi.service.merging.storage.mutation import save_flat_profile, delete_multiple_profiles, \
     move_profile_events_and_sessions
@@ -17,9 +17,9 @@ from tracardi.domain.metadata import ProfileMetadata
 from tracardi.domain.profile import Profile
 from tracardi.domain.profile_stats import ProfileStats
 from tracardi.domain.time import ProfileTime
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 
-from tracardi.service.dot_notation_converter import DotNotationConverter
+from tracardi.common.dot_notation.dot_notation_converter import DotNotationConverter
 
 from tracardi.service.merging.merger import merge as dict_merge, get_conflicted_values, MergingStrategy
 

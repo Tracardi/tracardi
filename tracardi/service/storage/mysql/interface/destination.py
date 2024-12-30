@@ -6,7 +6,7 @@ from tracardi.service.storage.mysql.service.destination_service import Destinati
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
 from tracardi.config import memory_cache
-from tracardi.service.decorators.async_cache import AsyncCache
+from tracardi.common.decorator.async_cache import AsyncCache
 
 ds = DestinationService()
 

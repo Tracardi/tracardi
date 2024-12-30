@@ -1,7 +1,7 @@
 import socket
 from typing import Optional
 
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 
 logger = get_logger(__name__)
 

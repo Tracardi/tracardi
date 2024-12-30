@@ -7,7 +7,7 @@ from tracardi.service.domain import resource as resource_db
 from tracardi.domain.resource import Resource
 from tracardi.process_engine.action.v1.connectors.mautic.client import MauticClient, MauticClientException, \
     MauticClientAuthException
-from tracardi.exceptions.exception import StorageException
+from tracardi.common.exception.exception import StorageException
 
 
 def validate(config: dict) -> Config:

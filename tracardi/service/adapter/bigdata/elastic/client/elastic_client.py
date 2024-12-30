@@ -12,8 +12,8 @@ from tracardi.config import ElasticConfig, elastic
 from tracardi import config
 from tracardi.domain import ExtraInfo
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.singleton import Singleton
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.common.singleton import Singleton
 
 logger = logging.getLogger('elasticsearch')
 logger.setLevel(elastic.logging_level)

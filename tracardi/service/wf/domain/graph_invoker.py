@@ -9,7 +9,7 @@ from pydantic import BaseModel, ValidationError
 
 from tracardi.domain import ExtraInfo
 from tracardi.domain.enum.event_status import PROCESSED
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 
 from tracardi.domain.event import Event
 from tracardi.domain.event_session import EventSession
@@ -33,8 +33,8 @@ from ..utils.dag_error import DagError, DagExecError
 from .edge import Edge
 from .node import Node
 from .tasks_results import ActionsResults
-from ...notation.dict_traverser import DictTraverser
-from ...notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from ...utils.getters import get_entity_id
 from ...value_threshold_manager import ValueThresholdManager
 

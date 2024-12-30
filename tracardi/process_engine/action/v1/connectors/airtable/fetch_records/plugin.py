@@ -5,7 +5,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.domain import resource as resource_db
 from .model.config import Config, APIKey
 from ..client import AirtableClient, AirtableClientException
-from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.common.template.dot_template import DotTemplate
 
 
 def validate(config: dict) -> Config:

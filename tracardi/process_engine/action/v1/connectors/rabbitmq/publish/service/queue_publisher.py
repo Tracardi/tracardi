@@ -1,6 +1,6 @@
 from kombu import Exchange, Queue, Producer
 
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from ..model.configuration import PluginConfiguration
 
 logger = get_logger(__name__)

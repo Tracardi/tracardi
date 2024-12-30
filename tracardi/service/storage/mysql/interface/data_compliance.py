@@ -4,7 +4,7 @@ from tracardi.service.storage.mysql.service.event_data_compliance_service import
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 from tracardi.service.storage.mysql.mapping.event_data_compliance_mapping import map_to_event_data_compliance
 from tracardi.config import memory_cache
-from tracardi.service.decorators.async_cache import AsyncCache
+from tracardi.common.decorator.async_cache import AsyncCache
 
 cdcs = ConsentDataComplianceService()
 

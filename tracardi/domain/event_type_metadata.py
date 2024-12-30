@@ -2,7 +2,7 @@ from typing import List, Any
 from typing import Optional
 
 from tracardi.domain.named_entity import NamedEntityInContext
-from tracardi.service.notation.event_description_template import EventDescriptionTemplate
+from tracardi.common.template.event_description_template import EventDescriptionTemplate
 
 
 class EventTypeMetadata(NamedEntityInContext):

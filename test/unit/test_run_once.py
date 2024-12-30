@@ -1,4 +1,4 @@
-from tracardi.service.decorators.run_once import run_once
+from tracardi.common.decorator.run_once import run_once
 
 
 # Example functions to test

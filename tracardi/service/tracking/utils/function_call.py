@@ -1,5 +1,5 @@
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.dotdict import DotDict
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.common.dot_notation.dotdict import DotDict
 from tracardi.service.module_loader import load_callable, import_package
 
 logger = get_logger(__name__)

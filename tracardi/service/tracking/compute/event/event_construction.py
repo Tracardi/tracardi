@@ -15,7 +15,7 @@ from tracardi.domain.flat_event import EventDict
 from tracardi.domain.event_metadata import EventMetadata
 from tracardi.domain.event_metadata import EventPayloadMetadata
 from tracardi.domain.session import Session
-from tracardi.service.string_manager import capitalize_event_type_id
+from tracardi.common.tools.string_manager import capitalize_event_type_id
 
 
 def _get_event_session(session: Union[Session, Entity]) -> Optional[EventSession]:

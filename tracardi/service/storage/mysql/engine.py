@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from tracardi.config import mysql
-from tracardi.service.singleton import Singleton
+from tracardi.common.singleton import Singleton
 
 
 class AsyncMySqlEngine(metaclass=Singleton):

@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
 
 from tracardi.context import get_context
-from tracardi.exceptions.exception import ExpiredException
+from tracardi.common.exception.exception import ExpiredException
 from tracardi.service.utils.date import seconds_to_minutes_seconds
 
 

@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 from tracardi.context import ServerContext, Context
 from tracardi.domain.flat_profile import FlatProfile
@@ -8,7 +8,6 @@ from tracardi.domain.event_metadata import EventPayloadMetadata
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.session import SessionMetadata, Session
 from tracardi.domain.time import Time
-from tracardi.service.tracker_config import TrackerConfig
 from tracardi.service.tracking.profile_loading import load_profile_and_session
 
 

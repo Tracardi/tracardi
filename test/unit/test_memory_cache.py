@@ -4,7 +4,7 @@ import pytest
 
 from tracardi.context import ServerContext, Context
 from tracardi.event_server.utils.memory_cache import MemoryCache, CacheItem
-from tracardi.exceptions.exception import ExpiredException
+from tracardi.common.exception.exception import ExpiredException
 
 
 def test_should_delete_memory_cache():

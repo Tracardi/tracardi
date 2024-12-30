@@ -1,6 +1,6 @@
 from uuid import uuid4
 from time import time
-from tracardi.service.singleton import Singleton
+from tracardi.common.singleton import Singleton
 
 
 class ApiInstance(metaclass=Singleton):

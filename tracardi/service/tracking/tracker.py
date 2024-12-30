@@ -14,8 +14,8 @@ from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.service.tracking.track_data_computation import compute_data
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.tracker_config import TrackerConfig
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.domain.tracker_config import TrackerConfig
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.triggers import exec_workflow
 

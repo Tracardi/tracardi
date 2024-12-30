@@ -8,7 +8,7 @@ from collections import deque, defaultdict
 
 from tracardi.config import tracardi
 from tracardi.context import get_context
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 
 locks = defaultdict(asyncio.Lock)
 logger = get_logger(__name__)

@@ -5,7 +5,7 @@ from tracardi.domain import ExtraInfo
 from tracardi.domain.entity import PrimaryEntity
 from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.field_change import FieldChange
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.tracking.compute.event.event_construction import event_payload_to_event
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
 from tracardi.domain.event_source import EventSource

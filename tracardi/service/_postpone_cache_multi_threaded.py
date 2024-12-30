@@ -1,61 +1,61 @@
-from typing import Optional
-
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.adapter.cache_adaper_selector import hcache_adapter
-
-logger = get_logger(__name__)
-
-_hcache = hcache_adapter()
-
-class PostponeCache:
-
-    def __init__(self, cache_type):
-        logger.info(f"Cache for {cache_type} created")
-        self.hash = cache_type
-
-    def exists(self, profile_id):
-        return _hcache.hexists(self.hash, profile_id)
-
-    def get(self, profile_id) -> bool:
-
-        if not self.exists(profile_id):
-            _hcache.hset(self.hash, profile_id, '1')
-            return False
-
-        return True
-
-    def set(self, profile_id):
-        _hcache.hset(self.hash, profile_id, '1')
-
-    def reset(self, profile_id):
-        _hcache.hdel(self.hash, profile_id)
-
-
-class InstanceCache:
-
-    def __init__(self, cache_type):
-        logger.info(f"Cache for {cache_type} created")
-        self.hash = cache_type
-
-    def exists(self, profile_id):
-        return _hcache.hexists(self.hash, profile_id)
-
-    def get_instance(self, profile_id, instance_id) -> Optional[str]:
-
-        if not self.exists(profile_id):
-            logger.info(f"Create instance {instance_id} for profile {profile_id}")
-            _hcache.hset(self.hash, profile_id, instance_id)
-            return None
-
-        value_bson = _hcache.hget(self.hash, profile_id)
-        value = value_bson.decode('utf-8')
-
-        return value
-
-    def set_instance(self, profile_id, instance_id):
-        logger.info(f"Destination sync for profile {profile_id} is going to be sent from worker instance {instance_id}")
-        _hcache.hset(self.hash, profile_id, instance_id)
-
-    def reset(self, profile_id):
-        logger.debug(f"Clean profile worker instance {profile_id}")
-        _hcache.hdel(self.hash, profile_id)
+# from typing import Optional
+#
+# from tracardi.common.logging.log_handler import get_logger
+# from tracardi.service.adapter.cache_adaper_selector import hcache_adapter
+#
+# logger = get_logger(__name__)
+#
+# _hcache = hcache_adapter()
+#
+# class PostponeCache:
+#
+#     def __init__(self, cache_type):
+#         logger.info(f"Cache for {cache_type} created")
+#         self.hash = cache_type
+#
+#     def exists(self, profile_id):
+#         return _hcache.hexists(self.hash, profile_id)
+#
+#     def get(self, profile_id) -> bool:
+#
+#         if not self.exists(profile_id):
+#             _hcache.hset(self.hash, profile_id, '1')
+#             return False
+#
+#         return True
+#
+#     def set(self, profile_id):
+#         _hcache.hset(self.hash, profile_id, '1')
+#
+#     def reset(self, profile_id):
+#         _hcache.hdel(self.hash, profile_id)
+#
+#
+# class InstanceCache:
+#
+#     def __init__(self, cache_type):
+#         logger.info(f"Cache for {cache_type} created")
+#         self.hash = cache_type
+#
+#     def exists(self, profile_id):
+#         return _hcache.hexists(self.hash, profile_id)
+#
+#     def get_instance(self, profile_id, instance_id) -> Optional[str]:
+#
+#         if not self.exists(profile_id):
+#             logger.info(f"Create instance {instance_id} for profile {profile_id}")
+#             _hcache.hset(self.hash, profile_id, instance_id)
+#             return None
+#
+#         value_bson = _hcache.hget(self.hash, profile_id)
+#         value = value_bson.decode('utf-8')
+#
+#         return value
+#
+#     def set_instance(self, profile_id, instance_id):
+#         logger.info(f"Destination sync for profile {profile_id} is going to be sent from worker instance {instance_id}")
+#         _hcache.hset(self.hash, profile_id, instance_id)
+#
+#     def reset(self, profile_id):
+#         logger.debug(f"Clean profile worker instance {profile_id}")
+#         _hcache.hdel(self.hash, profile_id)

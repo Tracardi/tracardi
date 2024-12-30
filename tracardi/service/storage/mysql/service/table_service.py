@@ -2,9 +2,9 @@ from typing import Optional, Type, Callable, Tuple, TypeVar
 
 from sqlalchemy.dialects.mysql import insert
 
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.license import License, LICENSE
-from tracardi.service.singleton import Singleton
+from tracardi.common.singleton import Singleton
 from tracardi.service.storage.mysql.engine import AsyncMySqlEngine
 from sqlalchemy import inspect, update, Column
 

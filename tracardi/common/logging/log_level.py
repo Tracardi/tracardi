@@ -1,7 +1,7 @@
 import logging
 
 
-def _get_logging_level(level: str) -> int:
+def get_logging_level(level: str) -> int:
     level = level.upper()
     if level == 'DEBUG':
         return logging.DEBUG

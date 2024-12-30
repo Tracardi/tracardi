@@ -1,9 +1,9 @@
 from tracardi.context import get_context
-from tracardi.exceptions.log_controller import log_controller
-from tracardi.exceptions.log_handler import log_handler, get_installation_logger
+from tracardi.common.logging.log_controller import log_controller
+from tracardi.common.logging.log_handler import log_handler, get_installation_logger
 from tracardi.service.adapter.bigdata.adapter_selector import bd_log_adapter
 from tracardi.service.license import License
-from tracardi.domain.installation_status import installation_status
+from tracardi.install.domain.installation_status import installation_status
 
 logger = get_installation_logger(__name__)
 _log_adapter = bd_log_adapter()

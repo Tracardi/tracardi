@@ -5,7 +5,7 @@ from tracardi.context import Context
 from tracardi.domain import ExtraInfo
 from tracardi.domain.session import Session
 from tracardi.domain.storage_record import RecordMetadata
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.tracking.cache.cache_helper import _get_cache, _has_cache, _delete_cache, _set_cache
 from tracardi.service.tracking.cache.prefix import get_cache_prefix

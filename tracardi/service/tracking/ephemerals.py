@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session

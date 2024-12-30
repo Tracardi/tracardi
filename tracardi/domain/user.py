@@ -1,7 +1,7 @@
 from typing import List, Optional, Any
 from pydantic import BaseModel
 
-from tracardi.service.sha1_hasher import SHA1Encoder
+from tracardi.common.security.hashing.sha1_hasher import SHA1Encoder
 from datetime import datetime
 
 

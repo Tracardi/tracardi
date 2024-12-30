@@ -1,7 +1,7 @@
 import re
 
-from .dot_accessor import DotAccessor
-from ..singleton import Singleton
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
+from tracardi.common.singleton import Singleton
 
 
 class DotTemplate(metaclass=Singleton):

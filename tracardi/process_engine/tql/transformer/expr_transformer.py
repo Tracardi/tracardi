@@ -4,8 +4,8 @@ import dateparser
 import pytimeparse
 import pytz
 
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from typing import Union
 
 from ..domain.field import Field

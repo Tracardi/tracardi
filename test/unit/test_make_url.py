@@ -1,5 +1,5 @@
 from tracardi.domain.profile import Profile
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from tracardi.service.url_constructor import ApiCredentials
 
 

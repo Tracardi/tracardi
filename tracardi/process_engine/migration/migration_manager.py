@@ -5,7 +5,7 @@ from tracardi.domain.migration_schema import MigrationSchema, CopyIndex
 from typing import Optional, List, Dict
 import json
 
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from hashlib import sha1
 from pathlib import Path

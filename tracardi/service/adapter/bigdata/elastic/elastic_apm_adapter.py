@@ -7,14 +7,14 @@ from typing import Union, List, Set, Tuple, AsyncGenerator, Any
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile import Profile
 from tracardi.domain.storage_record import RecordMetadata, StorageRecords
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from tracardi.service.adapter.bigdata.elastic.helpers.adapter_helper import (load_profile as load_profile_helper)
 from tracardi.service.adapter.bigdata.elastic.client.elastic_query import get_query_by_values, \
     get_query_for_duplicated_profiles_by_ids, get_query_for_auto_merge, get_agg_query_for_duplicated_profile_counts, \
     get_update_query_to_update_profile_id, get_agg_query_for_duplicated_profiles_by_field, \
     get_query_to_load_by_field_and_value, get_agg_query_for_groups_of_profile_ids
-from tracardi.service.time_converters import pretty_time_format
+from tracardi.common.time.time_converters import pretty_time_format
 
 logger = get_logger(__name__)
 

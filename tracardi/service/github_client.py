@@ -1,10 +1,10 @@
 import json
+import base64
 
 from typing import Optional
 
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.tracardi_http_client import HttpClient
-import base64
 
 from tracardi.service.utils.date import now_in_utc
 

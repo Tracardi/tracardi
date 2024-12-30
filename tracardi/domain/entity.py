@@ -13,11 +13,11 @@ from tracardi.domain import ExtraInfo
 from tracardi.domain.storage_record import RecordMetadata, StorageRecord
 from tracardi.domain.time import Time, EventTime
 from tracardi.domain.value_object.storage_info import StorageInfo
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.protocol.operational import Operational
 from tracardi.service.change_monitoring.field_update_logger import FieldUpdateLogger
-from tracardi.service.dot_notation_converter import dotter
-from tracardi.service.dotdict import DotDict
+from tracardi.common.dot_notation.dot_notation_converter import dotter
+from tracardi.common.dot_notation.dotdict import DotDict
 from tracardi.service.storage.index import Resource
 
 logger = get_logger(__name__)

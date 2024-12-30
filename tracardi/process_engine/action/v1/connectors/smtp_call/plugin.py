@@ -4,7 +4,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.domain import resource as resource_db
 from tracardi.domain.resource import Resource
-from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.common.template.dot_template import DotTemplate
 
 from .service.sendman import PostMan
 from .model.smtp_configuration import Configuration, SmtpConfiguration, Message

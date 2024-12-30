@@ -11,7 +11,7 @@ from .time import ProfileTime
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
 from ..config import tracardi
-from ..service.dot_notation_converter import DotNotationConverter
+from tracardi.common.dot_notation.dot_notation_converter import DotNotationConverter
 from .profile_stats import ProfileStats
 from ..service.tracking.profile_pii_hashing import get_allowed_piis_to_be_hashed_as_ids
 from ..service.utils.date import now_in_utc

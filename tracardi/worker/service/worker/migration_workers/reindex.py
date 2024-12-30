@@ -1,5 +1,5 @@
 from tracardi.context import Context, ServerContext
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.worker.domain.migration_schema import MigrationSchema
 from tracardi.worker.misc.task_progress import task_create, task_status, task_finish, task_progress
 from time import sleep

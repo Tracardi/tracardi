@@ -2,7 +2,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
     Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 
-from tracardi.exceptions.exception import WorkflowException
+from tracardi.common.exception.exception import  WorkflowException
 from tracardi.service.plugin.domain.config import PluginConfig
 
 

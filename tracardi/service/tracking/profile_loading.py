@@ -2,7 +2,7 @@ from typing import Optional, Tuple
 
 from tracardi.domain.entity import PrimaryEntity
 from tracardi.domain.session import Session
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.flat_profile import FlatProfile
 

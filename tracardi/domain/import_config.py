@@ -1,6 +1,6 @@
 from pydantic import field_validator
 from typing import Optional
-from tracardi.service.secrets import encrypt, decrypt
+from tracardi.common.security.encrypt.secrets import encrypt, decrypt
 from tracardi.domain.named_entity import NamedEntity
 
 

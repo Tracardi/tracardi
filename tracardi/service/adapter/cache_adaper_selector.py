@@ -3,7 +3,7 @@ from tracardi.service.adapter.cache.cache_protocol import CacheProtocol
 from tracardi.service.adapter.cache.hcache_protocol import HCacheProtocol
 from tracardi.service.adapter.cache.member_cache_protocol import MemberCacheProtocol
 from tracardi.service.adapter.cache.pubsub_protocol import PubSubProtocol
-from tracardi.service.decorators.run_once import run_once
+from tracardi.common.decorator.run_once import run_once
 
 _cache_adapter_var = tracardi.cache_adapter
 

@@ -1,5 +1,3 @@
-import json
-
 from datetime import datetime
 from typing import Optional, List, Union, Any
 from uuid import uuid4
@@ -18,8 +16,7 @@ from .profile_data import ProfileLoyalty, ProfileJob, ProfilePreference, Profile
 from .request import Request
 from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo
-from ..service.string_manager import capitalize_event_type_id
-from ..service.utils.date import now_in_utc
+from tracardi.common.tools.string_manager import capitalize_event_type_id
 
 
 class Tags(BaseModel):

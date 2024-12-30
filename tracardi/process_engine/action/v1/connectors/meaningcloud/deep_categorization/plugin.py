@@ -1,4 +1,4 @@
-from tracardi.exceptions.exception import TracardiException
+from tracardi.common.exception.exception import TracardiException
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner

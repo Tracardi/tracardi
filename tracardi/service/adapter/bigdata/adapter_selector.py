@@ -6,7 +6,7 @@ from tracardi.service.adapter.bigdata.elastic.elastic_log_adapter import Elastic
 from tracardi.service.adapter.bigdata.elastic.elastic_gui_search_adapter import ElasticSearchAdapter
 from tracardi.service.adapter.bigdata.elastic.elstic_analitics_adapter import ElasticAnalyticsAdapter
 
-from tracardi.service.decorators.run_once import run_once
+from tracardi.common.decorator.run_once import run_once
 
 _big_data_adapter_var = com_tracardi_settings.big_data_adapter
 

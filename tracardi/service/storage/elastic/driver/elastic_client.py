@@ -12,7 +12,7 @@ from tracardi.config import ElasticConfig, elastic
 from tracardi import config
 from tracardi.domain import ExtraInfo
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 
 _singleton = None
 logger = logging.getLogger('elasticsearch')

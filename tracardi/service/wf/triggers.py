@@ -20,8 +20,8 @@ from tracardi.service.wf.domain.tracker_result import TrackerResult
 from tracardi.domain import ExtraInfo
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.exceptions.exception_service import get_traceback
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.common.exception.exception_service import get_traceback
 from tracardi.domain.event import Event
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.service.merging.facade_old import merge_profile_by_merging_keys, get_merging_keys_and_values

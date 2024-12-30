@@ -1,11 +1,4 @@
-import asyncio
-from typing import List, Tuple, Optional, Set
-
-from tracardi.domain.flat_profile import FlatProfile
-from tracardi.domain.storage_record import RecordMetadata, StorageRecords
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.storage.elastic.driver.factory import storage_manager
-from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
+from tracardi.common.logging.log_handler import get_logger
 
 logger = get_logger(__name__)
 _max_load_chunk = 1000

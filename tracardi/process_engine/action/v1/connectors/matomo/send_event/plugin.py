@@ -11,7 +11,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.domain import resource as resource_db
 from .service.page_performance import PerformanceValueGetter
 from .model.config import Config, MatomoPayload
-from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
 import hashlib
 
 

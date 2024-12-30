@@ -5,7 +5,7 @@ from tracardi.service.storage.elastic.interface import raw as raw_db
 from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
 from elasticsearch import ElasticsearchException
-from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.common.template.dot_template import DotTemplate
 from pytimeparse import parse as parse_time
 
 

@@ -1,6 +1,6 @@
 from tracardi.domain.entity import Entity
 
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from tracardi.process_engine.action.v1.connectors.matomo.send_event.service.page_performance import \
     PerformanceValueGetter
 from tracardi.domain.event import Event

@@ -6,7 +6,7 @@ from tracardi.service.domain import resource as resource_db
 from tracardi.process_engine.action.v1.connectors.mixpanel.client import MixPanelAPIClient
 from tracardi.service.plugin.domain.result import Result
 from datetime import datetime
-from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
 
 
 def validate(config: dict) -> Config:

@@ -1,7 +1,7 @@
 from typing import Optional
 from enum import Enum
-from tracardi.service.notation.dot_accessor import DotAccessor
-from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
+from tracardi.common.template.dot_template import DotTemplate
 from tracardi.service.plugin.domain.config import PluginConfig
 
 

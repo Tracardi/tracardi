@@ -14,8 +14,8 @@ from tracardi.context import get_context
 from tracardi.domain.entity import Entity, FlatEntity
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.singleton import Singleton
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.common.singleton import Singleton
 
 from .elastic_client import ElasticClient
 

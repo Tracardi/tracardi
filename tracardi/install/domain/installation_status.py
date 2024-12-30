@@ -6,11 +6,11 @@ from pydantic import BaseModel
 
 from tracardi.domain import ExtraInfo
 from tracardi.service.license import License, MULTI_TENANT
-from tracardi.service.singleton import Singleton
+from tracardi.common.singleton import Singleton
 from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from tracardi.config import tracardi, mysql
 from tracardi.context import ServerContext, get_context, Context
-from tracardi.exceptions.log_handler import get_installation_logger
+from tracardi.common.logging.log_handler import get_installation_logger
 from tracardi.service import system
 from tracardi.service.storage.index import Resource
 

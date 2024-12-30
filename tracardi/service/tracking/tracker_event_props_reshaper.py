@@ -1,6 +1,6 @@
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from tracardi.domain.event_reshaping_schema import EventReshapingSchema
-from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
 from typing import List, Tuple, Optional
 
 

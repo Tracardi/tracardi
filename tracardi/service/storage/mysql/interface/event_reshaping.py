@@ -5,7 +5,7 @@ from tracardi.service.storage.mysql.mapping.event_reshaping_mapping import map_t
 from tracardi.service.storage.mysql.service.event_reshaping_service import EventReshapingService
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 from tracardi.config import memory_cache
-from tracardi.service.decorators.async_cache import AsyncCache
+from tracardi.common.decorator.async_cache import AsyncCache
 
 ers = EventReshapingService()
 

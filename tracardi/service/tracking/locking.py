@@ -4,7 +4,7 @@ import asyncio
 
 from typing import Union, Tuple, Optional
 
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.adapter.cache.cache_protocol import CacheProtocol
 from tracardi.service.adapter.cache_adaper_selector import cache_adapter
 

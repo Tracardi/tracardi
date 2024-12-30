@@ -5,7 +5,7 @@ from typing import Generator, Any, Tuple
 
 from tracardi.config import tracardi, elastic
 from tracardi.context import get_context
-from tracardi.service.singleton import Singleton
+from tracardi.common.singleton import Singleton
 
 _local_dir = os.path.dirname(__file__)
 

@@ -1,7 +1,7 @@
 from tracardi.context import ServerContext, Context
 from tracardi.domain.profile import Profile
-from tracardi.service.notation.dot_accessor import DotAccessor
-from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
+from tracardi.common.template.dot_template import DotTemplate
 
 
 def test_dot_template():

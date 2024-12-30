@@ -7,7 +7,7 @@ from uuid import uuid4
 from defer.model.transport_context import TransportContext
 from tracardi.version import version as system_version
 from tracardi.domain.user import User
-from tracardi.service.singleton import Singleton
+from tracardi.common.singleton import Singleton
 from tracardi.service.tracking.tracker_profiler import TrackerProfiler
 from urllib.parse import parse_qs
 

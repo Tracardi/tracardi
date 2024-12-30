@@ -4,7 +4,7 @@ from uuid import uuid4
 from typing import Optional
 
 from tracardi.domain.entity import Entity
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.tracking.storage.session_storage import load_session
 from tracardi.domain.session import Session
 

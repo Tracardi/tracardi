@@ -8,7 +8,7 @@ from aiohttp import ClientConnectorError, BasicAuth, ContentTypeError
 from pydantic import BaseModel
 
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from .destination_interface import DestinationInterface
 from ...domain import ExtraInfo
 from ...domain.flat_event import FlatEvent

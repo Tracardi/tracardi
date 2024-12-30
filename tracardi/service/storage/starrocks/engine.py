@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from tracardi.config import mysql, starrocks
-from tracardi.service.singleton import Singleton
+from tracardi.config import starrocks
+from tracardi.common.singleton import Singleton
 
 
 class AsyncStarRocksEngine(metaclass=Singleton):

@@ -6,7 +6,7 @@
 # from tracardi.domain.rule import Rule
 #
 # from tracardi.exceptions.log_handler import get_logger
-# from tracardi.exceptions.exception_service import get_traceback
+# from tracardi.common.exception.exception_service import get_traceback
 # from tracardi.domain.event import Event
 # from tracardi.domain.profile import Profile
 # from tracardi.domain.session import Session

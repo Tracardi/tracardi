@@ -19,7 +19,7 @@ from .application import Application
 from .device import Device
 from .. import ExtraInfo
 from ..request import Request
-from ...exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
 from ..payload.event_payload import EventPayload
@@ -27,7 +27,7 @@ from ..session import Session
 from ..time import Time
 from ..entity import Entity, PrimaryEntity, DefaultEntity
 from tracardi.domain.flat_profile import FlatProfile
-from ...service.dotdict import DotDict
+from tracardi.common.dot_notation.dotdict import DotDict
 from ...service.storage.elastic.interface.collector.load.flat_profile import load_flat_profile
 
 from ...service.utils.getters import get_entity_id

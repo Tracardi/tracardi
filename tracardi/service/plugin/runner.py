@@ -6,7 +6,7 @@ from tracardi.domain.event import Event
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from tracardi.service.plugin.domain.console import Console
 from tracardi.service.plugin.domain.result import Result
 

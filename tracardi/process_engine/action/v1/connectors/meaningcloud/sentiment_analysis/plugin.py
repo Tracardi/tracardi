@@ -5,7 +5,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from .model.configuration import Configuration
-from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.common.template.dot_template import DotTemplate
 from tracardi.service.tracardi_http_client import HttpClient
 
 

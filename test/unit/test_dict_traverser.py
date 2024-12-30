@@ -1,5 +1,5 @@
-from tracardi.service.notation.dict_traverser import DictTraverser
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 
 
 def test_should_return_spread_data():

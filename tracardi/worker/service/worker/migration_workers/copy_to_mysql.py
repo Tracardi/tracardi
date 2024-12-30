@@ -22,7 +22,7 @@ from tracardi.domain.rule import Rule
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.domain.task import Task
 from tracardi.domain.user import User
-from tracardi.exceptions.log_handler import get_installation_logger
+from tracardi.common.logging.log_handler import get_installation_logger
 from tracardi.service.storage.mysql.mapping.bridge_mapping import map_to_bridge_table
 from tracardi.service.storage.mysql.mapping.consent_type_mapping import map_to_consent_type_table
 from tracardi.service.storage.mysql.mapping.destination_mapping import map_to_destination_table

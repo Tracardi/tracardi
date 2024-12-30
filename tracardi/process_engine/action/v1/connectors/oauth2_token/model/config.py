@@ -1,6 +1,6 @@
 from pydantic import field_validator
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.service.dot_notation_validator import is_dot_notation_valid
+from tracardi.common.dot_notation.dot_notation_validator import is_dot_notation_valid
 from tracardi.service.plugin.domain.config import PluginConfig
 
 

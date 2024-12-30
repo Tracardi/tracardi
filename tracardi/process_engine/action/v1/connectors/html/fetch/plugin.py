@@ -1,7 +1,7 @@
 import asyncio
 import aiohttp
 from aiohttp import ClientConnectorError
-from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result

@@ -2,7 +2,7 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
-from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.common.template.dot_template import DotTemplate
 from tracardi.service.plugin.domain.config import PluginConfig
 
 

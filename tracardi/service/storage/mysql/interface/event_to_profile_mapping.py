@@ -3,7 +3,7 @@ from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.service.storage.mysql.mapping.event_to_profile_mapping import map_to_event_to_profile
 from tracardi.service.storage.mysql.service.event_to_profile_service import EventToProfileMappingService
 from tracardi.config import memory_cache
-from tracardi.service.decorators.async_cache import AsyncCache
+from tracardi.common.decorator.async_cache import AsyncCache
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
 etpms = EventToProfileMappingService()

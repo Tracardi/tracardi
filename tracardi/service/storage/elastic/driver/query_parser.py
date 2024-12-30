@@ -1,6 +1,6 @@
 from typing import Optional
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.singleton import Singleton
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.common.singleton import Singleton
 from tracardi.process_engine.tql.parser import Parser
 from tracardi.process_engine.tql.transformer.filter_transformer import FilterTransformer
 

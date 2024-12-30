@@ -1,4 +1,4 @@
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 
 
 class PerformanceValueGetter:

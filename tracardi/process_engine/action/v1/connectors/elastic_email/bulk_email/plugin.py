@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from email_validator import validate_email, EmailNotValidError
-from tracardi.service.notation.dot_template import DotTemplate
+from tracardi.common.template.dot_template import DotTemplate
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result

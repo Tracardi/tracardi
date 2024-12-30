@@ -6,7 +6,7 @@ from aiohttp import ClientConnectorError
 from tracardi.domain.resource import Resource
 from tracardi.domain.settings import Settings
 from tracardi.service.domain import resource as resource_db
-from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData
 from tracardi.service.plugin.domain.result import Result

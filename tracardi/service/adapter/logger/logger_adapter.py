@@ -1,6 +1,6 @@
 import os
 
-from tracardi.service.logging.formater import CustomFormatter, JSONFormatter, ConsoleFormatter
+from tracardi.common.logging.formater import CustomFormatter, JSONFormatter, ConsoleFormatter
 
 
 def log_format_adapter():

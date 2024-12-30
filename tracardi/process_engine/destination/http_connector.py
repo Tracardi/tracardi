@@ -10,7 +10,7 @@ from aiohttp import ClientConnectorError, BasicAuth, ContentTypeError
 from pydantic import BaseModel
 
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.process_engine.action.v1.connectors.api_call.model.configuration import Method
 from .destination_interface import DestinationInterface

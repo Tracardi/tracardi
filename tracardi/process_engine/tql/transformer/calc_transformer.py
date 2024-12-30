@@ -1,12 +1,10 @@
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from tracardi.process_engine.tql.transformer.transformer_namespace import TransformerNamespace
 from lark import v_args
 
 
 @v_args(inline=True)
 class CalcTransformer(TransformerNamespace):
-    from operator import add, sub, mul, truediv as div, neg
-
     number = float
 
     def __init__(self, dot, *args, **kwargs):

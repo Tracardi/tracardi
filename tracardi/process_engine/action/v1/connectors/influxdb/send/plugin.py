@@ -7,7 +7,7 @@ from .model.config import Config, InfluxCredentials
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
 from tracardi.service.domain import resource as resource_db
-from tracardi.service.notation.dict_traverser import DictTraverser
+from tracardi.common.dot_notation.dict_traverser import DictTraverser
 from dateutil.parser import parse, ParserError
 
 

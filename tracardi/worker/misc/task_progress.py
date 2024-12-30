@@ -2,7 +2,7 @@ from typing import Optional
 from uuid import uuid4
 
 from tracardi.domain.task import Task
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.mysql.mapping.task_mapping import map_to_task
 from tracardi.service.storage.mysql.service.task_service import BackgroundTaskService
 from tracardi.service.utils.date import now_in_utc

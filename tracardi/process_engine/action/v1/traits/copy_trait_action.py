@@ -1,17 +1,14 @@
 from pydantic import BaseModel
 
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent, \
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
 from deepdiff import DeepDiff
-from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 
 from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.service.plugin.domain.config import PluginConfig
-from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_graph import FlowGraph
 
 logger = get_logger(__name__)

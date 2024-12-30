@@ -1,5 +1,5 @@
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 
 
 def test_should_access_object_with_flat_profile():

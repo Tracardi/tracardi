@@ -1,6 +1,6 @@
 import asyncio
 
-from tracardi.service.decorators.async_cache import AsyncCache
+from tracardi.common.decorator.async_cache import AsyncCache
 
 async def main():
     @AsyncCache(ttl=1, throttle=3, use_context=False)

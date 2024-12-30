@@ -1,4 +1,4 @@
-from tracardi.service.notation.event_description_template import EventDescriptionTemplate
+from tracardi.common.template.event_description_template import EventDescriptionTemplate
 
 
 def test_event_template():

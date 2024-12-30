@@ -4,7 +4,7 @@ import pytest
 from time import sleep
 
 from tracardi.context import ServerContext, Context
-from tracardi.service.decorators.async_cache import AsyncCache
+from tracardi.common.decorator.async_cache import AsyncCache
 
 run_counter = 0
 

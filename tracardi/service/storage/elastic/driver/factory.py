@@ -5,7 +5,7 @@ from tracardi.service.storage.elastic.driver.persistence_service import Persiste
 from tracardi.domain.entity import Entity
 from pydantic import BaseModel
 from tracardi.service.storage.elastic.driver.agg_result import AggResult
-from tracardi.exceptions.exception import TracardiException, StorageException
+from tracardi.common.exception.exception import TracardiException, StorageException
 from tracardi.domain.storage_record import StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 import tracardi.domain.entity as domain

@@ -1,7 +1,7 @@
 import time
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.service.tracker import Tracker
-from tracardi.service.tracker_config import TrackerConfig
+from tracardi.domain.tracker_config import TrackerConfig
 from typing import List
 
 

@@ -3,8 +3,7 @@ from typing import Optional, List
 from pydantic import BaseModel
 
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.domain.session import Session
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.common.logging.log_handler import get_logger
 from .destination_interface import DestinationInterface
 from ...domain.flat_event import FlatEvent
 

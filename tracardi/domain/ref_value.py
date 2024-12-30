@@ -1,8 +1,8 @@
 from typing import Any, Optional
 from pydantic import BaseModel
 
-from tracardi.exceptions.log_handler import get_logger
-from tracardi.service.dotdict import DotDict
+from tracardi.common.logging.log_handler import get_logger
+from tracardi.common.dot_notation.dotdict import DotDict
 
 logger = get_logger(__name__)
 

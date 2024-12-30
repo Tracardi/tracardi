@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.service.notation.dot_accessor import DotAccessor
+from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from tracardi.domain.event import Event, EventMetadata
 from tracardi.domain.event_session import EventSession
 from tracardi.domain.entity import Entity
