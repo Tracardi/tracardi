@@ -47,7 +47,6 @@ def validate(config: dict) -> Configuration:
 
 
 class CreateResponseAction(ActionRunner):
-
     config: Configuration
 
     async def set_up(self, init):
@@ -65,6 +64,10 @@ class CreateResponseAction(ActionRunner):
             template = DictTraverser(dot)
 
         output = json.loads(self.config.body)
+
+        if not isinstance(output, dict):
+            raise ValueError(f"Wrong configuration. Output must be an object. Got {type(output)}")
+
         result = template.reshape(reshape_template=output)
 
         flow = self.flow  # type: FlowGraph

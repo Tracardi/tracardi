@@ -42,8 +42,9 @@ class RulesEngine:
         self.profile = profile  # Profile can be None if profile_less event
         self.events_rules = events_rules
 
-    async def invoke(self, ux: list, tracker_payload: TrackerPayload, debug: bool) -> RuleInvokeResult:
+    async def invoke(self, tracker_payload: TrackerPayload, debug: bool) -> RuleInvokeResult:
 
+        ux = []
         source_id = tracker_payload.source.id
         flow_task_store = defaultdict(list)
         debugger = Debugger()
@@ -163,9 +164,6 @@ class RulesEngine:
                             tracker_payload=tracker_payload
                         )
 
-                        # Flows are run concurrently
-                        logger.debug(f"Invoked workflow {flow.name}:{flow.id} for event {event.type}:{event.id}")
-
                         # Debugging can be controlled from tracker payload.
 
                         flow_task = asyncio.create_task(
@@ -264,7 +262,8 @@ class RulesEngine:
             invoked_rules,
             invoked_flows,
             flow_responses,
-            changed_field_timestamps
+            changed_field_timestamps,
+            ux
         )
 
     def _get_merging_keys_and_values(self):

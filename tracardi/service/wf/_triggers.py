@@ -2,33 +2,30 @@ from contextlib import asynccontextmanager
 from uuid import uuid4
 from typing import List, Optional, Tuple, Dict, Set
 
-from defer.model.transport_context import TransportContext
-from tracardi.config import tracardi
-from tracardi.context import ServerContext, Context
-from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.rule_invoke_result import RuleInvokeResult
-from tracardi.service.wf.field_mappings_cache import add_new_field_mappings
-from tracardi.service.storage.elastic.interface.collector.mutation.profile import save_profile_in_db_and_cache
-from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db_and_cache
-from tracardi.service.storage.redis.collections import Collection
-from tracardi.service.tracking.locking import Lock, async_mutex
-from tracardi.domain.event import flat_events_to_event
-from tracardi.domain.flat_event import FlatEvent
-from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
-from tracardi.service.wf.domain.tracker_result import TrackerResult
 from tracardi.domain import ExtraInfo
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.rule import Rule
-from tracardi.exceptions.log_handler import get_logger
+from tracardi.domain.rule_invoke_result import RuleInvokeResult
+
 from tracardi.exceptions.exception_service import get_traceback
-from tracardi.domain.event import Event
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.service.merging.facade_old import merge_profile_by_merging_keys, get_merging_keys_and_values
 from tracardi.service.utils.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 from tracardi.service.storage.mysql.interface import workflow_trigger_dao
+from tracardi.config import tracardi
+from tracardi.domain.payload.tracker_payload import TrackerPayload
+from tracardi.exceptions.log_handler import get_logger
+from tracardi.service.wf.field_mappings_cache import add_new_field_mappings
+from tracardi.service.storage.elastic.interface.collector.mutation.profile import save_profile_in_db_and_cache
+from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db_and_cache
 from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
+from tracardi.domain.event import Event, flat_events_to_event
+from tracardi.domain.flat_event import FlatEvent
+from tracardi.domain.profile import Profile
+from tracardi.domain.session import Session
+from tracardi.service.wf.domain.tracker_result import TrackerResult
+
 
 logger = get_logger(__name__)
 
@@ -243,23 +240,30 @@ async def _run_workflows(tracker_payload: TrackerPayload, profile: Profile, sess
         )
 
 
+
 async def _trigger_workflows(profile: Profile,
-                             session: Session,
-                             events: List[Event],
-                             tracker_payload: TrackerPayload,
-                             debug: bool) -> Tuple[
+                            session: Session,
+                            events: List[Event],
+                            tracker_payload: TrackerPayload,
+                            debug: bool) -> Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict], Dict[str, List], bool]:
-    # Checks rules and trigger workflows for given events
+    # Checks rules and trigger workflows for given events and saves profile and session
 
-    tracker_result = await _run_workflows(tracker_payload, profile, session, events, debug)
+    ux = []
+    response = {}
+    tracker_result = None
 
-    # Reassign results
+    if tracardi.enable_workflow:
 
-    profile = tracker_result.profile
-    session = tracker_result.session
-    events = tracker_result.events
-    ux = tracker_result.ux
-    response = tracker_result.response
+        tracker_result = await _run_workflows(tracker_payload, profile, session, events, debug)
+
+        # Reassign results
+
+        profile = tracker_result.profile
+        session = tracker_result.session
+        events = tracker_result.events
+        ux = tracker_result.ux
+        response = tracker_result.response
 
     is_wf_triggered = isinstance(tracker_result, TrackerResult) and tracker_result.wf_triggered
 
@@ -337,23 +341,8 @@ async def exec_workflow(profile_id: Optional[str], session: Session, flat_events
             profile_id, session, events, tracker_payload
         )
 
-    profile_key = Lock.get_key(Collection.lock_tracker, "profile", profile_id)
-    profile_lock = Lock(profile_key, default_lock_ttl=5)
-
-    # Load profile - it could be changed since last loaded
-    async with async_mutex(profile_lock, name='workflow-worker'):
-        profile, session, events, ux, response, changed_fields, is_wf_triggered = await _exec_workflow(
-            profile_id, session, events, tracker_payload
-        )
+    profile, session, events, ux, response, changed_fields, is_wf_triggered = await _exec_workflow(
+        profile_id, session, events, tracker_payload
+    )
 
     return profile, session, events, ux, response, changed_fields, is_wf_triggered
-
-
-async def exec_workflow_in_queue(context: TransportContext,
-                                 profile_id: Optional[str],
-                                 session: Session,
-                                 flat_events: List[FlatEvent],
-                                 tracker_payload: TrackerPayload) -> Optional[Tuple[
-    Profile, Session, List[Event], Optional[list], Optional[dict], Dict[str, list], bool]]:
-    with ServerContext(Context(**context.as_context())) as c:
-        return await exec_workflow(profile_id, session, flat_events, tracker_payload)

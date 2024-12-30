@@ -89,29 +89,29 @@ class WorkflowTriggerService(TableService):
 
         return event_type_rules, has_routes
 
-    @staticmethod
-    def _read_rule(event_type_id: str, rules: Dict[str, List[Rule]]) -> List[Rule]:
-        if event_type_id not in rules:
-            return []
-
-        return rules[event_type_id]
+    # @staticmethod
+    # def _read_rule(event_type_id: str, rules: Dict[str, List[Rule]]) -> List[Rule]:
+    #     if event_type_id not in rules:
+    #         return []
+    #
+    #     return rules[event_type_id]
 
     async def has_rules_for_events(self, source_id: str, event_types: Set[str]) -> bool:
         _, has_routing_rules = await self.get_rules_for_source_and_event_type(source_id, event_types)
         return has_routing_rules
 
-    async def load_by_source_and_events(self, source_id: str, events: List[Event]) -> Optional[
-        List[Tuple[List[Rule], Event]]]:
-
-        # Get event types for valid events
-        event_types = {event.type for event in events if event.metadata.valid}
-
-        rules, has_routing_rules = await self.get_rules_for_source_and_event_type(source_id, event_types)
-
-        if not has_routing_rules:
-            return None
-
-        return [(self._read_rule(event.type, rules), event) for event in events]
+    # async def load_by_source_and_events(self, source_id: str, events: List[Event]) -> Optional[
+    #     List[Tuple[List[Rule], Event]]]:
+    #
+    #     # Get event types for valid events
+    #     event_types = {event.type for event in events if event.metadata.valid}
+    #
+    #     rules, has_routing_rules = await self.get_rules_for_source_and_event_type(source_id, event_types)
+    #
+    #     if not has_routing_rules:
+    #         return None
+    #
+    #     return [(self._read_rule(event.type, rules), event) for event in events]
 
     async def load_by_event_type(self, event_type_id: str, limit: int = 100) -> SelectResult:
         where = where_tenant_and_mode_context(

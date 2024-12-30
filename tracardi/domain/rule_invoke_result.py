@@ -10,7 +10,8 @@ class RuleInvokeResult:
                  invoked_rules: Dict[str, List[str]],
                  invoked_flows: List[str],
                  flow_responses: List[dict],
-                 changed_fields: Dict[str, List]):
+                 changed_fields: Dict[str, List],
+                 ux: List):
         self.flow_responses: List[dict] = flow_responses
         self.invoked_rules: Dict[str, List[str]] = invoked_rules
         self.invoked_flows: List[str] = invoked_flows
@@ -18,3 +19,13 @@ class RuleInvokeResult:
         self.ran_event_types: List[str] = ran_event_types
         self.debugger: Debugger = debugger
         self.changed_fields: Dict[str, List] = changed_fields
+        self.ux = ux
+
+
+    def __repr__(self):
+        return (f"RuleInvokeResult(flow_responses={self.flow_responses}, "
+                f"invoked_rules={dict(self.invoked_rules)}, "
+                f"invoked_flows={self.invoked_flows}), "
+                f"event_types={self.ran_event_types}, "
+                f"changed_fields={self.changed_fields}, "
+                f"ux={bool(self.ux)}")

@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Generator
 
 from tracardi.domain.event import Event
 from tracardi.domain.flat_event import FlatEvent
@@ -36,30 +36,22 @@ async def load_by_workflow(workflow_id: str, limit: int = None, offset: int = No
     return _records(await wts.load_by_workflow(workflow_id, limit, offset), map_to_workflow_trigger_rule)
 
 
-async def load_rule(event_type_id, source_id):
-    return await wts.load_rule(event_type_id, source_id)
-
-
-async def has_rules_for_events(source_id: str, events: List[FlatEvent]) -> bool:
-    # Get event types for valid events
-    event_types = {event.type for event in events if event.is_valid()}
-    return await wts.has_rules_for_events(source_id, event_types)
-
-# Cached
-async def load_by_source_and_events(source_id: str, events: List[Event]) -> Optional[
-    List[Tuple[List[Rule], Event]]]:
-    return await wts.load_by_source_and_events(source_id, events)
+# async def has_rules_for_events(source_id: str, events: List[FlatEvent]) -> bool:
+#     # Get event types for valid events
+#     event_types = {event.type for event in events if event.is_valid()}
+#     return await wts.has_rules_for_events(source_id, event_types)
 
 
 async def load_by_event_type(event_type_id: str, limit: int = 100) -> Tuple[List[Rule], int]:
     return _records(await wts.load_by_event_type(event_type_id, limit), map_to_workflow_trigger_rule)
 
 
-# async def load_by_segment(segment_id: str, limit: int = 100) -> SelectResult:
-#     return await wts.load_by_segment(segment_id, limit)
-
-
 # Cache
+
+async def load_rule(event_type_id, source_id) -> List[Rule]:
+    records = await wts.load_rule(event_type_id, source_id)
+    return list(records.map_to_objects(map_to_workflow_trigger_rule))
+
 
 async def delete_by_id(trigger_id: str) -> Tuple[bool, Optional[Rule]]:
     return await wts.delete_by_id(trigger_id)
