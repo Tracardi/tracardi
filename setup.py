@@ -15,7 +15,8 @@ setup(
     author_email='risto.kowaczewski@gmail.com',
     packages=['tracardi'],
     install_requires=[
-        'pip>=21.2.4',
+        'setuptools>=75.6.0',
+        'pip>=24.3.1',
         'pydantic==2.10.3',
         'aiohttp[speedups]',
         'redis==5.2.1',
