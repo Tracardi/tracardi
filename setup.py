@@ -70,12 +70,12 @@ setup(
         'user-agents==2.2.0',
         'faker==18.4.0',
         'faker-commerce==1.0.3',
-        'SQLAlchemy==2.0.23',
+        'SQLAlchemy==2.0.36',
         'speedict==0.3.12',
         'boto3==1.34.41',
         'dotdict_parser>=0.7.2',
         # Worker requirements
-        'mysql-connector-python==8.0.29',
+        'mysql-connector-python==8.4.0',
         'requests',
         # Com requirements
         'weaviate-client==3.23.2',
