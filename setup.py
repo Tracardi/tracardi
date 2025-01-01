@@ -56,7 +56,7 @@ setup(
         # 'grpcio==1.48.2',
         # 'grpcio-tools==1.48.2',
         # 'protobuf==3.20.2',
-        'certifi==2022.9.24',
+        'certifi==2024.12.14',
         'celery==5.2.6',
         'random-password-generator==2.2.0',
         'aiomqtt==1.0.0',
