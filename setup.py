@@ -82,7 +82,7 @@ setup(
         'weaviate-client==3.23.2',
         'twilio==8.2.1',
         'huey',
-        'pulsar-client==3.3.0',
+        'pulsar-client==3.5.0',
         'aiokafka==0.8.1',
         'tabulate',
         # Adapters
