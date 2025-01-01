@@ -1,12 +1,9 @@
-from lxml import etree
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.runner import ActionRunner
 from pydantic import field_validator
-from tracardi.domain.profile import Profile
-from tracardi.service.tracardi_http_client import HttpClient
 
 from bs4 import BeautifulSoup
 

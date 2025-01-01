@@ -24,7 +24,7 @@ jsonschema==4.3.3
 python-dateutil
 mailchimp-transactional
 email-validator
-lxml
+lxml==5.3.0
 beautifulsoup4
 mailchimp-marketing
 names==0.3.0
