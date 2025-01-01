@@ -66,7 +66,7 @@ upstash_redis==1.2.0
 
 # Worker requirements
 mysql-connector-python==8.4.0
-requests>=2.32.0,<3
+requests>=2.0.0,<3
 
 # Com requirements
 huey

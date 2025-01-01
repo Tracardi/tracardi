@@ -77,7 +77,7 @@ setup(
         'dotdict_parser>=0.7.2',
         # Worker requirements
         'mysql-connector-python==8.4.0',
-        'requests>=2.32.0,<3',
+        'requests>=2.0.0,<3',
         # Com requirements
         'weaviate-client==3.23.2',
         'twilio==8.2.1',
