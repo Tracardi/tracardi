@@ -38,7 +38,7 @@ setup(
         'python-dateutil==2.8.2',
         'mailchimp-transactional',
         'email-validator',
-        'lxml==4.9.1',
+        'lxml==5.3.0',
         'beautifulsoup4',
         'names==0.3.0',
         'motor~=3.6.0',
