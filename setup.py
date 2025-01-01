@@ -41,7 +41,7 @@ setup(
         'lxml==4.9.1',
         'beautifulsoup4',
         'names==0.3.0',
-        'motor~=2.5.0',
+        'motor~=3.6.0',
         'aiodns',
         'urllib3>=1.26,<2',
         'geoip2==4.2.0',
