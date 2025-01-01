@@ -43,7 +43,7 @@ setup(
         'names==0.3.0',
         'motor~=2.5.0',
         'aiodns',
-        'urllib3==1.26.12',
+        'urllib3>=1.26,<2',
         'geoip2==4.2.0',
         'aiomysql==0.1.1',
         'kombu==5.2.4',
@@ -77,7 +77,7 @@ setup(
         'dotdict_parser>=0.7.2',
         # Worker requirements
         'mysql-connector-python==8.4.0',
-        'requests',
+        'requests>=2.32.0,<3',
         # Com requirements
         'weaviate-client==3.23.2',
         'twilio==8.2.1',
