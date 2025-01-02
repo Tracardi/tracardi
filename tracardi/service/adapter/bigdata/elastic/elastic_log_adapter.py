@@ -5,7 +5,7 @@ from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.adapter.bigdata.elastic.client.elastic_query import get_query_to_load_by_field_and_value, \
     get_agg_query_for_log_levels
 
-from com_tracardi.protocol.bigdata.collector_protocol import CollectorProtocol
+from tracardi.service.adapter.bigdata.collector_protocol import CollectorProtocol
 from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from tracardi.service.utils.date import now_in_utc
 
