@@ -3,7 +3,8 @@ redis
 mysql-connector-python==8.4.0
 pydantic>=2.3.0
 requests
-elasticsearch==7.10.1
+#elasticsearch==7.10.1
+elasticsearch==7.17.0
 pulsar-client==3.5.0
 huey==2.4.5
 

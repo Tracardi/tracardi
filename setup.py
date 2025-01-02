@@ -21,7 +21,7 @@ setup(
         'aiohttp[speedups]',
         'redis==5.2.1',
         'aioredis==2.0.1',
-        'elasticsearch[async]==7.10.1',
+        'elasticsearch[async]==7.17.0',
         'prodict>=0.8.18',
         'tzlocal',
         'python-multipart>=0.0.5',
