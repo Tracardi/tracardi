@@ -34,7 +34,7 @@ urllib3>=1.26,<2
 geoip2~=4.2.0
 aiomysql
 kombu==5.2.4
-asyncpg
+asyncpg==0.30.0
 aiobotocore~=2.12.1
 google-api-python-client == 2.33.0
 google_auth_oauthlib == 0.4.6

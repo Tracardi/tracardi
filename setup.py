@@ -47,7 +47,7 @@ setup(
         'geoip2==4.2.0',
         'aiomysql==0.1.1',
         'kombu==5.2.4',
-        'asyncpg==0.26.0',
+        'asyncpg==0.30.0',
         'aiobotocore~=2.12.1',
         'google-api-python-client == 2.33.0',
         'google_auth_oauthlib == 0.4.6',
