@@ -30,31 +30,31 @@ logger = get_logger(__name__)
 #             }
 #         }
 #     })
-
-async def load_profiles_with_duplicated_ids(log_error=True):
-    query = {
-        "size": 0,
-        "aggs": {
-            "duplicate_ids": {
-                "terms": {
-                    "field": "ids",
-                    "min_doc_count": 2,
-                    "size": 1000
-                }
-            }
-        }
-    }
-
-    records = await storage_manager('profile').query(query, log_error)
-
-    duplicated_ids = set()
-    for data in records.aggregations("duplicate_ids").buckets():
-        logger.info(f"Found {data['doc_count']} profiles with the same ID='{data['key']}'")
-        duplicated_ids.add(data['key'])
-
-    if duplicated_ids:
-        async for row in load_by_ids(list(duplicated_ids), batch=1000):
-            yield row
+#
+# async def load_profiles_with_duplicated_ids(log_error=True):
+#     query = {
+#         "size": 0,
+#         "aggs": {
+#             "duplicate_ids": {
+#                 "terms": {
+#                     "field": "ids",
+#                     "min_doc_count": 2,
+#                     "size": 1000
+#                 }
+#             }
+#         }
+#     }
+#
+#     records = await storage_manager('profile').query(query, log_error)
+#
+#     duplicated_ids = set()
+#     for data in records.aggregations("duplicate_ids").buckets():
+#         logger.info(f"Found {data['doc_count']} profiles with the same ID='{data['key']}'")
+#         duplicated_ids.add(data['key'])
+#
+#     if duplicated_ids:
+#         async for row in load_by_ids(list(duplicated_ids), batch=1000):
+#             yield row
 
 
 async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
@@ -98,28 +98,28 @@ async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
     return profile_records.first()
 
 
-def load_by_ids(profile_ids: List[str], batch):
-    query = {
-        "query": {
-            "bool": {
-                "should": [
-                    {
-                        "terms": {
-                            "ids": profile_ids
-                        }
-                    },
-                    {
-                        "terms": {
-                            "id": profile_ids
-                        }
-                    }
-                ],
-                "minimum_should_match": 1
-            }
-        }
-    }
-
-    return storage_manager('profile').scan(query, batch)
+# def load_by_ids(profile_ids: List[str], batch):
+#     query = {
+#         "query": {
+#             "bool": {
+#                 "should": [
+#                     {
+#                         "terms": {
+#                             "ids": profile_ids
+#                         }
+#                     },
+#                     {
+#                         "terms": {
+#                             "id": profile_ids
+#                         }
+#                     }
+#                 ],
+#                 "minimum_should_match": 1
+#             }
+#         }
+#     }
+#
+#     return storage_manager('profile').scan(query, batch)
 
 
 # async def load_modified_top_profiles(size):
@@ -136,16 +136,16 @@ def load_by_ids(profile_ids: List[str], batch):
 #     return await storage_manager('profile').query(query)
 
 
-async def load_by_primary_ids(profile_ids: List[str], size):
-    query = {
-        "size": size,
-        "query": {
-            "terms": {
-                "id": profile_ids
-            }
-        }
-    }
-    return await storage_manager('profile').query(query)
+# async def load_by_primary_ids(profile_ids: List[str], size):
+#     query = {
+#         "size": size,
+#         "query": {
+#             "terms": {
+#                 "id": profile_ids
+#             }
+#         }
+#     }
+#     return await storage_manager('profile').query(query)
 
 
 async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]] = None):
@@ -217,38 +217,38 @@ async def load_profile_by_values(key_value_pairs: List[Tuple[str, str]],
     return await raw_db.load_by_key_value_pairs('profile', key_value_pairs, sort_by, limit=limit)
 
 
-async def load_profiles_by_segments(segments: List[str], condition: str = 'must'):
-    """
-    Requires all segments
-    """
-    return await storage_manager('profile').load_by_values(
-        field_value_pairs=[('segments', segment) for segment in segments],
-        condition=condition
-    )
+# async def load_profiles_by_segments(segments: List[str], condition: str = 'must'):
+#     """
+#     Requires all segments
+#     """
+#     return await storage_manager('profile').load_by_values(
+#         field_value_pairs=[('segments', segment) for segment in segments],
+#         condition=condition
+#     )
 
 
-async def load_active_profile_by_field(field: str, value: str, start: int = 0, limit: int = 100) -> StorageRecords:
-    query = {
-        "from": start,
-        "size": limit,
-        "query": {
-            "bool": {
-                "must": [
-                    {
-                        "term": {
-                            field: value
-                        }
-                    },
-                    {
-                        "term": {
-                            "active": True
-                        }
-                    }
-                ]
-            }
-        }
-    }
-    return await storage_manager('profile').query(query)
+# async def load_active_profile_by_field(field: str, value: str, start: int = 0, limit: int = 100) -> StorageRecords:
+#     query = {
+#         "from": start,
+#         "size": limit,
+#         "query": {
+#             "bool": {
+#                 "must": [
+#                     {
+#                         "term": {
+#                             field: value
+#                         }
+#                     },
+#                     {
+#                         "term": {
+#                             "active": True
+#                         }
+#                     }
+#                 ]
+#             }
+#         }
+#     }
+#     return await storage_manager('profile').query(query)
 
 
 # async def aggregate_by_field(bucket, aggr_field: str, query: dict = None, bucket_size: int = 100,

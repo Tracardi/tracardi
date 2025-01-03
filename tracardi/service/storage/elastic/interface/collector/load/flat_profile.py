@@ -1,13 +1,15 @@
 from typing import Optional
 
+from tracardi.service.adapter.bigdata.adapter_selector import bd_crud_profile_adapter
 from tracardi.service.tracking.cache.flat_profile_cache import save_flat_profile_cache, load_flat_profile_cache
 from tracardi.context import Context, get_context
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.service.storage.elastic.interface import profile as profile_db
+
+_bd_crud_profile_adapter = bd_crud_profile_adapter()
 
 
 async def load_flat_profile(profile_id: str, context: Optional[Context] = None, fallback_to_db: bool = True) -> \
-Optional[FlatProfile]:
+        Optional[FlatProfile]:
     if context is None:
         context = get_context()
 
@@ -20,7 +22,7 @@ Optional[FlatProfile]:
         return None
 
     # This load is acceptable
-    flat_profile = await profile_db.load_flat_profile_by_id(profile_id)
+    flat_profile = await _bd_crud_profile_adapter.load_flat_profile_by_id(profile_id)
     save_flat_profile_cache(flat_profile, context)
 
     # Monitor change in flat profile

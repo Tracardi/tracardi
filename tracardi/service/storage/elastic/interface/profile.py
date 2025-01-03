@@ -12,8 +12,8 @@ logger = get_logger(__name__)
 #     return await profile_db.count(query)
 
 
-async def load_profile_by_primary_ids(profile_id_batch, batch):
-    return await profile_db.load_by_primary_ids(profile_id_batch, size=batch)
+# async def load_profile_by_primary_ids(profile_id_batch, batch):
+#     return await profile_db.load_by_primary_ids(profile_id_batch, size=batch)
 
 
 # async def load_modified_top_profiles(size):
@@ -157,9 +157,9 @@ async def refresh():
 #
 #     return profile
 
-
-async def load_flat_profile_by_id(profile_id: str) -> Optional[FlatProfile]:
-    record = await profile_db.load_by_id(profile_id)
-    if record is None:
-        return None
-    return FlatProfile.from_es_storage_record(record)
+#
+# async def load_flat_profile_by_id(profile_id: str) -> Optional[FlatProfile]:
+#     record = await profile_db.load_by_id(profile_id)
+#     if record is None:
+#         return None
+#     return FlatProfile.from_es_storage_record(record)
