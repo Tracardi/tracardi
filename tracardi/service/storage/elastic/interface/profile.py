@@ -16,9 +16,9 @@ async def load_profile_by_primary_ids(profile_id_batch, batch):
     return await profile_db.load_by_primary_ids(profile_id_batch, size=batch)
 
 
-async def load_modified_top_profiles(size):
-    result = await profile_db.load_modified_top_profiles(size)
-    return result.dict()
+# async def load_modified_top_profiles(size):
+#     result = await profile_db.load_modified_top_profiles(size)
+#     return result.dict()
 
 
 # async def load_profiles_marked_for_auto_merge() -> AsyncGenerator[Profile, Any]:

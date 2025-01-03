@@ -3,8 +3,10 @@ from typing import Optional, List, Dict
 from tracardi.domain.event import Event
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
+from tracardi.service.adapter.bigdata.adapter_selector import bd_elastic_adapter
 from tracardi.service.storage.driver.elastic import event as event_db
 
+_elastic_adapter = bd_elastic_adapter()
 
 # async def refresh_event_db():
 #     return await event_db.refresh()
@@ -30,30 +32,30 @@ async def count_events_in_db(query: dict = None):
     return await event_db.count(query)
 
 
-async def load_nth_last_event(event_type: str, offset: int, profile_id: Optional[str] = None):
-    return await event_db.get_nth_last_event(
-        profile_id=profile_id,
-        event_type=event_type,
-        n=(-1) * offset
-    )
+# async def load_nth_last_event(event_type: str, offset: int, profile_id: Optional[str] = None):
+#     return await event_db.get_nth_last_event(
+#         profile_id=profile_id,
+#         event_type=event_type,
+#         n=(-1) * offset
+#     )
 
 
 async def load_unique_field_value(search_query, limit):
     return await event_db.unique_field_value(search_query, limit)
 
 
-async def load_events_avg_requests():
-    result = await count_events_in_db(query={
-        "query": {
-            "range": {
-                "metadata.time.insert": {
-                    "gte": "now-5m",
-                    "lte": "now"
-                }
-            }
-        }
-    })
-    return result['count'] / (5 * 60) if 'count' in result else 0
+# async def load_events_avg_requests():
+#     result = await _elastic_adapter.core.count('event', query={
+#         "query": {
+#             "range": {
+#                 "metadata.time.insert": {
+#                     "gte": "now-5m",
+#                     "lte": "now"
+#                 }
+#             }
+#         }
+#     })
+#     return result['count'] / (5 * 60) if 'count' in result else 0
 
 
 # async def save_events_in_db(flat_events: List[FlatEvent]) -> BulkInsertResult:
@@ -103,65 +105,65 @@ async def load_events_by_session(session_id: str, limit: int) -> Optional[List[E
 #     )
 
 
-async def aggregate_events_by_profile_and_field(profile_id: str, field: str, bucket_name: str):
-    return await event_db.aggregate_profile_events_by_field(profile_id,
-                                                            field=field,
-                                                            bucket_name=bucket_name)
+# async def aggregate_events_by_profile_and_field(profile_id: str, field: str, bucket_name: str):
+#     return await event_db.aggregate_profile_events_by_field(profile_id,
+#                                                             field=field,
+#                                                             bucket_name=bucket_name)
 
 
-async def load_events_by_profile_and_field(profile_id: str, field: str, table: bool = False):
-    bucket_name = f"by_{field}"
-    result = await aggregate_events_by_profile_and_field(profile_id,
-                                                         field=field,
-                                                         bucket_name=bucket_name)
-
-    if table:
-        return {id: count for id, count in result.aggregations[bucket_name][0].items()}
-    return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
-
-
-async def aggregate_event_types_from_db() -> List[Dict[str, str]]:
-    return await event_db.aggregate_event_type()
+# async def load_events_by_profile_and_field(profile_id: str, field: str, table: bool = False):
+#     bucket_name = f"by_{field}"
+#     result = await aggregate_events_by_profile_and_field(profile_id,
+#                                                          field=field,
+#                                                          bucket_name=bucket_name)
+#
+#     if table:
+#         return {id: count for id, count in result.aggregations[bucket_name][0].items()}
+#     return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
 
 
-async def aggregate_events_by_source_and_type(source_id, time_span):
-    return await event_db.aggregate_source_by_type(source_id, time_span)
+# async def aggregate_event_types_from_db() -> List[Dict[str, str]]:
+#     return await event_db.aggregate_event_type()
 
 
-async def aggregate_events_by_source_and_tags(source_id, time_span):
-    return await event_db.aggregate_source_by_tags(source_id, time_span)
+# async def aggregate_events_by_source_and_type(source_id, time_span):
+#     return await event_db.aggregate_source_by_type(source_id, time_span)
 
 
-async def aggregate_event_tags_from_db() -> List[Dict[str, str]]:
-    return await event_db.aggregate_event_tag()
+# async def aggregate_events_by_source_and_tags(source_id, time_span):
+#     return await event_db.aggregate_source_by_tags(source_id, time_span)
 
 
-async def load_event_avg_process_time():
-    return await event_db.get_avg_process_time()
+# async def aggregate_event_tags_from_db() -> List[Dict[str, str]]:
+#     return await event_db.aggregate_event_tag()
 
 
-async def aggregate_event_statuses_from_db():
-    return await event_db.aggregate_event_status()
+# async def load_event_avg_process_time():
+#     return await event_db.get_avg_process_time()
 
 
-async def aggregate_event_devices_geo_from_db():
-    return await event_db.aggregate_event_device_geo()
+# async def aggregate_event_statuses_from_db():
+#     return await event_db.aggregate_event_status()
 
 
-async def aggregate_event_os_names_from_db():
-    return await event_db.aggregate_event_os_name()
+# async def aggregate_event_devices_geo_from_db():
+#     return await event_db.aggregate_event_device_geo()
 
 
-async def aggregate_event_channels_from_db():
-    return await event_db.aggregate_event_channels()
+# async def aggregate_event_os_names_from_db():
+#     return await event_db.aggregate_event_os_name()
 
 
-async def aggregate_event_resolutions_from_db():
-    return await event_db.aggregate_event_resolution()
+# async def aggregate_event_channels_from_db():
+#     return await event_db.aggregate_event_channels()
 
 
-async def aggregate_events_by_source_from_db(buckets_size: int):
-    return await event_db.aggregate_events_by_source(buckets_size=buckets_size)
+# async def aggregate_event_resolutions_from_db():
+#     return await event_db.aggregate_event_resolution()
+
+
+# async def aggregate_events_by_source_from_db(buckets_size: int):
+#     return await event_db.aggregate_events_by_source(buckets_size=buckets_size)
 
 
 async def aggregate_events_by_type_and_source():

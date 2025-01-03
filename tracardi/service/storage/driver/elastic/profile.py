@@ -10,26 +10,26 @@ from tracardi.service.storage.elastic.driver.factory import storage_manager
 
 logger = get_logger(__name__)
 
-async def count_profile_duplicates(profile_ids: List[str]):
-    return await storage_manager('profile').count({
-        "query": {
-            "bool": {
-                "should": [
-                    {
-                        "terms": {
-                            "ids": profile_ids
-                        }
-                    },
-                    {
-                        "terms": {
-                            "id": profile_ids
-                        }
-                    }
-                ],
-                "minimum_should_match": 1
-            }
-        }
-    })
+# async def count_profile_duplicates(profile_ids: List[str]):
+#     return await storage_manager('profile').count({
+#         "query": {
+#             "bool": {
+#                 "should": [
+#                     {
+#                         "terms": {
+#                             "ids": profile_ids
+#                         }
+#                     },
+#                     {
+#                         "terms": {
+#                             "id": profile_ids
+#                         }
+#                     }
+#                 ],
+#                 "minimum_should_match": 1
+#             }
+#         }
+#     })
 
 async def load_profiles_with_duplicated_ids(log_error=True):
     query = {
@@ -122,18 +122,18 @@ def load_by_ids(profile_ids: List[str], batch):
     return storage_manager('profile').scan(query, batch)
 
 
-async def load_modified_top_profiles(size):
-    query = {
-        "size": size,
-        "sort": [
-            {
-                "metadata.time.update": {
-                    "order": "desc"
-                }
-            }
-        ]
-    }
-    return await storage_manager('profile').query(query)
+# async def load_modified_top_profiles(size):
+#     query = {
+#         "size": size,
+#         "sort": [
+#             {
+#                 "metadata.time.update": {
+#                     "order": "desc"
+#                 }
+#             }
+#         ]
+#     }
+#     return await storage_manager('profile').query(query)
 
 
 async def load_by_primary_ids(profile_ids: List[str], size):
@@ -251,25 +251,25 @@ async def load_active_profile_by_field(field: str, value: str, start: int = 0, l
     return await storage_manager('profile').query(query)
 
 
-async def aggregate_by_field(bucket, aggr_field: str, query: dict = None, bucket_size: int = 100,
-                             min_docs_count: int = 1):
-    _query = {
-        "size": 0,
-        "aggs": {
-            bucket: {
-                "terms": {
-                    "field": aggr_field,
-                    "size": bucket_size,
-                    "min_doc_count": min_docs_count
-                }
-            }
-        }
-    }
-
-    if query:
-        _query['query'] = query
-
-    return await storage_manager('profile').query(_query)
+# async def aggregate_by_field(bucket, aggr_field: str, query: dict = None, bucket_size: int = 100,
+#                              min_docs_count: int = 1):
+#     _query = {
+#         "size": 0,
+#         "aggs": {
+#             bucket: {
+#                 "terms": {
+#                     "field": aggr_field,
+#                     "size": bucket_size,
+#                     "min_doc_count": min_docs_count
+#                 }
+#             }
+#         }
+#     }
+#
+#     if query:
+#         _query['query'] = query
+#
+#     return await storage_manager('profile').query(_query)
 
 
 # async def load_duplicated_profiles_for_profile(profile: Profile) -> StorageRecords:

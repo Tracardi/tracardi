@@ -1,10 +1,12 @@
+from tracardi.service.adapter.bigdata.adapter_selector import bd_plugin_adapter
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.elastic.interface.event import load_nth_last_event
 from .model.config import Config
 from tracardi.service.plugin.domain.result import Result
 
+
+_bd_plugin_adapter = bd_plugin_adapter()
 
 def validate(config: dict) -> Config:
     return Config(**config)
@@ -22,7 +24,7 @@ class PreviousEventGetter(ActionRunner):
         event_type = self.event.type if self.config.event_type.id == "@current" else self.config.event_type.id
 
         if self.event.metadata.profile_less is False:
-            result = await load_nth_last_event(
+            result = await _bd_plugin_adapter.load_nth_last_event(
                 profile_id=self.profile.id,
                 event_type=event_type,
                 offset=(-1) * self.config.offset
@@ -33,7 +35,7 @@ class PreviousEventGetter(ActionRunner):
             return Result(port="found", value=result)
 
         else:
-            result = await load_nth_last_event(
+            result = await _bd_plugin_adapter.load_nth_last_event(
                 event_type=event_type,
                 offset=(-1) * self.config.offset
             )

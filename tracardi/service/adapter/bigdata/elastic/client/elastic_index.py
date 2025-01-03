@@ -457,3 +457,7 @@ class ElasticIndex:
 
     async def get_mapping(self):
         return await self.client.get_mapping(self.index.get_index_alias())
+
+    async def count(self, query: Optional[dict] = None):
+        index = self.index.get_index_alias()
+        return await self.client.count(index, query)

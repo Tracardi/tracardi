@@ -56,6 +56,10 @@ class ElasticCoreAdapter:
     async def query(self, index_type: str, query: dict) -> StorageRecords:
         return await self._index(index_type).query(query)
 
+    async def count(self, index_type: str, query: Optional[dict] = None):
+        entity_index = self._index(index_type)
+        return await entity_index.count(query)
+
 
 class ElasticAdapter:
 

@@ -2,6 +2,11 @@ from typing import List, Dict
 
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.service.storage.elastic.driver.factory import storage_manager
+from tracardi.service.storage.mysql.interface import event_source_dao
+
+
+def _get_name(source_names_idx, id):
+    return source_names_idx[id] if id in source_names_idx else id
 
 
 async def _aggregate_event(bucket_name, by, filter_query=None, buckets_size=100) -> StorageAggregateResult:
@@ -26,6 +31,7 @@ async def _aggregate_event(bucket_name, by, filter_query=None, buckets_size=100)
     }
 
     return await storage_manager(index="event").aggregate(query)
+
 
 async def aggregate_event_type() -> List[Dict[str, str]]:
     bucket_name = "by_type"
@@ -104,6 +110,7 @@ async def aggregate_source_by_tags(source_id: str, time_span: str):
     except KeyError:
         return []
 
+
 async def aggregate_event_tag() -> List[Dict[str, str]]:
     bucket_name = "by_tag"
 
@@ -171,6 +178,7 @@ async def aggregate_event_status() -> List[Dict[str, str]]:
 
     return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
 
+
 async def aggregate_event_device_geo() -> List[Dict[str, str]]:
     bucket_name = "by_device_geo"
 
@@ -217,6 +225,7 @@ async def aggregate_event_os_name() -> List[Dict[str, str]]:
         return []
 
     return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
+
 
 async def aggregate_event_channels() -> List[Dict[str, str]]:
     bucket_name = "by_channel"
@@ -294,3 +303,17 @@ async def aggregate_events_by_source(buckets_size):
     source_names_idx = {source.id: source.name for source in event_source_as_named_entities}
     return [{"name": _get_name(source_names_idx, id), "value": count} for id, count in
             result.aggregations['by_source'][0].items()]
+
+
+async def load_events_avg_requests():
+    result = await storage_manager(index="event").count(query={
+        "query": {
+            "range": {
+                "metadata.time.insert": {
+                    "gte": "now-5m",
+                    "lte": "now"
+                }
+            }
+        }
+    })
+    return result['count'] / (5 * 60) if 'count' in result else 0
