@@ -14,3 +14,12 @@ class ElasticCrudProfileAdapter(ElasticAdapter):
         if record is None:
             return None
         return FlatProfile.from_es_storage_record(record)
+
+    async def load_by_id(self, profile_id: str) -> Optional[dict]:
+        record = await load_by_id(profile_id)
+        if record is None:
+            return None
+
+        result = dict(record)
+        result['_meta'] = record.get_meta_data()
+        return result

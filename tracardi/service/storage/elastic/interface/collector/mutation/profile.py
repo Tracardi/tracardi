@@ -69,7 +69,7 @@ async def delete_profile(id: str,
         context = get_context()
 
     result = await _delete_by_id(id, index)
-    await _collector_adapter.refresh('profile')
+    await _collector_adapter.core.refresh('profile')
     if cache:
         delete_flat_profile_cache(profile_id=id, context=context)
 

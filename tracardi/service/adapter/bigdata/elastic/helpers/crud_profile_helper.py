@@ -69,3 +69,8 @@ async def save(profile: Union[FlatProfile, Profile, List[Profile], Set[Profile]]
 
 async def save_all(profiles: List[Profile]):
     return await storage_manager("profile").upsert(profiles, exclude={"operation": ...})
+
+
+async def delete_by_id(id: str, index: str):
+    sm = storage_manager('profile')
+    return await sm.delete(id, index)

@@ -688,25 +688,25 @@ async def count(query: dict = None):
 #             "records": 0
 #         }
 
-
-async def get_events_by_session_and_profile(profile_id: str, session_id: str, limit: int = 100) -> StorageRecords:
-    query = {
-        "query": {
-            "bool": {
-                "must": [
-                    {"term": {"profile.id": profile_id}},
-                    {"term": {"session.id": session_id}}
-                ]
-            }
-        },
-        "sort": [
-            {
-                "metadata.time.insert": {"order": "desc"}
-            }
-        ],
-        "size": limit
-    }
-    return await storage_manager("event").query(query)
+#
+# async def get_events_by_session_and_profile(profile_id: str, session_id: str, limit: int = 100) -> StorageRecords:
+#     query = {
+#         "query": {
+#             "bool": {
+#                 "must": [
+#                     {"term": {"profile.id": profile_id}},
+#                     {"term": {"session.id": session_id}}
+#                 ]
+#             }
+#         },
+#         "sort": [
+#             {
+#                 "metadata.time.insert": {"order": "desc"}
+#             }
+#         ],
+#         "size": limit
+#     }
+#     return await storage_manager("event").query(query)
 
 
 def scan(query: dict = None, batch: int = 1000):

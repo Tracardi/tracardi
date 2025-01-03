@@ -12,3 +12,22 @@ async def load_profiles_by_segments(segments: List[str], condition: str = 'must'
         field_value_pairs=[('segments', segment) for segment in segments],
         condition=condition
     )
+
+async def get_events_by_session_and_profile(profile_id: str, session_id: str, limit: int = 100) -> StorageRecords:
+    query = {
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"profile.id": profile_id}},
+                    {"term": {"session.id": session_id}}
+                ]
+            }
+        },
+        "sort": [
+            {
+                "metadata.time.insert": {"order": "desc"}
+            }
+        ],
+        "size": limit
+    }
+    return await storage_manager("event").query(query)

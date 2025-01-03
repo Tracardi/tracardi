@@ -62,24 +62,24 @@ async def load_unique_field_value(search_query, limit):
 #     return await event_db.save(flat_events, exclude={"operation": ...})
 
 
-async def load_events_by_session_and_profile(profile_id: str, session_id: str, limit: int):
-    result = await event_db.get_events_by_session_and_profile(
-        profile_id,
-        session_id,
-        limit)
-
-    more_to_load = result.total > len(result)
-    result = [{
-        "id": doc["id"],
-        "metadata": doc["metadata"],
-        "type": doc["type"],
-        "name": doc.get('name', None),
-        "source": doc.get('source'),
-        "context": doc.get('context', None),
-        "tags": doc.get('tags', [])
-    } for doc in result]
-
-    return {"result": result, "more_to_load": more_to_load}
+# async def load_events_by_session_and_profile(profile_id: str, session_id: str, limit: int):
+#     result = await event_db.get_events_by_session_and_profile(
+#         profile_id,
+#         session_id,
+#         limit)
+#
+#     more_to_load = result.total > len(result)
+#     result = [{
+#         "id": doc["id"],
+#         "metadata": doc["metadata"],
+#         "type": doc["type"],
+#         "name": doc.get('name', None),
+#         "source": doc.get('source'),
+#         "context": doc.get('context', None),
+#         "tags": doc.get('tags', [])
+#     } for doc in result]
+#
+#     return {"result": result, "more_to_load": more_to_load}
 
 
 async def load_events_by_profile_id(profile_id: str, limit: int) -> dict:

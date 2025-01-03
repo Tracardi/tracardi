@@ -57,45 +57,45 @@ logger = get_logger(__name__)
 #             yield row
 
 
-async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
-    query = {
-        "size": 2,
-        "query": {
-            "bool": {
-                "should": [
-                    {
-                        "term": {
-                            "ids": profile_id
-                        }
-                    },
-                    {
-                        "term": {
-                            "id": profile_id
-                        }
-                    }
-                ],
-                "minimum_should_match": 1
-            }
-        },
-        "sort": [
-            {
-                "metadata.time.update": {
-                    "order": "desc"
-                }
-            }
-        ]
-    }
-
-    profile_records = await storage_manager('profile').query(query)
-
-    if profile_records.total <= 0:
-        return None
-
-    if profile_records.total > 1:
-        logger.warning(
-            "Profile {} id duplicated in the database. It will be merged with APM worker.".format(profile_id))
-
-    return profile_records.first()
+# async def load_by_id(profile_id: str) -> Optional[StorageRecord]:
+#     query = {
+#         "size": 2,
+#         "query": {
+#             "bool": {
+#                 "should": [
+#                     {
+#                         "term": {
+#                             "ids": profile_id
+#                         }
+#                     },
+#                     {
+#                         "term": {
+#                             "id": profile_id
+#                         }
+#                     }
+#                 ],
+#                 "minimum_should_match": 1
+#             }
+#         },
+#         "sort": [
+#             {
+#                 "metadata.time.update": {
+#                     "order": "desc"
+#                 }
+#             }
+#         ]
+#     }
+#
+#     profile_records = await storage_manager('profile').query(query)
+#
+#     if profile_records.total <= 0:
+#         return None
+#
+#     if profile_records.total > 1:
+#         logger.warning(
+#             "Profile {} id duplicated in the database. It will be merged with APM worker.".format(profile_id))
+#
+#     return profile_records.first()
 
 
 # def load_by_ids(profile_ids: List[str], batch):
