@@ -1,6 +1,26 @@
 from typing import Dict
 from tracardi.service.license import License, SCHEDULER
 from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, PluginTest
+from tracardi.process_engine.action.v1.ux.question_popup.plugin import QuestionPopupPlugin
+from tracardi.process_engine.action.v1.ux.cta.plugin import CtaMessageUx
+from tracardi.process_engine.action.v1.connectors.aws.s3.upload_segments.plugin import S3SegmentsUploaderPlugin
+from tracardi.process_engine.action.v1.get_integration_id_action import GetIntegrationIdAction
+from tracardi.process_engine.action.v1.add_integration_id_action import AddIntegrationIdAction
+from tracardi.process_engine.action.v1.time.time_delay.plugin import TimeDelay
+from tracardi.process_engine.action.v1.strings.string_replace.plugin import StringReplaceAction
+from tracardi.process_engine.action.v1.connectors.clicksend.sendsms.plugin import ClicksendSendSmsAction
+from tracardi.process_engine.action.v1.list.operations_on_sets.plugin import SetOperationPlugin
+from tracardi.process_engine.action.v1.list.find_max_value.plugin import FindMaxValuePlugin
+from tracardi.process_engine.action.v1.strings.string_to_date.plugin import DateConverter
+from tracardi.process_engine.action.v1.strings.string_stripper.plugin import StringStripper
+from tracardi.process_engine.action.v1.time.last_profile_visit.plugin import LastVisitAction
+from tracardi.process_engine.action.v1.connectors.telegram.post.plugin import TelegramPostAction
+from tracardi.process_engine.action.v1.connectors.google.analytics.plugin import GoogleAnalyticsEventTrackerAction
+from tracardi.process_engine.action.v1.connectors.google.analytics_v4.plugin import GoogleAnalyticsV4EventTrackerAction
+from tracardi.process_engine.action.v1.connectors.whois.plugin import WhoisAction
+from tracardi.process_engine.action.v1.operations.contains_pattern.plugin import ContainsPatternAction
+from tracardi.process_engine.action.v1.memory.collect.plugin import PayloadMemoryCollector
+from tracardi.process_engine.action.v1.password_generator_action import PasswordGeneratorAction
 
 installed_plugins: Dict[str, PluginMetadata] = {
     "tracardi.process_engine.action.v1.genai_action": PluginMetadata(
@@ -16,7 +36,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
             "api_key": "<api-key>"
         })
     ),
-    "tracardi.process_engine.action.v1.ux.question_popup.plugin": PluginMetadata(
+    QuestionPopupPlugin.__module__: PluginMetadata(
         test=PluginTest(
             init={'api_url': 'http://localhost:8686', 'content': None, 'dark_theme': False, 'event_type': None,
                   'horizontal_pos': 'center', 'left_button_text': None, 'popup_lifetime': '6', 'popup_title': None,
@@ -25,7 +45,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
             resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.ux.cta.plugin": PluginMetadata(
+    CtaMessageUx.__module__: PluginMetadata(
         test=PluginTest(
             init={
                 "title": "",
@@ -45,7 +65,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
             resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.connectors.aws.s3.upload_segments.plugin": PluginMetadata(
+    S3SegmentsUploaderPlugin.__module__: PluginMetadata(
         test=PluginTest(
             init={
                 "aws_access_key_id": "",
@@ -55,7 +75,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
             resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.get_integration_id_action": PluginMetadata(
+    GetIntegrationIdAction.__module__: PluginMetadata(
         test=PluginTest(
             init={
                 "name": "",
@@ -63,7 +83,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
             resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.add_integration_id_action": PluginMetadata(
+    AddIntegrationIdAction.__module__: PluginMetadata(
         test=PluginTest(
             init={
                 "id": "event@properties",
@@ -73,7 +93,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
             resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.time.time_delay.plugin": PluginMetadata(
+    TimeDelay.__module__: PluginMetadata(
         test=PluginTest(
             init={
                 "reference_date": None,
@@ -83,7 +103,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
             resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.strings.string_replace.plugin": PluginMetadata(
+    StringReplaceAction.__module__: PluginMetadata(
         test=PluginTest(
             init={
                 "field": "profile@",
@@ -93,7 +113,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
             resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.connectors.clicksend.sendsms.plugin": PluginMetadata(
+    ClicksendSendSmsAction.__module__: PluginMetadata(
         test=PluginTest(
             init={
                 "resource": {
@@ -111,7 +131,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
         plugin_registry="tracardi.process_engine.action.v1.connectors.clicksend.sendsms.registry"
     ),
 
-    "tracardi.process_engine.action.v1.list.operations_on_sets.plugin": PluginMetadata(
+    SetOperationPlugin.__module__: PluginMetadata(
         test=PluginTest(init={
                 "set1": "",
                 "set2": "",
@@ -119,30 +139,30 @@ installed_plugins: Dict[str, PluginMetadata] = {
             }, resource=None),
     ),
 
-    "tracardi.process_engine.action.v1.list.find_max_value.plugin": PluginMetadata(
+    FindMaxValuePlugin.__module__: PluginMetadata(
         test=PluginTest(init={
                 "source": "abc"
             }, resource=None),
     ),
 
-    "tracardi.process_engine.action.v1.strings.string_to_date.plugin": PluginMetadata(
+    DateConverter.__module__: PluginMetadata(
         test=PluginTest(init={
                 "string": "abc"
             }, resource=None),
     ),
 
-    "tracardi.process_engine.action.v1.strings.string_stripper.plugin": PluginMetadata(
+    StringStripper.__module__: PluginMetadata(
         test=PluginTest(init={
                 "string": "abc",
                 "to_remove": "a",
             }, resource=None),
     ),
 
-    "tracardi.process_engine.action.v1.time.last_profile_visit.plugin": PluginMetadata(
+    LastVisitAction.__module__: PluginMetadata(
         test=PluginTest(init=None, resource=None),
     ),
 
-    "tracardi.process_engine.action.v1.connectors.telegram.post.plugin": PluginMetadata(
+    TelegramPostAction.__module__: PluginMetadata(
         test=PluginTest(
             init={'resource': {'id': 'id', 'name': 'name'}, 'message': 'test'},
             resource={
@@ -152,7 +172,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
         plugin_registry="tracardi.process_engine.action.v1.connectors.telegram.post.registry"
     ),
 
-    "tracardi.process_engine.action.v1.connectors.google.analytics.plugin": PluginMetadata(
+    GoogleAnalyticsEventTrackerAction.__module__: PluginMetadata(
         test=PluginTest(
             init={'source': {'id': 'id', 'name': 'name'}, 'category': 'category', 'action': 'action', 'label': 'label',
                   'value': 'value'},
@@ -162,7 +182,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
         plugin_registry="tracardi.process_engine.action.v1.connectors.google.analytics.registry"
     ),
 
-    "tracardi.process_engine.action.v1.connectors.google.analytics_v4.plugin": PluginMetadata(
+    GoogleAnalyticsV4EventTrackerAction.__module__: PluginMetadata(
         test=PluginTest(
             init={'source': {'id': 'id', 'name': 'name'}, 'name': 'event_name', 'params': "payload@id"},
             resource={
@@ -172,22 +192,22 @@ installed_plugins: Dict[str, PluginMetadata] = {
         plugin_registry="tracardi.process_engine.action.v1.connectors.google.analytics_v4.registry"
     ),
 
-    "tracardi.process_engine.action.v1.connectors.whois.plugin": PluginMetadata(
+    WhoisAction.__module__: PluginMetadata(
         test=PluginTest(init={"domain": "some.com"},
                         resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.operations.contains_pattern.plugin": PluginMetadata(
+    ContainsPatternAction.__module__: PluginMetadata(
         test=PluginTest(init={"field": "payload@field", "pattern": "all"},
                         resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.memory.collect.plugin": PluginMetadata(
+    PayloadMemoryCollector.__module__: PluginMetadata(
         test=PluginTest(init={'name': 'Test name', 'type': 'list'},
                         resource=None)
     ),
 
-    "tracardi.process_engine.action.v1.password_generator_action": PluginMetadata(
+    PasswordGeneratorAction.__module__: PluginMetadata(
         test=PluginTest(
             init={'lowercase': 4, 'max_length': 13, 'min_length': 8, 'special_characters': 2, 'uppercase': 2},
             resource=None)
