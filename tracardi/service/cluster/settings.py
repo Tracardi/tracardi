@@ -11,13 +11,13 @@ from threading import Thread
 
 from tracardi.domain import ExtraInfo
 from tracardi.common.logging.log_handler import get_logger
+from tracardi.common.singleton import Singleton
 from tracardi.domain.configuration import Configuration
+from tracardi.common.time.date import now_in_utc
 from tracardi.service.adapter.cache_adaper_selector import pubsub_adapter
 from tracardi.service.cache.load_settings import load_global_settings_by_key
-from tracardi.common.singleton import Singleton
 from tracardi.service.storage.mysql.mapping.configuration_mapping import map_to_configuration
 from tracardi.service.storage.mysql.service.configuration_service import ConfigurationService
-from tracardi.common.time.date import now_in_utc
 
 logger = get_logger(__name__)
 _pubsub_cache = pubsub_adapter()

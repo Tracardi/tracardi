@@ -45,7 +45,7 @@ async def add_consent(data: CustomerConsent, all: Optional[bool] = False):
     else:
         for consent, flag in data.consents.items():
             if flag:
-                flat_profile.consents[consent] = ConsentRevoke().model_dump(mode="json")
+                flat_profile['consents'][consent] = ConsentRevoke().model_dump(mode="json")
             else:
                 if consent in flat_profile['consents']:
                     del flat_profile['consents'][consent]
