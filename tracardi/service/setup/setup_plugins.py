@@ -156,6 +156,63 @@ import com_tracardi.action.v1.entity.delete.plugin
 import com_tracardi.action.v1.segmentation.memorize.plugin
 import com_tracardi.action.v1.segmentation.recall.plugin
 
+import tracardi.process_engine.action.v1.connectors.elasticsearch.query.plugin
+import tracardi.process_engine.action.v1.connectors.sms77.sendsms.plugin
+import tracardi.process_engine.action.v1.connectors.clicksend.sendsms.plugin
+import tracardi.process_engine.action.v1.connectors.influxdb.send.plugin
+import tracardi.process_engine.action.v1.connectors.influxdb.fetch.plugin
+import tracardi.process_engine.action.v1.connectors.elastic_email.add_contact.plugin
+import tracardi.process_engine.action.v1.connectors.elastic_email.contact_status_change.plugin
+import tracardi.process_engine.action.v1.connectors.elastic_email.transactional_email.plugin
+import tracardi.process_engine.action.v1.connectors.elastic_email.bulk_email.plugin
+import tracardi.process_engine.action.v1.connectors.sendgrid.add_contact_to_list.plugin
+import tracardi.process_engine.action.v1.connectors.sendgrid.add_email_to_global_suppression.plugin
+import tracardi.process_engine.action.v1.connectors.sendgrid.send_email.plugin
+import tracardi.process_engine.action.v1.connectors.postgresql.query.plugin
+import tracardi.process_engine.action.v1.connectors.mongo.query.plugin
+import tracardi.process_engine.action.v1.connectors.mysql.query.plugin
+import tracardi.process_engine.action.v1.connectors.salesforce.marketing_cloud.send.plugin
+import tracardi.process_engine.action.v1.connectors.zapier.webhook.plugin
+import tracardi.process_engine.action.v1.connectors.mqtt.publish.plugin
+import tracardi.process_engine.action.v1.connectors.mixpanel.send.plugin
+import tracardi.process_engine.action.v1.connectors.mixpanel.fetch_funnel.plugin
+import tracardi.process_engine.action.v1.connectors.airtable.send_record.plugin
+import tracardi.process_engine.action.v1.connectors.airtable.fetch_records.plugin
+import tracardi.process_engine.action.v1.connectors.matomo.send_event.plugin
+import tracardi.process_engine.action.v1.connectors.hubspot.add_company.plugin
+import tracardi.process_engine.action.v1.connectors.hubspot.add_contact.plugin
+import tracardi.process_engine.action.v1.connectors.hubspot.get_company.plugin
+import tracardi.process_engine.action.v1.connectors.hubspot.get_contact.plugin
+import tracardi.process_engine.action.v1.connectors.hubspot.update_company.plugin
+import tracardi.process_engine.action.v1.connectors.hubspot.update_contact.plugin
+import tracardi.process_engine.action.v1.connectors.full_contact.person_enrich.plugin
+import tracardi.process_engine.action.v1.connectors.active_campaign.fetch_by_email.plugin
+import tracardi.process_engine.action.v1.connectors.active_campaign.add_contact.plugin
+import tracardi.process_engine.action.v1.connectors.rabbitmq.publish.plugin
+import tracardi.process_engine.action.v1.connectors.civi_crm.add_contact.plugin
+import tracardi.process_engine.action.v1.connectors.amplitude.send_events.plugin
+import tracardi.process_engine.action.v1.connectors.aws.sqs.plugin
+import tracardi.process_engine.action.v1.connectors.novu.trigger.plugin
+import tracardi.process_engine.action.v1.connectors.pushover.push.plugin
+import tracardi.process_engine.action.v1.connectors.meaningcloud.sentiment_analysis.plugin
+import tracardi.process_engine.action.v1.connectors.meaningcloud.language_detection.plugin
+import tracardi.process_engine.action.v1.connectors.meaningcloud.text_classification.plugin
+import tracardi.process_engine.action.v1.connectors.meaningcloud.corporate_reputation.plugin
+import tracardi.process_engine.action.v1.connectors.meaningcloud.topics_extraction.plugin
+import tracardi.process_engine.action.v1.connectors.meaningcloud.summarization.plugin
+import tracardi.process_engine.action.v1.connectors.meaningcloud.deep_categorization.plugin
+import tracardi.process_engine.action.v1.connectors.mautic.add_contact.plugin
+import tracardi.process_engine.action.v1.connectors.mautic.fetch_contact_by_id.plugin
+import tracardi.process_engine.action.v1.connectors.mautic.fetch_contact_by_email.plugin
+import tracardi.process_engine.action.v1.connectors.mautic.edit_points.plugin
+import tracardi.process_engine.action.v1.connectors.mautic.add_remove_segment.plugin
+import tracardi.process_engine.action.v1.connectors.mailchimp.tag_contact.plugin
+import tracardi.process_engine.action.v1.connectors.mailchimp.transactional_email.plugin
+import tracardi.process_engine.action.v1.connectors.mailchimp.add_to_audience.plugin
+import tracardi.process_engine.action.v1.connectors.mailchimp.remove_from_audience.plugin
+import tracardi.process_engine.action.v1.operations.write_to_memory.plugin
+import tracardi.process_engine.action.v1.operations.read_from_memory.plugin
+
 installed_plugins: Dict[str, PluginMetadata] = {
     "tracardi.process_engine.action.v1.genai_action": PluginMetadata(
         test=PluginTest(init={
@@ -1701,19 +1758,19 @@ test_plugins: Dict[str, PluginMetadata] = {
             })
     ),
 
-    "tracardi.process_engine.action.v1.pro.scheduler.plugin": PluginMetadata(
-        test=PluginTest(
-            init={
-                'resource': {"id": '1', "name": '2'},
-                'source': {"id": '1', "name": '2'},
-                'event_type': 'type',
-                'postpone': 10
-            },
-            resource={
-                "callback_host": "http://localhost:8686"
-            }),
-        plugin_registry="tracardi.process_engine.action.v1.pro.scheduler.registry"
-    ),
+    # "tracardi.process_engine.action.v1.pro.scheduler.plugin": PluginMetadata(
+    #     test=PluginTest(
+    #         init={
+    #             'resource': {"id": '1', "name": '2'},
+    #             'source': {"id": '1', "name": '2'},
+    #             'event_type': 'type',
+    #             'postpone': 10
+    #         },
+    #         resource={
+    #             "callback_host": "http://localhost:8686"
+    #         }),
+    #     plugin_registry="tracardi.process_engine.action.v1.pro.scheduler.registry"
+    # ),
     "tracardi.process_engine.action.v1.connectors.novu.trigger.plugin": PluginMetadata(
         test=PluginTest(
             init={'payload': '{}', 'recipient_email': 'profile@data.contact.email.main', 'source': {'id': '', 'name': ''},
