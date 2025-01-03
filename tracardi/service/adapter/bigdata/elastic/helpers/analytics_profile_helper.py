@@ -89,3 +89,4 @@ async def aggregate_profile_events(profile_id: str, aggregate_query: dict) -> St
         "aggs": aggregate_query
     }
     return await storage_manager(index="event").aggregate(query)
+

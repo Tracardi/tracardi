@@ -9,8 +9,8 @@ from tracardi.domain.field_change import FieldChange
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.common.logging.log_handler import get_logger
+from tracardi.service.adapter.bigdata.adapter_selector import bd_gui_adapter
 from tracardi.service.license import License
-from tracardi.service.storage.elastic.interface.event import load_unique_field_value
 from tracardi.common.tools.string_manager import capitalize_event_type_id
 
 if License.has_license():
@@ -20,7 +20,7 @@ _local_dir = os.path.dirname(__file__)
 _predefined_event_types = {}
 
 logger = get_logger(__name__)
-
+_bd_gui_adapter = bd_gui_adapter()
 
 # def call_function(call_string, event: DotDict, profile: DotDict):
 #     state = call_string[5:]
@@ -66,7 +66,7 @@ async def get_event_types(query: str = None, limit: int = 1000):
     context = get_context()
 
     with ServerContext(context.switch_context(production=True)):
-        production_event_types = await load_unique_field_value(query, limit)
+        production_event_types = await _bd_gui_adapter.load_unique_field_value(query, limit)
 
         for item in production_event_types:
             if item not in pre_defined_ids:
@@ -74,7 +74,7 @@ async def get_event_types(query: str = None, limit: int = 1000):
                 pre_defined_ids.append(item)
 
     with ServerContext(context.switch_context(production=False)):
-        test_event_types = await load_unique_field_value(query, limit)
+        test_event_types = await _bd_gui_adapter.load_unique_field_value(query, limit)
 
         for item in test_event_types:
             if item not in pre_defined_ids:

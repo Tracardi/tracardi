@@ -211,10 +211,10 @@ async def count(query: dict = None) -> dict:
     return await storage_manager('profile').count(query)
 
 
-async def load_profile_by_values(key_value_pairs: List[Tuple[str, str]],
-                                 sort_by: Optional[List[ElasticFiledSort]] = None,
-                                 limit: int = 20) -> StorageRecords:
-    return await raw_db.load_by_key_value_pairs('profile', key_value_pairs, sort_by, limit=limit)
+# async def load_profile_by_values(key_value_pairs: List[Tuple[str, str]],
+#                                  sort_by: Optional[List[ElasticFiledSort]] = None,
+#                                  limit: int = 20) -> StorageRecords:
+#     return await raw_db.load_by_key_value_pairs('profile', key_value_pairs, sort_by, limit=limit)
 
 
 # async def load_profiles_by_segments(segments: List[str], condition: str = 'must'):

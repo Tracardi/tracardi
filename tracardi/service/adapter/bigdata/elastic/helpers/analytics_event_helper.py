@@ -1,6 +1,7 @@
 from typing import List, Dict
 
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
+from tracardi.domain.storage_record import StorageRecords
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.storage.mysql.interface import event_source_dao
 
@@ -317,3 +318,38 @@ async def load_events_avg_requests():
         }
     })
     return result['count'] / (5 * 60) if 'count' in result else 0
+
+
+async def aggregate_events_by_type_and_source() -> StorageRecords:
+    return await storage_manager("event").query({
+        "query": {
+            "match_all": {}
+        },
+        "size": 0,
+        "aggs": {
+            "by_type": {
+                "terms": {
+                    "field": "type",
+                    "size": 100,
+                    "order": {
+                        "_key": "asc"
+                    }
+                },
+                "aggs": {
+                    "by_source": {
+                        "terms": {
+                            "field": "source.id",
+                            "size": 20
+                        },
+                        # "aggs": {
+                        #     "last": {
+                        #         "top_hits": {
+                        #             "size": 1
+                        #         }
+                        #     }
+                        # }
+                    }
+                }
+            }
+        }
+    })
