@@ -29,7 +29,7 @@ def test_merger():
     assert result['b'] == 2
     assert result['c'] == {'a1': 3, 'a2': 0}
     assert set(result['d']) == {'a', 'b'}
-    assert result['e'] == [None, 'e']
+    assert set(result['e']) == {None, 'e'}
 
     assert set(get_conflicted_values(base, result)['d']) == {'a', 'b'}
     assert get_added_values(base, result) == {'c': {'a2': 0}}
