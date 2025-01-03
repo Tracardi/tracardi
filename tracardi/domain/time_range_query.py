@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from enum import Enum
 
 from tracardi.common.time.time import parse_date, parse_date_delta
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 
 class DatetimeType(str, Enum):

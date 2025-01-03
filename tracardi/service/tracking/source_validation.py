@@ -10,7 +10,7 @@ from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.mysql.interface import event_source_dao
 from tracardi.service.setup.setup_bridges import open_rest_source_bridge
 from tracardi.domain.tracker_config import TrackerConfig
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 logger = get_logger(__name__)
 

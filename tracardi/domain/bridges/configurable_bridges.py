@@ -12,7 +12,7 @@ from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.common.dot_notation.dotdict import DotDict
 from tracardi.service.events import get_default_mappings_for
 from tracardi.domain.tracker_config import TrackerConfig
-from tracardi.service.utils.hasher import uuid4_from_md5, hash_id
+from tracardi.common.security.hashing.hasher import uuid4_from_md5, hash_id
 
 from tracardi.service.storage.mysql.interface import event_to_profile_dao
 

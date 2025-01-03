@@ -2,7 +2,7 @@ from tracardi.context import get_context
 from tracardi.service.storage.mysql.schema.table import TestTable
 from tracardi.domain.test import Test
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 def map_to_test_table(test: Test) -> TestTable:
     context = get_context()

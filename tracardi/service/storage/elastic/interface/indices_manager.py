@@ -4,7 +4,7 @@ from elasticsearch import NotFoundError
 from tracardi.context import get_context
 from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from tracardi.service.storage.index import Resource, Index
-from tracardi.service.utils.diff import get_changed_values
+from tracardi.common.tools.diff import get_changed_values
 
 
 async def get_indices_status():

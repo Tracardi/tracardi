@@ -1,6 +1,6 @@
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 from uuid import uuid4
-from tracardi.domain.entity import Entity, PrimaryEntity
+from tracardi.domain.entity import PrimaryEntity
 from tracardi.domain.event_session import EventSession
 from tracardi.domain.metadata import ProfileMetadata
 from tracardi.domain.profile import Profile

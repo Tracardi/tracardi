@@ -3,7 +3,7 @@ from typing import Optional
 
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.service.plugin.domain.register import Form
-from tracardi.service.utils.hasher import uuid4_from_md5
+from tracardi.common.security.hashing.hasher import uuid4_from_md5
 
 
 class Bridge(NamedEntity):

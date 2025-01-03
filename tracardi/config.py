@@ -11,8 +11,8 @@ from tracardi.domain.yaml_config import YamlConfig
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.common.logging.log_level import get_logging_level
 from tracardi.common.singleton import Singleton
-from tracardi.service.utils.environment import get_env_as_int, get_env_as_bool
-from tracardi.service.utils.validators import is_valid_url
+from tracardi.common.tools.environment import get_env_as_int, get_env_as_bool
+from tracardi.common.tools.validators import is_valid_url
 from tracardi.version import version
 
 logger = get_logger(__name__)

@@ -5,7 +5,7 @@ from pydantic import field_validator, PrivateAttr
 from .metadata import Metadata
 from .named_entity import NamedEntity, NamedEntityInContext
 from .time import Time
-from ..service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 
 class Rule(NamedEntityInContext):

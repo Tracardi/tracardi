@@ -1,4 +1,4 @@
-from tracardi.service.utils.validators import is_valid_hex
+from tracardi.common.tools.validators import is_valid_hex
 
 
 def get_cache_prefix(string: str) -> str:

@@ -1,8 +1,7 @@
 # The function to be tested
-from typing import Optional
 
 from tracardi.domain.entity import Entity, FlatEntity
-from tracardi.service.utils.getters import get_entity_id
+from tracardi.common.tools.getters import get_entity_id
 
 
 # Pytest cases

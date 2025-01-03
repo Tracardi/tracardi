@@ -1,4 +1,4 @@
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent

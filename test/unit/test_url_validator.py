@@ -1,4 +1,4 @@
-from tracardi.service.utils.validators import is_valid_url
+from tracardi.common.tools.validators import is_valid_url
 
 
 def test_valid_http_url():

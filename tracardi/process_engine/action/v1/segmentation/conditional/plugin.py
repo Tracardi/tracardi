@@ -1,4 +1,4 @@
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 from tracardi.domain.profile import Profile
 from tracardi.service.plugin.runner import ActionRunner

@@ -25,7 +25,7 @@ from tracardi.common.exception.exception_service import get_traceback
 from tracardi.domain.event import Event
 from tracardi.process_engine.rules_engine import RulesEngine
 from tracardi.service.merging.facade_old import merge_profile_by_merging_keys, get_merging_keys_and_values
-from tracardi.service.utils.getters import get_entity_id
+from tracardi.common.tools.getters import get_entity_id
 from tracardi.service.wf.domain.flow_response import FlowResponses
 from tracardi.service.storage.mysql.interface import workflow_trigger_dao
 from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile

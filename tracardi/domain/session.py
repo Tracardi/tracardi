@@ -13,7 +13,7 @@ from .time import Time
 
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo
-from ..service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 
 class SessionTime(Time):

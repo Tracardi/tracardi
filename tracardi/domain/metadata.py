@@ -1,11 +1,10 @@
-from typing import Optional, Dict, Set, List, Tuple
+from typing import Optional, Dict
 
 from pydantic import BaseModel
 
-from tracardi.domain.entity import Entity
 from tracardi.domain.geo import Geo
 from tracardi.domain.time import Time, ProfileTime
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 
 class Metadata(BaseModel):

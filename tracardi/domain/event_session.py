@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime
 
 from tracardi.domain.entity import Entity
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 
 class EventSession(Entity):

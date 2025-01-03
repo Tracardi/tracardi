@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from pydantic import field_validator, BaseModel, validator
+from pydantic import field_validator, BaseModel
 from pytimeparse.timeparse import timeparse
 
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 
 class Schedule(BaseModel):

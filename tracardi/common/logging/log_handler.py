@@ -10,7 +10,7 @@ from tracardi.context import get_context, ContextError
 from tracardi.logging import log_stack_trace_as, log_stack_trace_for, log_bulk_size
 from tracardi.service.adapter.logger.logger_adapter import log_format_adapter
 from tracardi.common.logging.log_level import get_logging_level
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 from logging import Handler, LogRecord
 from time import time
 

@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional, Any, Callable
 from tracardi.service.plugin.domain.register import Plugin
 from .entity import Entity
@@ -6,7 +5,7 @@ from .metadata import Metadata
 from .settings import Settings
 from .time import Time
 from tracardi.service.module_loader import import_package, load_callable
-from ..service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 
 class FlowActionPlugin(Entity):

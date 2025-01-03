@@ -2,7 +2,7 @@ from uuid import uuid4
 from typing import Optional, Any
 from datetime import datetime
 from tracardi.domain.named_entity import NamedEntity
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 
 class Test(NamedEntity):

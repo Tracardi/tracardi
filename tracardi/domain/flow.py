@@ -12,7 +12,7 @@ from ..config import tracardi
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.common.security.encrypt.secrets import decrypt, encrypt, b64_encoder, b64_decoder
 
-from ..service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 logger = get_logger(__name__)
 

@@ -15,7 +15,7 @@ from tracardi.domain.destination import Destination
 from tracardi.service.destination.utils import get_destination_data
 from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from tracardi.service.storage.mysql.interface import destination_dao
-from tracardi.service.utils.getters import get_entity_id
+from tracardi.common.tools.getters import get_entity_id
 
 logger = get_logger(__name__)
 

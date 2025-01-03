@@ -3,7 +3,7 @@ from tracardi.domain.setting import Setting
 from tracardi.service.storage.mysql.mapping.setting_mapping import map_to_setting, map_to_settings_table
 
 from tracardi.service.storage.mysql.schema.table import SettingTable
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 
 def test_all_fields_mapped():

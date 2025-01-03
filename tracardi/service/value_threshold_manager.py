@@ -1,5 +1,5 @@
 from tracardi.service.adapter.cache_adaper_selector import cache_adapter
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 from typing import Optional
 from tracardi.domain.value_threshold import ValueThreshold
 from tracardi.service.storage.redis.collections import Collection

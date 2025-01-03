@@ -16,7 +16,7 @@ from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.domain.tracker_config import TrackerConfig
-from tracardi.service.utils.getters import get_entity_id
+from tracardi.common.tools.getters import get_entity_id
 from tracardi.service.wf.triggers import exec_workflow
 
 logger = get_logger(__name__)

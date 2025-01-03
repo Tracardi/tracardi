@@ -9,7 +9,7 @@ from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.console import Console
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.utils.getters import get_entity_id
+from tracardi.common.tools.getters import get_entity_id
 from tracardi.service.wf.domain.node import Node
 
 

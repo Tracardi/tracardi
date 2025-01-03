@@ -5,7 +5,7 @@ from typing import Optional, Union, List, Any
 
 from tracardi.domain.named_entity import NamedEntity, NamedEntityInContext
 from tracardi.service.license import License, LICENSE
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 if License.has_service(LICENSE):
     from com_tracardi.bridge.bridges import javascript_bridge
 

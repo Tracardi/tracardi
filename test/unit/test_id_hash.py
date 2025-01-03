@@ -3,7 +3,7 @@ from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile_data import PREFIX_EMAIL_BUSINESS, PREFIX_EMAIL_MAIN, PREFIX_EMAIL_PRIVATE, \
     PREFIX_PHONE_BUSINESS, PREFIX_PHONE_MAIN, PREFIX_PHONE_MOBILE, \
     PREFIX_PHONE_WHATSUP
-from tracardi.service.utils.hasher import timestamped_hash_id
+from tracardi.common.security.hashing.hasher import timestamped_hash_id
 
 tracardi.auto_profile_merging = "abc"
 

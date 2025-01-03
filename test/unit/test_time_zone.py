@@ -3,7 +3,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from tracardi.service.utils.date import add_utc_time_zone_if_none
+from tracardi.common.time.date import add_utc_time_zone_if_none
 
 
 def test_returns_none_if_input_is_none():

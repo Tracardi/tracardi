@@ -35,7 +35,7 @@ from .node import Node
 from .tasks_results import ActionsResults
 from tracardi.common.dot_notation.dict_traverser import DictTraverser
 from tracardi.common.dot_notation.dot_accessor import DotAccessor
-from ...utils.getters import get_entity_id
+from tracardi.common.tools.getters import get_entity_id
 from ...value_threshold_manager import ValueThresholdManager
 
 logger = get_logger(__name__)

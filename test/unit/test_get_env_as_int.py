@@ -1,6 +1,6 @@
 import os
 
-from tracardi.service.utils.environment import get_env_as_int
+from tracardi.common.tools.environment import get_env_as_int
 
 
 def test_returns_integer_value():

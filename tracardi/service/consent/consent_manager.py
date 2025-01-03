@@ -7,7 +7,7 @@ from tracardi.domain.flat_profile import FlatProfile
 from tracardi.service.storage.elastic.interface.collector.load.flat_profile import load_flat_profile
 from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
 from tracardi.service.tracking.storage.session_storage import load_session
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 from tracardi.domain.payload.customer_consent import CustomerConsent
 from tracardi.domain.consent_revoke import ConsentRevoke
 from tracardi.service.storage.mysql.interface import event_source_dao

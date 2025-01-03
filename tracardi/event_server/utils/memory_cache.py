@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from tracardi.context import get_context
 from tracardi.common.exception.exception import ExpiredException
-from tracardi.service.utils.date import seconds_to_minutes_seconds
+from tracardi.common.time.date import seconds_to_minutes_seconds
 
 
 class CacheItem(BaseModel):

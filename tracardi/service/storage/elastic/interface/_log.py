@@ -1,11 +1,3 @@
-from datetime import datetime, timedelta
-from typing import Optional
-
-from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.service.storage.elastic.driver.factory import storage_manager
-from tracardi.service.utils.date import now_in_utc
-
-
 # from tracardi.service.storage.elastic_client import ElasticClient
 # from tracardi.service.storage.index import Resource
 

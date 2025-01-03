@@ -1,6 +1,6 @@
 from zoneinfo import ZoneInfo
 
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 from typing import Optional, Any, Union
 from uuid import uuid4
@@ -14,7 +14,7 @@ from ..event import Event
 from tracardi.domain.event_session import EventSession
 from ..session import Session
 from ..time import Time
-from ...service.utils.getters import get_entity_id
+from tracardi.common.tools.getters import get_entity_id
 
 
 class ProcessStatus(BaseModel):

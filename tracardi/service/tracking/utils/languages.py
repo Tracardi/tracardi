@@ -1,9 +1,8 @@
 from typing import Optional, Tuple
 
-from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.session import Session
-from tracardi.service.utils.languages import language_codes_dict
-from tracardi.service.utils.parser import parse_accept_language
+from tracardi.common.db.languages import language_codes_dict
+from tracardi.common.tools.parser import parse_accept_language
 
 
 def get_continent(tracker_payload) -> Optional[str]:

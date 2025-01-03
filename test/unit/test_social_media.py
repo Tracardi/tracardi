@@ -1,4 +1,4 @@
-from tracardi.service.utils.social_media import SocialMedia
+from tracardi.common.db.social_media import SocialMedia
 
 
 def test_filter_social_urls_valid_urls():

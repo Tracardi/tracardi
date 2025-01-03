@@ -1,5 +1,5 @@
 from tracardi.service.cluster.settings import GlobalSettings
-from tracardi.service.utils.environment import get_env_as_bool, _str_to_bool
+from tracardi.common.tools.environment import get_env_as_bool, _str_to_bool
 
 global_settings = GlobalSettings()
 _default_save_logs = get_env_as_bool('SAVE_LOGS', 'yes')

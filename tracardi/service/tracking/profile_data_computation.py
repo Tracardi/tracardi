@@ -15,10 +15,10 @@ from tracardi.service.events import get_default_mappings_for
 from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from tracardi.service.tracking.compute.geo_location_computer import get_geo_location
 from tracardi.service.tracking.utils.function_call import default_event_call_function
-from tracardi.service.utils.date import now_in_utc
-from tracardi.service.utils.domains import free_email_domains
+from tracardi.common.time.date import now_in_utc
+from tracardi.common.db.domains import free_email_domains
 from tracardi.service.events import copy_default_event_to_profile
-from tracardi.service.utils.languages import language_countries_dict
+from tracardi.common.db.languages import language_countries_dict
 
 EQUALS = 0
 EQUALS_IF_NOT_EXISTS = 1

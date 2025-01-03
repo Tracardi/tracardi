@@ -1,7 +1,7 @@
 from tracardi.domain.entity import Entity
 from tracardi.domain.storage_record import RecordMetadata
 from tracardi.domain.value_object.storage_info import StorageInfo
-from tracardi.service.utils.getters import get_entity
+from tracardi.common.tools.getters import get_entity
 
 
 def test_should_set_entity_data():

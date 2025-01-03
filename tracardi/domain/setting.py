@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, Any
 
 from tracardi.domain.named_entity import NamedEntityInContext
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 
 class Setting(NamedEntityInContext):

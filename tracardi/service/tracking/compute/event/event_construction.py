@@ -1,7 +1,7 @@
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.event_payload import EventPayload
 
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 from typing import Optional, Union, Tuple
 from uuid import uuid4

@@ -7,7 +7,7 @@ from tracardi.service.adapter.bigdata.elastic.client.elastic_query import get_qu
 
 from tracardi.service.adapter.bigdata.collector_protocol import CollectorProtocol
 from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 
 class ElasticLogAdapter(ElasticAdapter, CollectorProtocol):

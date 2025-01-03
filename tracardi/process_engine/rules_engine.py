@@ -24,7 +24,7 @@ from ..domain.rule_invoke_result import RuleInvokeResult
 from ..domain.session import Session
 from ..domain.rule import Rule
 from tracardi.common.logging.log_handler import get_logger
-from ..service.utils.getters import get_entity_id
+from tracardi.common.tools.getters import get_entity_id
 from tracardi.common.exception.exception_service import get_traceback
 from tracardi.service.storage.mysql.interface import workflow_dao
 

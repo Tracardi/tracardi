@@ -2,7 +2,7 @@ from datetime import datetime
 from urllib.parse import urlparse, ParseResult
 
 from user_agents.parsers import UserAgent
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 import time
 
@@ -30,8 +30,8 @@ from tracardi.domain.flat_profile import FlatProfile
 from tracardi.common.dot_notation.dotdict import DotDict
 from ...service.storage.elastic.interface.collector.load.flat_profile import load_flat_profile
 
-from ...service.utils.getters import get_entity_id
-from ...service.utils.hasher import get_shadow_session_id
+from tracardi.common.tools.getters import get_entity_id
+from tracardi.common.security.hashing.hasher import get_shadow_session_id
 
 logger = get_logger(__name__)
 

@@ -5,7 +5,7 @@ from tracardi.domain.task import Task
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.mysql.mapping.task_mapping import map_to_task
 from tracardi.service.storage.mysql.service.task_service import BackgroundTaskService
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 
 logger = get_logger(__name__)

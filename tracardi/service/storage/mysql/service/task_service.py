@@ -10,7 +10,7 @@ from tracardi.service.storage.mysql.schema.table import TaskTable
 from tracardi.service.storage.mysql.utils.select_result import SelectResult
 from tracardi.service.storage.mysql.service.table_service import TableService
 from tracardi.service.storage.mysql.service.table_filtering import where_tenant_and_mode_context
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 logger = get_logger(__name__)
 

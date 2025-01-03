@@ -7,7 +7,7 @@ from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.session import Session
 from tracardi.domain.time import Time
-from tracardi.service.utils.date import now_in_utc
+from tracardi.common.time.date import now_in_utc
 
 
 def add_system_events(is_profile_new: bool, session: Session, tracker_payload: TrackerPayload) -> Tuple[

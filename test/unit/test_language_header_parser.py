@@ -1,4 +1,4 @@
-from tracardi.service.utils.parser import parse_accept_language
+from tracardi.common.tools.parser import parse_accept_language
 
 
 def test_single_language_tag():
