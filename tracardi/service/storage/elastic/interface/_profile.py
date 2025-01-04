@@ -138,13 +138,13 @@ logger = get_logger(__name__)
 #     return [profile.to_entity(Profile) for profile in profiles]
 
 
-async def delete_by_id(id: str, index: str):
-    sm = storage_manager('profile')
-    return await sm.delete(id, index)
+# async def delete_by_id(id: str, index: str):
+#     sm = storage_manager('profile')
+#     return await sm.delete(id, index)
 
 
-async def refresh():
-    return await storage_manager('profile').refresh()
+# async def refresh():
+#     return await storage_manager('profile').refresh()
 
 
 # async def load_by_id(profile_id: str) -> Optional[Profile]:

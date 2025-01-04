@@ -15,40 +15,40 @@ async def delete_by_id(entity_id: str) -> dict:
     return await sm.delete(entity_id, index=sm.get_single_storage_index())
 
 
-async def _unique_entity_types(bucket_name, buckets_size=500) -> StorageAggregateResult:
-    async def _aggregate(bucket_name, by, filter_query=None, buckets_size=15) -> StorageAggregateResult:
-        aggregate_query = {
-            bucket_name: {
-                "terms": {
-                    "field": by,
-                    "size": buckets_size,
-                }
-            }
-        }
+# async def _unique_entity_types(bucket_name, buckets_size=500) -> StorageAggregateResult:
+#     async def _aggregate(bucket_name, by, filter_query=None, buckets_size=15) -> StorageAggregateResult:
+#         aggregate_query = {
+#             bucket_name: {
+#                 "terms": {
+#                     "field": by,
+#                     "size": buckets_size,
+#                 }
+#             }
+#         }
+#
+#         if filter_query is None:
+#             filter_query = {
+#                 "match_all": {}
+#             }
+#
+#         query = {
+#             "size": 0,
+#             "query": filter_query,
+#             "aggs": aggregate_query
+#         }
+#
+#         return await storage_manager(index="entity").aggregate(query)
+#
+#     return await _aggregate(bucket_name, "type", buckets_size=buckets_size)
 
-        if filter_query is None:
-            filter_query = {
-                "match_all": {}
-            }
 
-        query = {
-            "size": 0,
-            "query": filter_query,
-            "aggs": aggregate_query
-        }
-
-        return await storage_manager(index="entity").aggregate(query)
-
-    return await _aggregate(bucket_name, "type", buckets_size=buckets_size)
-
-
-async def load_entity_types() -> Tuple[List[dict], int]:
-    # Returns only 800 types
-    result = await _unique_entity_types(bucket_name="type", buckets_size=800)
-    return [{
-        "id": key,
-        "name": key
-    } for key, _ in result.aggregations['type'][0].items() if key != "other"], result.total
+# async def load_entity_types() -> Tuple[List[dict], int]:
+#     # Returns only 800 types
+#     result = await _unique_entity_types(bucket_name="type", buckets_size=800)
+#     return [{
+#         "id": key,
+#         "name": key
+#     } for key, _ in result.aggregations['type'][0].items() if key != "other"], result.total
 
 
 async def upsert(entity: EntityRecord) -> BulkInsertResult:

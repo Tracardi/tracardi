@@ -1,8 +1,7 @@
 import json
 from json import JSONDecodeError
 
-from tracardi.service.adapter.bigdata.adapter_selector import bd_crud_event_adapter
-from tracardi.service.storage.elastic.interface.collector.load.session import load_session_from_db
+from tracardi.service.adapter.bigdata.adapter_selector import bd_crud_event_adapter, bd_session_adapter
 from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -16,6 +15,7 @@ from tracardi.domain.event_session import EventSession
 from tracardi.domain.entity import Entity
 
 _bd_crud_event_adapter = bd_crud_event_adapter()
+_bd_session_adapter = bd_session_adapter()
 
 def validate(config: dict):
     return Configuration(**config)
@@ -54,7 +54,7 @@ class StartAction(ActionRunner):
         # Replace session
 
         if self.config.session_id:
-            session = await load_session_from_db(self.config.session_id)
+            session = await _bd_session_adapter.load_session_from_db(self.config.session_id)
             if not session:
                 raise ValueError(f"Can not load session with id {self.config.session_id}")
             # replace session in event

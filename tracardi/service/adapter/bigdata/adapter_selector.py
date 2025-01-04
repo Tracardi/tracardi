@@ -6,11 +6,13 @@ from tracardi.service.adapter.bigdata.elastic.elastic_audience_adapter import El
 from tracardi.service.adapter.bigdata.elastic.elastic_collector_adapter import ElasticCollectorAdapter
 from tracardi.service.adapter.bigdata.elastic.elastic_crud_event_adapter import ElasticCrudEventAdapter
 from tracardi.service.adapter.bigdata.elastic.elastic_crud_profile_adapter import ElasticCrudProfileAdapter
+from tracardi.service.adapter.bigdata.elastic.elastic_entity_adapter import ElasticEntityAdapter
 from tracardi.service.adapter.bigdata.elastic.elastic_gui_adapter import ElasticGuiAdapter
 from tracardi.service.adapter.bigdata.elastic.elastic_log_adapter import ElasticLogAdapter
 from tracardi.service.adapter.bigdata.elastic.elastic_gui_search_adapter import ElasticSearchAdapter
 from tracardi.service.adapter.bigdata.elastic.elastic_analytics_adapter import ElasticAnalyticsAdapter
 from tracardi.service.adapter.bigdata.elastic.elastic_plugin_adapter import ElasticPluginAdapter
+from tracardi.service.adapter.bigdata.elastic.elastic_session_adapter import ElasticSessionAdapter
 
 _big_data_adapter_var = tracardi.big_data_adapter
 
@@ -101,3 +103,18 @@ def bd_crud_event_adapter() -> ElasticCrudEventAdapter:
         return ElasticCrudEventAdapter()
     else:
         raise ValueError(f"Unknown big data event CRUD adapter `{_big_data_adapter_var}`")
+
+
+@run_once
+def bd_session_adapter() -> ElasticSessionAdapter:
+    if _big_data_adapter_var.lower() == 'elastic':
+        return ElasticSessionAdapter()
+    else:
+        raise ValueError(f"Unknown big data session adapter `{_big_data_adapter_var}`")
+
+@run_once
+def bd_entity_adapter() -> ElasticEntityAdapter:
+    if _big_data_adapter_var.lower() == 'elastic':
+        return ElasticEntityAdapter()
+    else:
+        raise ValueError(f"Unknown big data entity adapter `{_big_data_adapter_var}`")

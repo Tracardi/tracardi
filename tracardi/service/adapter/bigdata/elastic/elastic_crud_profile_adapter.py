@@ -3,7 +3,7 @@ from typing import Optional
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
-from tracardi.service.adapter.bigdata.elastic.helpers.crud_profile_helper import load_by_id
+from tracardi.service.adapter.bigdata.elastic.helpers.crud_profile_helper import load_by_id, delete_by_id
 
 logger = get_logger(__name__)
 
@@ -23,3 +23,6 @@ class ElasticCrudProfileAdapter(ElasticAdapter):
         result = dict(record)
         result['_meta'] = record.get_meta_data()
         return result
+
+    async def delete_profile_by_id(self, profile_id, index: str):
+        return await delete_by_id(profile_id, index)

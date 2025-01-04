@@ -3,11 +3,12 @@ from tracardi.domain.entity import PrimaryEntity
 from tracardi.domain.event_session import EventSession
 from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.value_object.operation import Operation
+from tracardi.service.adapter.bigdata.adapter_selector import bd_session_adapter
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db
 
+_bd_session_adapter = bd_session_adapter()
 
 class AddEmptySessionAction(ActionRunner):
 
@@ -27,7 +28,7 @@ class AddEmptySessionAction(ActionRunner):
             )
 
         self.execution_graph.set_sessions(session)
-        await save_session_to_db(session)
+        await _bd_session_adapter.save_session_to_db(session)
 
         self.set_tracker_option("saveSession", True)
 

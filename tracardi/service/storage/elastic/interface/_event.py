@@ -5,7 +5,6 @@ from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.adapter.bigdata.adapter_selector import bd_elastic_adapter
 
-_elastic_adapter = bd_elastic_adapter()
 
 # async def refresh_event_db():
 #     return await event_db.refresh()

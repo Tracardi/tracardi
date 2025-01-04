@@ -7,9 +7,9 @@ from tracardi.config import tracardi
 from tracardi.context import ServerContext, Context
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.rule_invoke_result import RuleInvokeResult
+from tracardi.service.adapter.bigdata.adapter_selector import bd_session_adapter
 from tracardi.service.wf.field_mappings_cache import add_new_field_mappings
 from tracardi.service.storage.elastic.interface.collector.mutation.profile import save_profile_in_db_and_cache
-from tracardi.service.storage.elastic.interface.collector.mutation.session import save_session_to_db_and_cache
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.tracking.locking import Lock, async_mutex
 from tracardi.domain.event import flat_events_to_event
@@ -31,7 +31,7 @@ from tracardi.service.storage.mysql.interface import workflow_trigger_dao
 from tracardi.service.storage.elastic.interface.collector.load.profile import load_profile
 
 logger = get_logger(__name__)
-
+_bd_session_adapter = bd_session_adapter()
 
 async def _get_rules_for_source_and_event_type(source_id: str, event_types: Set[str]) -> Tuple[
     Dict[str, List[Rule]], bool]:
@@ -315,7 +315,7 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
             # Profile is in mutex, that means no session for the profile should be modified.
             # No session loading from cache necessary; Save it in db and cache
             # Synchronous save
-            await save_session_to_db_and_cache(session)
+            await _bd_session_adapter.save_session_to_db_and_cache(session)
 
     return profile, session, events, ux, response, changed_fields, is_wf_triggered
 
