@@ -46,7 +46,7 @@ setup(
         'urllib3>=1.26,<2',
         'geoip2==4.2.0',
         'aiomysql==0.1.1',
-        'kombu==5.2.4',
+        'kombu==5.4.2',
         'asyncpg==0.30.0',
         'aiobotocore~=2.12.1',
         'google-api-python-client == 2.33.0',
@@ -85,6 +85,8 @@ setup(
         'pulsar-client==3.5.0',
         'aiokafka==0.8.1',
         'tabulate',
+        # Plugins
+        'langchain==0.3.14',
         # Adapters
         'upstash_redis==1.2.0',
         # Telemetry

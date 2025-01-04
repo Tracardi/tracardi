@@ -70,7 +70,7 @@ class ElasticClient:
         return await self._client.indices.put_mapping(body=mapping, index=index)
 
     async def exists_index_template(self, name):
-        return await self._client.indices.exists_index_template(name)
+        return await self._client.indices.exists_index_template(name=name)
 
     async def exists(self, index, id) -> bool:
         # WARNING this method does not work on aliases
@@ -80,7 +80,7 @@ class ElasticClient:
             return False
 
     async def search(self, index, query, scroll=None):
-        return await self._client.search(index=index, body=query, scroll=scroll)
+        return await self._client.search(body=query, index=index, scroll=scroll)
 
     async def scroll(self, *args, **kwargs):
         return await self._client.scroll(*args, **kwargs)

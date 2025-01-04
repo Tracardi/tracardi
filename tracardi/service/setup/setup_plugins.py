@@ -21,6 +21,7 @@ from tracardi.process_engine.action.v1.connectors.whois.plugin import WhoisActio
 from tracardi.process_engine.action.v1.operations.contains_pattern.plugin import ContainsPatternAction
 from tracardi.process_engine.action.v1.memory.collect.plugin import PayloadMemoryCollector
 from tracardi.process_engine.action.v1.password_generator_action import PasswordGeneratorAction
+from tracardi.process_engine.action.v1.genai_action import GenAIAction
 
 import tracardi.process_engine.action.v1.weekdays_checker_action
 import tracardi.process_engine.action.v1.flow.start.start_action
@@ -214,7 +215,7 @@ import tracardi.process_engine.action.v1.operations.write_to_memory.plugin
 import tracardi.process_engine.action.v1.operations.read_from_memory.plugin
 
 installed_plugins: Dict[str, PluginMetadata] = {
-    "tracardi.process_engine.action.v1.genai_action": PluginMetadata(
+    GenAIAction.__module__: PluginMetadata(
         test=PluginTest(init={
             'provider': '',
             'model': '',

@@ -79,7 +79,7 @@ class ElasticClient(metaclass=Singleton):
             return False
 
     async def search(self, index, query, scroll=None):
-        return await self._client.search(index=index, body=query, scroll=scroll)
+        return await self._client.search(body=query, index=index, scroll=scroll)
 
     async def scroll(self, *args, **kwargs):
         return await self._client.scroll(*args, **kwargs)
