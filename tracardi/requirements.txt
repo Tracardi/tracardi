@@ -64,6 +64,7 @@ langchain==0.3.14
 python-whois==0.8.0
 tweepy==4.10.1
 kombu==5.4.2
+geopy
 
 # Adapters
 upstash_redis==1.2.0

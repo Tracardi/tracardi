@@ -4,7 +4,6 @@ from tracardi.domain.event import Event
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.adapter.bigdata.adapter_selector import bd_elastic_adapter
-from tracardi.service.storage.driver.elastic import event as event_db
 
 _elastic_adapter = bd_elastic_adapter()
 

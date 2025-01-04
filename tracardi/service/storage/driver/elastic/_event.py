@@ -1,18 +1,18 @@
-from datetime import datetime
+# from datetime import datetime
 
-from tracardi.service.storage.elastic.driver.agg_result import AggResult
+# from tracardi.service.storage.elastic.driver.agg_result import AggResult
 from tracardi.domain.event import Event
 from tracardi.domain.flat_event import FlatEvent
-from tracardi.domain.named_entity import NamedEntity
+# from tracardi.domain.named_entity import NamedEntity
 
-from tracardi.domain.storage_aggregate_result import StorageAggregateResult
+# from tracardi.domain.storage_aggregate_result import StorageAggregateResult
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiledSort
+# from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiledSort
 from tracardi.service.storage.elastic.driver.factory import storage_manager, StorageForBulk
 from typing import List, Optional, Dict, Tuple, Union, Set
-from tracardi.service.storage.elastic.interface import raw as raw_db
-from tracardi.service.storage.mysql.interface import event_source_dao
+# from tracardi.service.storage.elastic.interface import raw as raw_db
+# from tracardi.service.storage.mysql.interface import event_source_dao
 
 logger = get_logger(__name__)
 
@@ -35,8 +35,8 @@ async def save(events: Union[List[FlatEvent], List[Event], Set[Event]], exclude=
 #     return await StorageForBulk().index('event').uniq_field_value("type", search=query, limit=limit)
 
 
-def _get_name(source_names_idx, id):
-    return source_names_idx[id] if id in source_names_idx else id
+# def _get_name(source_names_idx, id):
+#     return source_names_idx[id] if id in source_names_idx else id
 
 
 async def search(query: dict):
