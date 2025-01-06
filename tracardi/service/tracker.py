@@ -32,6 +32,11 @@ class Tracker:
             logger.error("Can't configure bridge. Method get_bridge used before "
                          "EventSource was created.")
 
+        # TODO permanent_profile_id is kept in tracker_payload.source.permanent_profile_id
+        # TODO GUI should change it in tracker_payload.source. That is why we copy it
+
+        tracker_payload.source.config['static_profile_id'] = tracker_payload.source.permanent_profile_id
+
         if 'webhook' in tracker_payload.source.type:
             return WebHookBridge(
                 id=tracker_payload.source.id,
@@ -84,6 +89,7 @@ class Tracker:
             # If there is a configurable bridge get it and set up tracker_payload and tracker_config
 
             configurable_bridge = self.get_bridge(tracker_payload)
+
             if configurable_bridge:
                 tracker_payload, self.tracker_config = await configurable_bridge.configure(
                     tracker_payload,
