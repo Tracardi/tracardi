@@ -1,13 +1,14 @@
+from tracardi.service.adapter.bigdata.adapter_selector import bd_raw_adapter
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
-from tracardi.service.plugin.runner import ActionRunner
-from tracardi.service.storage.elastic.interface import raw as raw_db
 from .model.config import Config
+from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from elasticsearch import ElasticsearchException
 from tracardi.common.template.dot_template import DotTemplate
 from pytimeparse import parse as parse_time
 
+_bd_raw_adapter = bd_raw_adapter()
 
 def validate(config: dict) -> Config:
     return Config(**config)
@@ -27,7 +28,7 @@ class CountRecordsAction(ActionRunner):
 
         try:
 
-            result = await raw_db.count_by_query(
+            result = await _bd_raw_adapter.count_by_query(
                 index=self.config.index,
                 query=query,
                 time_span=parse_time(self.config.time_range)

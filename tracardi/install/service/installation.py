@@ -1,4 +1,5 @@
 import os
+from tracardi.service.adapter.bigdata.adapter_selector import bd_elastic_adapter
 from uuid import uuid4
 
 from tracardi.domain.payload.tracker_payload import TrackerPayload
@@ -16,7 +17,6 @@ from tracardi.common.logging.log_handler import get_installation_logger
 from tracardi.service.fake_data_maker.generate_payload import generate_payload
 from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.setup_indices import create_schema, run_on_start
-from tracardi.service.storage.elastic.interface import raw as raw_db
 from tracardi.service.storage.index import Resource
 from tracardi.service.track_event import track_event
 
@@ -27,7 +27,7 @@ if License.has_license():
         from com_tracardi.service.multi_tenant_manager import MultiTenantManager
 
 logger = get_installation_logger(__name__)
-
+_bd_adapter = bd_elastic_adapter()
 
 async def install_system(credentials: Credentials):
     if tracardi.multi_tenant:
@@ -66,7 +66,7 @@ async def install_system(credentials: Credentials):
         if tracardi.installation_token and tracardi.installation_token != credentials.token:
             raise PermissionError("Installation forbidden. Invalid installation token.")
 
-    info = await raw_db.health()
+    info = await _bd_adapter.client.health()
 
     if 'number_of_data_nodes' in info and int(info['number_of_data_nodes']) == 1:
         os.environ['ELASTIC_INDEX_REPLICAS'] = "0"

@@ -69,7 +69,7 @@ class ElasticClient(metaclass=Singleton):
         return await self._client.indices.put_mapping(body=mapping, index=index)
 
     async def exists_index_template(self, name):
-        return await self._client.indices.exists_index_template(name)
+        return await self._client.indices.exists_index_template(name=name)
 
     async def exists(self, index, id) -> bool:
         # WARNING this method does not work on aliases
@@ -78,6 +78,7 @@ class ElasticClient(metaclass=Singleton):
         except NotFoundError:
             return False
 
+    # TODO should be named to query
     async def search(self, index, query, scroll=None):
         return await self._client.search(body=query, index=index, scroll=scroll)
 
@@ -226,12 +227,12 @@ class ElasticClient(metaclass=Singleton):
         return await self._client.indices.exists_alias(name=alias, index=index)
 
     async def list_indices(self, index="*"):
-        return await self._client.indices.get(index)
+        return await self._client.indices.get(index=index)
 
     async def list_aliases(self):
         return await self._client.indices.get_alias(name="*")
 
-    async def get_alias(self, name):
+    async def get_alias(self, name: str):
         return await self._client.indices.get_alias(name=name)
 
     async def clone(self, source_index, destination_index):
@@ -334,7 +335,15 @@ class ElasticClient(metaclass=Singleton):
 
         return kwargs
 
+    async def health(self):
+        return await self._client.cluster.health()
+
+    async def get_task(self, task_id):
+        return self._client.tasks.get(task_id=task_id)
+
     @staticmethod
     def instance() -> 'ElasticClient':
         kwargs = ElasticClient.get_elastic_config(config.elastic)
         return ElasticClient(**kwargs)
+
+

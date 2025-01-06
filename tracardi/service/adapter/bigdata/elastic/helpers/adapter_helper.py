@@ -3,14 +3,10 @@ from typing import Optional
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.adapter.bigdata.elastic.client.elastic_client import ElasticClient
-from tracardi.service.adapter.bigdata.elastic.client.elastic_index import ElasticIndex
+from tracardi.service.adapter.bigdata.elastic.client.elastic_index import ElasticIndex, index
 from tracardi.service.adapter.bigdata.elastic.client.elastic_query import get_query_to_load_profile_by_id
 
 logger = get_logger(__name__)
-
-
-def index(client: ElasticClient, idx) -> ElasticIndex:
-    return ElasticIndex(client, idx)
 
 
 async def load_profile(client: ElasticClient, profile_id: str, **kwargs) -> Optional[StorageRecord]:

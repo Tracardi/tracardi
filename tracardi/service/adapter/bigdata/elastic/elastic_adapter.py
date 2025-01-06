@@ -6,6 +6,7 @@ from tracardi.domain.storage_record import StorageRecord, StorageRecords
 
 from tracardi.service.adapter.bigdata.elastic.client.elastic_client import ElasticClient
 from tracardi.service.adapter.bigdata.elastic.client.elastic_index import ElasticIndex
+from tracardi.service.adapter.bigdata.elastic.client.elastic_template import ElasticTemplate
 
 
 class ElasticCoreAdapter:
@@ -71,3 +72,11 @@ class ElasticAdapter:
 
     def index(self, index) -> ElasticIndex:
         return ElasticIndex(self._client, index)
+
+    @property
+    def client(self):
+        return self._client
+
+    @property
+    def template(self) -> ElasticTemplate:
+        return ElasticTemplate(self._client)

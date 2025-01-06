@@ -7,9 +7,10 @@ from tracardi.domain.flat_profile import FlatProfile
 from ...domain.flat_event import FlatEvent
 from ...domain.resource import Resource
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.service.storage.elastic.interface.integration_id import load_integration_id, save_integration_id
+from ...service.adapter.bigdata.adapter_selector import bd_entity_adapter
 
 logger = get_logger(__name__)
+_bd_entity_adapter = bd_entity_adapter()
 
 
 class HubSpotConnector(DestinationInterface):
@@ -25,7 +26,7 @@ class HubSpotConnector(DestinationInterface):
             logger.info(f"Updating in hubspot with data {payload} for remote ID {hubspot_id}")
             response = await self.client.update_contact(hubspot_id, payload)
             logger.info(f"Updated data {payload} in hubspot; response {response}")
-            print(await save_integration_id(profile_id, self.name, hubspot_id, {}))
+            print(await _bd_entity_adapter.save_integration_id(profile_id, self.name, hubspot_id, {}))
 
         except HubSpotClientException as e:
             # Record deleted
@@ -53,7 +54,7 @@ class HubSpotConnector(DestinationInterface):
         finally:
             if hubspot_id:
                 logger.info(f"Updating hubspot integration with {hubspot_id}")
-                print(await save_integration_id(profile_id, self.name, hubspot_id, {}))
+                print(await _bd_entity_adapter.save_integration_id(profile_id, self.name, hubspot_id, {}))
 
     @staticmethod
     def _prepare_payload(flat_profile: FlatProfile, config_data):
@@ -99,7 +100,7 @@ class HubSpotConnector(DestinationInterface):
             logger.info(f"No update in hubspot data is empty for profile {flat_profile.id}.")
             return
 
-        integration_ids = await load_integration_id(flat_profile.id, self.name)
+        integration_ids = await _bd_entity_adapter.load_integration_id(flat_profile.id, self.name)
 
         if not integration_ids:
             return await self._add_contact(payload, flat_profile.id)

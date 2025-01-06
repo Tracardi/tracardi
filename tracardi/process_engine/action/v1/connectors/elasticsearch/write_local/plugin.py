@@ -1,4 +1,5 @@
 import json
+from tracardi.service.adapter.bigdata.adapter_selector import bd_elastic_adapter
 
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
@@ -7,49 +8,49 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from .model.config import Config
-from tracardi.service.storage.elastic.interface import raw as raw_db
+
+_bd_elastic_adapter = bd_elastic_adapter()
 
 
 def validate(config: dict):
     config = Config(**config)
     return config
 
-class WriteLocalDatabase(ActionRunner):
 
+class WriteLocalDatabase(ActionRunner):
     config: Config
 
     async def set_up(self, init):
         self.config = Config(**init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-        
+
         dot = self._get_dot_accessor(payload)
 
         try:
-            
-            index=dot[self.config.index]
-            documents=dot[self.config.documents]
-            identifier=dot[self.config.identifier]
-            
+
+            index = dot[self.config.index]
+            documents = dot[self.config.documents]
+            identifier = dot[self.config.identifier]
+
             if isinstance(documents, str):
                 documents = json.loads(documents)
-            
+
             if isinstance(documents, list) and identifier:
-                documents = [{identifier: item} for item in documents]          
-                
+                documents = [{identifier: item} for item in documents]
+
             if identifier:
                 for item in documents:
                     if identifier in item:
                         item["_id"] = item[identifier]
 
-            result = await raw_db.bulk_upsert(
-                    index=index,
-                    data=documents   
-                )
-            
+            # Raw insert
+            result = await _bd_elastic_adapter.client.insert(index, documents)
+
+            result_dict = {}
             if isinstance(result, BulkInsertResult):
-                result_dict = result.dict()
-            
+                result_dict = result.model_dump()
+
         except Exception as e:
             self.console.error(str(e))
             return Result(port="error", value={
@@ -57,6 +58,7 @@ class WriteLocalDatabase(ActionRunner):
             })
 
         return Result(port="result", value=result_dict)
+
 
 def register() -> Plugin:
     return Plugin(

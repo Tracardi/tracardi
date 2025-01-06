@@ -1,11 +1,13 @@
 from pydantic import field_validator
 
-from tracardi.service.storage.elastic.interface.integration_id import load_integration_id
+from tracardi.service.adapter.bigdata.adapter_selector import bd_entity_adapter
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
+
+_bd_entity_adapter = bd_entity_adapter()
 
 
 class Config(PluginConfig):
@@ -18,7 +20,6 @@ class Config(PluginConfig):
         if not value:
             raise ValueError("Name can not be empty.")
         return value
-
 
 
 def validate(config: dict) -> Config:
@@ -39,7 +40,7 @@ class GetIntegrationIdAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None):
         try:
             system_name = self.config.name.lower().replace(" ", "-")
-            result = await load_integration_id(self.profile.id, system_name)
+            result = await _bd_entity_adapter.load_integration_id(self.profile.id, system_name)
 
             if result is not None:
                 if self.config.get_ids_only:

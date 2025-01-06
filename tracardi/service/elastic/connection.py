@@ -1,14 +1,14 @@
 import asyncio
 
 import elasticsearch
+from tracardi.service.adapter.bigdata.adapter_selector import bd_raw_adapter
 
 from tracardi.config import tracardi, elastic
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.service.storage.elastic.interface import raw as raw_db
 from tracardi.service import system
 
 logger = get_logger(__name__)
-
+_db_raw_adapter = bd_raw_adapter()
 
 def _is_elastic_on_localhost():
     local_hosts = {'127.0.0.1', 'localhost'}
@@ -47,7 +47,7 @@ async def wait_for_connection(no_of_tries=10):
             if no_of_tries < 0:
                 break
 
-            _health = await raw_db.health()
+            _health = await _db_raw_adapter.health()
             for key, value in _health.items():
                 key = key.replace("_", " ")
                 logger.info(f"Elasticsearch {key}: {value}")

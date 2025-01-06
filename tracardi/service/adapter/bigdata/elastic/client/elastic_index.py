@@ -461,3 +461,7 @@ class ElasticIndex:
     async def count(self, query: Optional[dict] = None):
         index = self.index.get_index_alias()
         return await self.client.count(index, query)
+
+
+def index(client: ElasticClient, idx) -> ElasticIndex:
+    return ElasticIndex(client, idx)

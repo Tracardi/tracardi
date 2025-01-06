@@ -51,17 +51,17 @@ async def delete_by_id(entity_id: str) -> dict:
 #     } for key, _ in result.aggregations['type'][0].items() if key != "other"], result.total
 
 
-async def upsert(entity: EntityRecord) -> BulkInsertResult:
-    return await storage_manager('entity').upsert(entity)
-
-
-async def refresh():
-    return await storage_manager('entity').refresh()
-
-
-async def flush():
-    return await storage_manager('entity').flush()
-
-
-async def count(query: dict = None):
-    return await storage_manager('entity').count(query)
+# async def upsert(entity: EntityRecord) -> BulkInsertResult:
+#     return await storage_manager('entity').upsert(entity)
+#
+#
+# async def refresh():
+#     return await storage_manager('entity').refresh()
+#
+#
+# async def flush():
+#     return await storage_manager('entity').flush()
+#
+#
+# async def count(query: dict = None):
+#     return await storage_manager('entity').count(query)

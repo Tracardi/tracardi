@@ -8,6 +8,7 @@ from tracardi.service.adapter.bigdata.elastic.client.elastic_query import get_qu
 from tracardi.service.adapter.bigdata.collector_protocol import CollectorProtocol
 from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from tracardi.common.time.date import now_in_utc
+from tracardi.service.adapter.bigdata.elastic.helpers.field_update_log_helper import load_field_update_log_by_type
 
 
 class ElasticLogAdapter(ElasticAdapter, CollectorProtocol):
@@ -44,5 +45,12 @@ class ElasticLogAdapter(ElasticAdapter, CollectorProtocol):
         buckets = result.aggregations('error_levels').buckets()
         return {item['key']: item['doc_count'] for item in buckets}
 
+    async def load_field_update_log_by_type(self, type: str) -> dict:
+        result = await load_field_update_log_by_type(type)
+        return result.dict()
+
     async def save_logs(self, logs) -> BulkInsertResult:
         return await self.core.save('log',logs)
+
+    async def save_field_update_log(self, logs: list) -> BulkInsertResult:
+        return await self.core.save('field-update-log',logs)
