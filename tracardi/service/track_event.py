@@ -13,6 +13,9 @@ async def track_event(tracker_payload: TrackerPayload,
                       static_profile_id: bool = False
                       ):
     tracking_start = time.time()
+
+    static_profile_id = static_profile_id or tracker_payload.options.get('static-profile-id', False)
+
     tr = Tracker(
         TrackerConfig(
             ip=ip,
