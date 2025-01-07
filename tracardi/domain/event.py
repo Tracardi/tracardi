@@ -410,7 +410,7 @@ def flat_events_to_event(flat_events: List[FlatEvent]) -> List[Event]:
             fe_dict['properties'] = properties.to_dict()
         traits = fe_dict.get('traits', {})
         if isinstance(traits, DotDict):
-            fe_dict['traits'] = properties.to_dict()
+            fe_dict['traits'] = traits.to_dict()
         event = Event(**fe_dict)
         events.append(event)
     return events
