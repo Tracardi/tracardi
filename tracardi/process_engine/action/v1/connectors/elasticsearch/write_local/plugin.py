@@ -1,8 +1,6 @@
 import json
 from tracardi.service.dependency import *
 
-from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.runner import ActionRunner
@@ -46,7 +44,7 @@ class WriteLocalDatabase(ActionRunner):
             result = await bd_elastic_adapter.client.insert(index, documents)
 
             result_dict = {}
-            if isinstance(result, BulkInsertResult):
+            if result:
                 result_dict = result.model_dump()
 
         except Exception as e:
