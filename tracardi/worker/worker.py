@@ -5,7 +5,7 @@ import asyncio
 from huey import RedisHuey
 
 from tracardi.common.logging.log_handler import get_installation_logger
-from tracardi.service.adapter.cache.redis.client.redis_connection_pool import get_redis_connection_pool
+from system.adapter.os.cache.redis.client.redis_connection_pool import get_redis_connection_pool
 
 import tracardi.worker.service.worker.migration_workers as migration_workers
 
