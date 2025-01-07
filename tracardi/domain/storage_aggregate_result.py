@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import Callable, Tuple, Any
 
-from adapter.bigdata.elastic.model.storage_record import StorageRecords
+from system.adapter.bigdata.elastic.model.storage_record import StorageRecords
 
 
 class StorageAggregateResult:
