@@ -6,7 +6,7 @@ from tracardi.common.logging.log_handler import get_logger
 from tracardi.domain.entity_record import EntityRecord
 from tracardi.domain.remote_system_integration_id import RemoteSystemIntegrationId
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
+from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from .helpers.entity_helper import delete_by_id, load, load_entity_types, upsert, load_integration_id, \
     save_integration_id, upsert_entity
 

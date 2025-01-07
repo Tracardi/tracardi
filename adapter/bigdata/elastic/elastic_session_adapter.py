@@ -1,6 +1,6 @@
 from typing import List, TypeVar, Union, Set
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
+from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from tracardi.context import get_context
 from tracardi.domain.session import Session
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult

@@ -2,13 +2,13 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Tuple, Optional
 
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.service.adapter.bigdata.elastic.client.elastic_query import get_query_to_load_by_field_and_value, \
+from adapter.bigdata.elastic.client.elastic_query import get_query_to_load_by_field_and_value, \
     get_agg_query_for_log_levels
 
-from tracardi.service.adapter.bigdata.collector_protocol import CollectorProtocol
-from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
+from adapter.bigdata.collector_protocol import CollectorProtocol
+from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from tracardi.common.time.date import now_in_utc
-from tracardi.service.adapter.bigdata.elastic.helpers.field_update_log_helper import load_field_update_log_by_type
+from adapter.bigdata.elastic.helpers.field_update_log_helper import load_field_update_log_by_type
 
 
 class ElasticLogAdapter(ElasticAdapter, CollectorProtocol):

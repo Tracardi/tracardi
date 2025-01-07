@@ -5,9 +5,9 @@ from tracardi.config import elastic
 from tracardi.domain.entity import FlatEntity
 from tracardi.domain.storage_record import StorageRecord, StorageRecords
 
-from tracardi.service.adapter.bigdata.elastic.client.elastic_client import ElasticClient
-from tracardi.service.adapter.bigdata.elastic.client.elastic_index import ElasticIndex
-from tracardi.service.adapter.bigdata.elastic.client.elastic_template import ElasticTemplate
+from adapter.bigdata.elastic.client.elastic_client import ElasticClient
+from adapter.bigdata.elastic.client.elastic_index import ElasticIndex
+from adapter.bigdata.elastic.client.elastic_template import ElasticTemplate
 
 
 class ElasticCoreAdapter:

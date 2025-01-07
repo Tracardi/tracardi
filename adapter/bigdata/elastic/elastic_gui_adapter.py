@@ -2,9 +2,10 @@ from typing import List, Optional
 
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.domain.event import Event
-from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
-from tracardi.service.adapter.bigdata.elastic.helpers.gui_helper import load_profiles_by_segments, \
+from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
+from adapter.bigdata.elastic.helpers.gui_helper import load_profiles_by_segments, \
     get_events_by_session_and_profile, get_events_by_profile, get_events_by_session, unique_field_value
+from elasticsearch.exceptions import NotFoundError
 
 logger = get_logger(__name__)
 
@@ -41,12 +42,16 @@ class ElasticGuiAdapter(ElasticAdapter):
         return result.dict()
 
     async def load_events_by_session(self, session_id: str, limit: int) -> Optional[List[Event]]:
-        result = await get_events_by_session(session_id, limit)
+        try:
+            result = await get_events_by_session(session_id, limit)
 
-        if result.total == 0:
-            return None
+            if result.total == 0:
+                return None
 
-        return result.to_domain_objects(Event)
+            return result.to_domain_objects(Event)
+        except NotFoundError as e:
+            raise ConnectionError(e)
+
 
     async def load_unique_field_value(self, search_query, limit):
         return await unique_field_value(search_query, limit)

@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from typing import Tuple, Optional
 from tracardi.domain.storage_record import StorageRecords
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.service.adapter.bigdata.elastic.client.elastic_index import ElasticIndex
+from adapter.bigdata.elastic.client.elastic_index import ElasticIndex
 from tracardi.service.list_default_value import list_value_at_index
 from tracardi.domain.query_result import QueryResult
 from tracardi.domain.time_range_query import DatetimeRangePayload

@@ -2,8 +2,8 @@ from typing import Optional
 
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.domain.event import Event
-from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
-from tracardi.service.adapter.bigdata.elastic.helpers.crud_event_helper import load_event, delete_by_id
+from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
+from adapter.bigdata.elastic.helpers.crud_event_helper import load_event, delete_by_id
 
 logger = get_logger(__name__)
 

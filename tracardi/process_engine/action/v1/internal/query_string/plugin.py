@@ -4,7 +4,6 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from .model.config import Config
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
-from elasticsearch import ElasticsearchException
 from tracardi.common.template.dot_template import DotTemplate
 from pytimeparse import parse as parse_time
 
@@ -35,7 +34,7 @@ class CountRecordsAction(ActionRunner):
 
             return Result(port="result", value={"numberOfRecords": result.total})
 
-        except ElasticsearchException as e:
+        except Exception as e:
             return Result(port="error", value={"error": str(e)})
 
 

@@ -2,13 +2,13 @@ from typing import List, Dict
 
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.domain.storage_aggregate_result import StorageAggregateResult
-from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
-from tracardi.service.adapter.bigdata.elastic.helpers.analytics_event_helper import aggregate_event_type, \
+from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
+from adapter.bigdata.elastic.helpers.analytics_event_helper import aggregate_event_type, \
     aggregate_source_by_type, aggregate_source_by_tags, aggregate_event_tag, get_avg_process_time, \
     aggregate_event_status, aggregate_event_device_geo, aggregate_event_os_name, aggregate_event_channels, \
     aggregate_event_resolution, aggregate_events_by_source, load_events_avg_requests, \
     aggregate_events_by_type_and_source
-from tracardi.service.adapter.bigdata.elastic.helpers.analytics_profile_helper import aggregate_profile_events_by_type, \
+from adapter.bigdata.elastic.helpers.analytics_profile_helper import aggregate_profile_events_by_type, \
     aggregate_profile_events_by_field, aggregate_profile_events, load_events_by_profile_and_field, \
     load_modified_top_profiles, count_profile_duplicates
 

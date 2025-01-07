@@ -9,12 +9,12 @@ from tracardi.common.logging.log_handler import get_installation_logger
 from tracardi.common.tools.diff import get_changed_values
 from tracardi.config import tracardi, elastic
 from tracardi.context import ServerContext, get_context, Context
-from tracardi.domain.credentials import Credentials
-from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from tracardi.service.license import License, MULTI_TENANT
 from tracardi.service.plugin.plugin_install import install_default_plugins
-from tracardi.service.setup.setup_indices import create_schema, run_on_start
+from tracardi.domain.credentials import Credentials
 from tracardi.service.storage.index import Resource, Index
+from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
+from adapter.bigdata.elastic.installer.setup_indices import create_schema, run_on_start
 
 if License.has_license() and License.has_service(MULTI_TENANT):
     from com_tracardi.service.multi_tenant_manager import MultiTenantManager
@@ -30,7 +30,7 @@ def _is_elastic_on_localhost():
     return elastic.host in local_hosts
 
 
-def get_missing(indices, type) -> list:
+def _get_missing(indices, type) -> list:
     return [idx[1] for idx in indices if idx[0] == type]
 
 
@@ -149,9 +149,9 @@ class ElasticInstallAdapter(ElasticAdapter):
 
         _indices = _indices_staging + _indices_production
 
-        missing_indices = get_missing(_indices, type='missing_index')
-        missing_aliases = get_missing(_indices, type='missing_alias')
-        missing_templates = get_missing(_indices, type='missing_template')
+        missing_indices = _get_missing(_indices, type='missing_index')
+        missing_aliases = _get_missing(_indices, type='missing_alias')
+        missing_templates = _get_missing(_indices, type='missing_template')
 
         is_schema_ok = not missing_indices and not missing_aliases and not missing_templates
 

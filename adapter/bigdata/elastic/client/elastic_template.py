@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from tracardi.service.adapter.bigdata.elastic.client.elastic_client import ElasticClient
+from adapter.bigdata.elastic.client.elastic_client import ElasticClient
 
 def _acknowledged(result):
     return 'acknowledged' in result and result['acknowledged'] is True

@@ -1,8 +1,8 @@
 from typing import Optional
 
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
-from tracardi.service.adapter.bigdata.elastic.helpers.plugin_event_helper import get_nth_last_event, \
+from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
+from adapter.bigdata.elastic.helpers.plugin_event_helper import get_nth_last_event, \
     load_active_profile_by_field, aggregate_event_by_field_within_time, count_events_by_type
 
 logger = get_logger(__name__)

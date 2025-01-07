@@ -1,12 +1,12 @@
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.service.adapter.bigdata.elastic.client.elastic_client import ElasticClient
+from adapter.bigdata.elastic.client.elastic_client import ElasticClient
 
 from tracardi.domain.event import Event
 from tracardi.domain.flat_event import FlatEvent
 
 from tracardi.domain.storage_record import StorageRecord
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.service.adapter.bigdata.elastic.client.elastic_index import index
+from adapter.bigdata.elastic.client.elastic_index import index
 from typing import List, Optional, Union, Set
 
 logger = get_logger(__name__)

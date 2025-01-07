@@ -3,10 +3,10 @@ from typing import Set, List
 from tracardi.domain.query_result import QueryResult
 from tracardi.domain.time_range_query import DatetimeRangePayload
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.service.adapter.bigdata.elastic.cache.field_mapping import load_cached_field_names, \
+from adapter.bigdata.elastic.cache.field_mapping import load_cached_field_names, \
     load_cached_column_values
-from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
-from tracardi.service.adapter.bigdata.elastic.helpers.search_engine_helper import SqlSearchQueryEngine, \
+from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
+from adapter.bigdata.elastic.helpers.search_engine_helper import SqlSearchQueryEngine, \
     get_fields_of_given_field_type
 from tracardi.service.wf.field_mappings_cache import FieldMapper
 

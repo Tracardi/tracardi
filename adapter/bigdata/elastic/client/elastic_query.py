@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict, Set
 
-from tracardi.service.adapter.bigdata.elastic.client.model.field_sort import ElasticFieldSort
+from adapter.bigdata.elastic.client.model.field_sort import ElasticFieldSort
 
 
 def get_query_by_values(fields_and_values: List[tuple],

@@ -4,8 +4,8 @@ from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
-from tracardi.service.adapter.bigdata.elastic.helpers.adapter_helper import (load_profile as load_profile_helper)
+from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
+from adapter.bigdata.elastic.helpers.adapter_helper import (load_profile as load_profile_helper)
 
 logger = get_logger(__name__)
 

@@ -1,4 +1,4 @@
-from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
+from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from .helpers.raw_helper import count_by_query
 from tracardi.service.storage.index import Resource
 from elasticsearch import NotFoundError
