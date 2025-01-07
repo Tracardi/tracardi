@@ -3,6 +3,14 @@ import pytest
 from tracardi.common.dot_notation.dotdict import DotDict
 
 
+def test_dotdict_set_as_dotdict():
+    d = DotDict({
+        "a": "1"
+    })
+
+    with pytest.raises(TypeError):
+        cd = DotDict(d)
+
 # Define tests for DotDict functionality
 def test_dotdict_set_get_delete_check():
     d = {

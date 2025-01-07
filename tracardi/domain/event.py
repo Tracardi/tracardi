@@ -17,6 +17,7 @@ from .request import Request
 from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo
 from tracardi.common.tools.string_manager import capitalize_event_type_id
+from ..common.dot_notation.dotdict import DotDict
 
 
 class Tags(BaseModel):
@@ -401,4 +402,12 @@ class Event(NamedEntity):
 
 
 def flat_events_to_event(flat_events: List[FlatEvent]) -> List[Event]:
-    return [Event(**flat_event.to_dict()) for flat_event in flat_events]
+    events = []
+    for flat_event in flat_events:
+        fe_dict = flat_event.to_dict()
+        properties = fe_dict.get('properties', {})
+        if isinstance(properties, DotDict):
+            fe_dict['properties'] = properties.to_dict()
+        event = Event(**fe_dict)
+        events.append(event)
+    return events
