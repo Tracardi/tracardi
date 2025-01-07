@@ -62,6 +62,8 @@ class DotDict:
         return DotDict(copy.deepcopy(self.root))
 
     def to_dict(self) -> dict:
+        if isinstance(self.root, DotDict):
+            return self.root.to_dict()
         return self.root
 
     def to_json(self, default=None, cls=None):
