@@ -1,6 +1,6 @@
 from typing import Optional
 
-from tracardi.service.storage.elastic.interface.collector.load.flat_profile import load_flat_profile
+from tracardi.service.collector.load.flat_profile import load_flat_profile
 from tracardi.context import Context
 from tracardi.domain.profile import Profile
 

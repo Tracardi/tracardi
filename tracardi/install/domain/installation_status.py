@@ -1,18 +1,15 @@
 import asyncio
-import elasticsearch
 
-from typing import List, Optional, Dict
+from typing import List, Optional
 from pydantic import BaseModel
 
 from tracardi.domain import ExtraInfo
-from tracardi.service.adapter.bigdata.adapter_selector import bd_install_adapter
+from tracardi.service.dependency import *
 from tracardi.service.license import License, MULTI_TENANT
 from tracardi.common.singleton import Singleton
-from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from tracardi.config import tracardi, mysql
-from tracardi.context import ServerContext, get_context, Context
+from tracardi.context import ServerContext, get_context
 from tracardi.common.logging.log_handler import get_installation_logger
-from tracardi.service.storage.index import Resource
 
 from tracardi.service.storage.mysql.service.database_service import DatabaseService
 from tracardi.service.storage.mysql.service.table_service import TableService
@@ -23,7 +20,6 @@ if License.has_license() and License.has_service(MULTI_TENANT):
     from com_tracardi.service.multi_tenant_manager import MultiTenantManager
 
 logger = get_installation_logger(__name__)
-_bd_install_adapter = bd_install_adapter()
 
 async def check_installation() -> dict:
     """
@@ -55,7 +51,7 @@ async def check_installation() -> dict:
 
     has_admin_account = len(admin_records) > 0
 
-    schema_ok, indices = await _bd_install_adapter.is_big_data_schema_ok()
+    schema_ok, indices = await bd_install_adapter.is_big_data_schema_ok()
 
     if schema_ok is False:
         return {
@@ -118,10 +114,6 @@ class SystemInstallationStatus(BaseModel):
 
 
 class InstallationStatus(metaclass=Singleton):
-    _installed_tenants: Dict[str, bool] = {}
-
-    def __init__(self):
-        self.es = ElasticClient.instance()
 
     @staticmethod
     async def get_status():
@@ -131,18 +123,6 @@ class InstallationStatus(metaclass=Singleton):
             "users": status.admin_ok,
             "form": status.form_ok
         }
-
-    async def has_logs_index(self, context: Context):
-        indices = Resource()
-        template = indices.get_template_name('log')
-
-        tenant = context.tenant
-        if tenant not in self._installed_tenants or self._installed_tenants[tenant] is False:
-            try:
-                self._installed_tenants[tenant] = await self.es.exists_index_template(template)
-            except elasticsearch.exceptions.ConnectionError:
-                return False
-        return self._installed_tenants[tenant]
 
 
 installation_status = InstallationStatus()

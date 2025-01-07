@@ -1,6 +1,6 @@
 import json
 import os
-from tracardi.service.adapter.bigdata.adapter_selector import bd_raw_adapter
+from tracardi.service.dependency import *
 from typing import List, Tuple, Generator, Any
 
 from elasticsearch.exceptions import TransportError, NotFoundError
@@ -9,7 +9,6 @@ from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.index import Resource, Index
 
 __local_dir = os.path.dirname(__file__)
-_bd_raw_adapter = bd_raw_adapter()
 
 index_mapping = {}
 
@@ -34,11 +33,11 @@ async def update_mappings():
             with open(path) as f:
                 update_mappings = json.load(f)
                 if index.multi_index:
-                    current_indices = await _bd_raw_adapter.list_indices(index.get_templated_index_pattern())
+                    current_indices = await bd_raw_adapter.list_indices(index.get_templated_index_pattern())
                     for idx, idx_data in current_indices.items():
                         from pprint import pprint
-                        pprint(await _bd_raw_adapter.set_mapping(idx, update_mappings))
-                        pprint(await _bd_raw_adapter.get_mapping(idx))
+                        pprint(await bd_raw_adapter.set_mapping(idx, update_mappings))
+                        pprint(await bd_raw_adapter.get_mapping(idx))
 
 
 async def create_index_and_template(index: Index, index_map, update_mapping) -> Tuple[List[str], List[str], List[str]]:
@@ -55,9 +54,9 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
 
         template_name = index.get_prefixed_template_name()
 
-        if not await _bd_raw_adapter.template_exists(template_name):
+        if not await bd_raw_adapter.template_exists(template_name):
             # Multi indices need templates. Index will be created automatically on first insert
-            ack, result = await _bd_raw_adapter.template_create(template_name, index_map)
+            ack, result = await bd_raw_adapter.template_create(template_name, index_map)
 
             if not ack:
                 raise ConnectionError(
@@ -75,10 +74,10 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
 
     # -------- INDEX --------
 
-    if not await _bd_raw_adapter.index_exists(target_index):
+    if not await bd_raw_adapter.index_exists(target_index):
 
         # There is no index but the alias may exist
-        exists_index_with_alias_name = await _bd_raw_adapter.index_exists(alias_index)
+        exists_index_with_alias_name = await bd_raw_adapter.index_exists(alias_index)
         exists_index_with_alias_name = True
 
         # Skip this error if the index is static. With static indexes there must be one alias to two indices.
@@ -98,7 +97,7 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
         result = None
         for attempt in range(0, 3):
             try:
-                result = await _bd_raw_adapter.index_create(target_index, mapping)
+                result = await bd_raw_adapter.index_create(target_index, mapping)
                 break
             except Exception as e:
                 raise ConnectionError(
@@ -122,7 +121,7 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
         try:
             logger.info(f"{alias_index} - EXISTS Index `{target_index}`. Updating mapping only.")
             mapping = index_map['template'] if index.multi_index else index_map
-            update_result = await _bd_raw_adapter.set_mapping(target_index, mapping['mappings'])
+            update_result = await bd_raw_adapter.set_mapping(target_index, mapping['mappings'])
             logger.info(f"{alias_index} - Mapping of `{target_index}` updated. Response {update_result}.")
         except TransportError as e:
             message = f"Update of index {target_index} mapping failed with error {repr(e)}"
@@ -134,17 +133,17 @@ async def create_index_and_template(index: Index, index_map, update_mapping) -> 
     # TODO Many force index creations
 
     # Check if alias exists
-    if not await _bd_raw_adapter.alias_exists(alias_index, index=target_index):
+    if not await bd_raw_adapter.alias_exists(alias_index, index=target_index):
         # Check if it points to target index
 
         try:
-            existing_aliases_setup = await _bd_raw_adapter.get_alias(alias_index)
+            existing_aliases_setup = await bd_raw_adapter.get_alias(alias_index)
         except NotFoundError:
             existing_aliases_setup = []
 
         if target_index not in existing_aliases_setup:
 
-            result = await _bd_raw_adapter.update_aliases({
+            result = await bd_raw_adapter.update_aliases({
                 "actions": [{"add": {"index": target_index, "alias": alias_index}}]
             })
             if acknowledged(result):

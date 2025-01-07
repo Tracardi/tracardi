@@ -2,11 +2,9 @@ import json
 from elasticsearch import NotFoundError
 
 from tracardi.context import get_context
-from tracardi.service.adapter.bigdata.adapter_selector import bd_raw_adapter
+from tracardi.service.dependency import *
 from tracardi.service.storage.index import Resource, Index
 from tracardi.common.tools.diff import get_changed_values
-
-_db_raw_adapter = bd_raw_adapter()
 
 
 async def get_indices_status():
@@ -17,7 +15,7 @@ async def get_indices_status():
             # Template
             _template = index.get_prefixed_template_name()
 
-            if not await _db_raw_adapter.template_exists(_template):
+            if not await bd_raw_adapter.template_exists(_template):
                 yield "missing_template", _template
             else:
                 yield "existing_template", _template
@@ -28,9 +26,9 @@ async def get_indices_status():
             _template_pattern = index.get_templated_index_pattern()
 
             if get_context().is_production():
-                has_alias = await _db_raw_adapter.alias_exists(_alias)
+                has_alias = await bd_raw_adapter.alias_exists(_alias)
             else:
-                has_alias = await _db_raw_adapter.alias_exists(_alias, index=_template_pattern)
+                has_alias = await bd_raw_adapter.alias_exists(_alias, index=_template_pattern)
 
             if not has_alias:
                 yield "missing_alias", _alias
@@ -41,7 +39,7 @@ async def get_indices_status():
 
             # Index
             _index = index.get_write_index()
-            if not await _db_raw_adapter.index_exists(_index):
+            if not await bd_raw_adapter.index_exists(_index):
                 yield "missing_index", _index
             else:
                 yield "existing_index", _index
@@ -50,9 +48,9 @@ async def get_indices_status():
             _alias = index.get_index_alias()
 
             if get_context().is_production():
-                has_alias = await _db_raw_adapter.alias_exists(_alias)
+                has_alias = await bd_raw_adapter.alias_exists(_alias)
             else:
-                has_alias = await _db_raw_adapter.alias_exists(_alias, index=_index)
+                has_alias = await bd_raw_adapter.alias_exists(_alias, index=_index)
 
             if not has_alias:
                 yield "missing_alias", _alias
@@ -89,7 +87,7 @@ async def check_indices_mappings_consistency():
             del system_mapping['settings']
 
         try:
-            es_mapping = await _db_raw_adapter.get_mapping(index.get_write_index())
+            es_mapping = await bd_raw_adapter.get_mapping(index.get_write_index())
             es_mapping = es_mapping[index.get_write_index()]
 
             diff = get_changed_values(old_dict=es_mapping, new_dict=system_mapping)

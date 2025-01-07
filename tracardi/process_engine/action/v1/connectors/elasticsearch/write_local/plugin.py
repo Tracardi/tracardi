@@ -1,5 +1,5 @@
 import json
-from tracardi.service.adapter.bigdata.adapter_selector import bd_elastic_adapter
+from tracardi.service.dependency import *
 
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 
@@ -8,8 +8,6 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from .model.config import Config
-
-_bd_elastic_adapter = bd_elastic_adapter()
 
 
 def validate(config: dict):
@@ -45,7 +43,7 @@ class WriteLocalDatabase(ActionRunner):
                         item["_id"] = item[identifier]
 
             # Raw insert
-            result = await _bd_elastic_adapter.client.insert(index, documents)
+            result = await bd_elastic_adapter.client.insert(index, documents)
 
             result_dict = {}
             if isinstance(result, BulkInsertResult):

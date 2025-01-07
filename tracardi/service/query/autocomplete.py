@@ -5,7 +5,7 @@ from lark import Lark, Token
 from lark.lexer import TerminalDef
 
 from .tql_schema import schema
-from ..adapter.bigdata.adapter_selector import bd_search_adapter
+from tracardi.service.dependency import *
 
 # ([^\s\"]+|(?<!\\)([\"].*?(?<!\\)[\"]))
 # %import common.ESCAPED_STRING
@@ -14,7 +14,7 @@ APPEND_NONE = None
 APPEND_BOTH = 0
 APPEND_BEFORE = -1
 APPEND_AFTER = 1
-_search_adapter = bd_search_adapter()
+
 
 @dataclass
 class Value:
@@ -85,7 +85,7 @@ class Values:
 
     async def _field(self, last: dict[str, Any], current: Value):
         current_value = current.value
-        fields = await _search_adapter.get_defined_columns_in_table(self.index)
+        fields = await bd_search_adapter.get_defined_columns_in_table(self.index)
         if current_value.strip() == "":
             return fields
         if current.token == "FIELD":
@@ -131,7 +131,7 @@ class Values:
 
     async def _value(self, last: dict[str, Any], current: Value):
         field = last['FIELD']
-        values = await _search_adapter.get_values_from_table_colum(self.index, field)
+        values = await bd_search_adapter.get_values_from_table_colum(self.index, field)
         if current.token == "VALUE":
             return self._filter(current.value, values)
         return values

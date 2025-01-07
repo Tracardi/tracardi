@@ -3,12 +3,12 @@ import elasticsearch
 import json
 import os
 from elasticsearch import NotFoundError
-from typing import Tuple
+from typing import Tuple, Dict
 
 from tracardi.common.logging.log_handler import get_installation_logger
 from tracardi.common.tools.diff import get_changed_values
 from tracardi.config import tracardi, elastic
-from tracardi.context import ServerContext, get_context
+from tracardi.context import ServerContext, get_context, Context
 from tracardi.domain.credentials import Credentials
 from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from tracardi.service.license import License, MULTI_TENANT
@@ -16,10 +16,11 @@ from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.service.setup.setup_indices import create_schema, run_on_start
 from tracardi.service.storage.index import Resource, Index
 
-logger = get_installation_logger(__name__)
-
 if License.has_license() and License.has_service(MULTI_TENANT):
     from com_tracardi.service.multi_tenant_manager import MultiTenantManager
+
+logger = get_installation_logger(__name__)
+_installed_tenants: Dict[str, bool] = {}
 
 
 def _is_elastic_on_localhost():
@@ -252,7 +253,6 @@ class ElasticInstallAdapter(ElasticAdapter):
                                       "login or password. Login must be a valid email and password "
                                       "can not be empty.")
 
-
         logger.info(f"Installing plugins on startup")
         installed_plugins = await install_default_plugins()
 
@@ -268,3 +268,17 @@ class ElasticInstallAdapter(ElasticAdapter):
         production_install_result['plugins'] = installed_plugins
 
         return staging_install_result, production_install_result
+
+    async def has_logs_index(self, context: Context):
+        template = Resource().get_template_name('log')
+
+        tenant = context.tenant
+        if tenant not in _installed_tenants or _installed_tenants[tenant] is False:
+            try:
+                _installed_tenants[tenant] = await self.client.exists_index_template(template)
+            except elasticsearch.exceptions.ConnectionError:
+                return False
+        return _installed_tenants[tenant]
+
+    async def close(self):
+        return self.client.close()

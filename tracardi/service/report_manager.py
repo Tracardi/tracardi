@@ -1,10 +1,8 @@
-from tracardi.service.adapter.bigdata.adapter_selector import bd_elastic_adapter
 
 from tracardi.domain.report import Report
+from tracardi.service.dependency import *
 from tracardi.service.storage.mysql.mapping.report_mapping import map_to_report
 from tracardi.service.storage.mysql.service.report_service import ReportService
-
-_bd_elastic_adapter = bd_elastic_adapter()
 
 
 class ReportManagerException(Exception):
@@ -33,7 +31,7 @@ class ReportManager:
 
     async def get_report(self, params: dict) -> dict:
         built_query = self.report.get_built_query(**params)
-        result = await _bd_elastic_adapter.index(self.report.index).query(built_query)
+        result = await bd_elastic_adapter.index(self.report.index).query(built_query)
         aggregations = result.aggregations()
         result = result.dict()
         if aggregations is not None:

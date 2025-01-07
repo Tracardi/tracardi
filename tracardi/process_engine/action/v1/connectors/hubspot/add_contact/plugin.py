@@ -1,4 +1,4 @@
-from tracardi.service.adapter.bigdata.adapter_selector import bd_entity_adapter
+from tracardi.service.dependency import *
 from tracardi.common.dot_notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -10,8 +10,6 @@ from tracardi.domain.resource import Resource
 from tracardi.process_engine.action.v1.connectors.hubspot.client import HubSpotClient
 from datetime import datetime
 
-
-_bd_entity_adapter = bd_entity_adapter()
 
 def validate(config: dict) -> Config:
     return Config(**config)
@@ -60,7 +58,7 @@ class HubSpotContactAdder(ActionRunner):
 
             if 'id' in result:
                 contact_id = result['id']
-                await _bd_entity_adapter.save_integration_id(self.profile.id, 'hubspot', contact_id)
+                await bd_entity_adapter.save_integration_id(self.profile.id, 'hubspot', contact_id)
 
             return Result(port="response", value=result)
 

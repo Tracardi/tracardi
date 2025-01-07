@@ -2,7 +2,7 @@ from tracardi.common.decorator.run_once import run_once
 from tracardi.config import tracardi
 from tracardi.service.adapter.metadata.mysql.mysql_install_adapter import MetaDataInstallAdapter
 
-_meta_data_adapter_var = tracardi.metadata_data_adapter
+_meta_data_adapter_var = tracardi.meta_data_adapter
 
 
 @run_once

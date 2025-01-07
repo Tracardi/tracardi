@@ -2,7 +2,7 @@
 # from elasticsearch import NotFoundError
 # from tracardi.domain.storage_record import StorageRecords
 # from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
+# from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 # from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiledSort
 # from tracardi.service.storage.elastic.driver.factory import storage_manager
 # from tracardi.service.storage.index import Resource

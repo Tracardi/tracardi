@@ -1,4 +1,3 @@
-from tracardi.service.adapter.bigdata.adapter_selector import bd_elastic_adapter
 from uuid import uuid4
 
 from tracardi.service.license import License, LICENSE
@@ -17,7 +16,6 @@ if License.has_license():
     from com_tracardi.db.bootstrap.default_bridges import commercial_default_bridges
 
 logger = get_installation_logger(__name__)
-_bd_adapter = bd_elastic_adapter()
 
 
 class MetaDataInstallAdapter:

@@ -19,7 +19,6 @@ from .application import Application
 from .device import Device
 from .. import ExtraInfo
 from ..request import Request
-from tracardi.common.logging.log_handler import get_logger
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
 from ..payload.event_payload import EventPayload
@@ -27,11 +26,11 @@ from ..session import Session
 from ..time import Time
 from ..entity import Entity, PrimaryEntity, DefaultEntity
 from tracardi.domain.flat_profile import FlatProfile
+from tracardi.common.logging.log_handler import get_logger
 from tracardi.common.dot_notation.dotdict import DotDict
-from ...service.storage.elastic.interface.collector.load.flat_profile import load_flat_profile
-
 from tracardi.common.tools.getters import get_entity_id
 from tracardi.common.security.hashing.hasher import get_shadow_session_id
+from tracardi.service.collector.load.flat_profile import load_flat_profile
 
 logger = get_logger(__name__)
 
