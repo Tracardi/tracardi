@@ -8,7 +8,7 @@ import dotdict_parser
 class DotDict:
     def __init__(self, dictionary: Union[dict | list]):
         if not isinstance(dictionary, (dict, list)):
-            raise ValueError(f"Expected dictionary or list as DotDict. Got {type(dictionary)}.")
+            raise TypeError(f"Expected dictionary or list as DotDict. Got {type(dictionary)}.")
         self.root = dictionary
 
     def _set_reference(self, path, is_leaf_a_list_item: bool):
