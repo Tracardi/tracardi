@@ -1,7 +1,7 @@
 from typing import List, Dict
 
-from tracardi.domain.storage_aggregate_result import StorageAggregateResult
-from tracardi.domain.storage_record import StorageRecords
+from adapter.bigdata.elastic.model.storage_aggregate_result import StorageAggregateResult
+from adapter.bigdata.elastic.model.storage_record import StorageRecords
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.storage.mysql.interface import event_source_dao
 

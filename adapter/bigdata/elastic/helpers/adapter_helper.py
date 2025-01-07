@@ -1,7 +1,7 @@
 from typing import Optional
 
-from tracardi.domain.storage_record import StorageRecord
-from tracardi.common.logging.log_handler import get_logger
+from adapter.bigdata.elastic.model.storage_record import StorageRecord
+from adapter.bigdata.elastic.logging.logger import get_logger
 from adapter.bigdata.elastic.client.elastic_client import ElasticClient
 from adapter.bigdata.elastic.client.elastic_index import index
 from adapter.bigdata.elastic.client.elastic_query import get_query_to_load_profile_by_id

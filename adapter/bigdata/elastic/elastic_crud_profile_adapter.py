@@ -1,6 +1,6 @@
 from typing import Optional
 
-from tracardi.common.logging.log_handler import get_logger
+from adapter.bigdata.elastic.logging.logger import get_logger
 from tracardi.domain.flat_profile import FlatProfile
 from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from adapter.bigdata.elastic.helpers.crud_profile_helper import load_by_id, delete_by_id

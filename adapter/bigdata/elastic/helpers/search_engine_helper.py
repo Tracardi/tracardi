@@ -3,8 +3,8 @@ from lark import LarkError
 
 from datetime import datetime, timedelta
 from typing import Tuple, Optional
-from tracardi.domain.storage_record import StorageRecords
-from tracardi.common.logging.log_handler import get_logger
+from adapter.bigdata.elastic.model.storage_record import StorageRecords
+from adapter.bigdata.elastic.logging.logger import get_logger
 from adapter.bigdata.elastic.client.elastic_index import ElasticIndex
 from tracardi.service.list_default_value import list_value_at_index
 from tracardi.domain.query_result import QueryResult

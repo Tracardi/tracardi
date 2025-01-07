@@ -6,21 +6,20 @@ from tracardi.service.storage.mysql.service.bridge_service import BridgeService
 from tracardi.service.storage.mysql.service.database_service import DatabaseService
 from tracardi.service.storage.mysql.service.user_service import UserService
 from tracardi.service.storage.mysql.service.version_service import VersionService
-from tracardi.config import tracardi
 from tracardi.context import ServerContext, get_context
 from tracardi.domain.credentials import Credentials
 from tracardi.domain.user import User
-from tracardi.common.logging.log_handler import get_installation_logger
+from .logging.logger import get_logger
 
 if License.has_license():
     from com_tracardi.db.bootstrap.default_bridges import commercial_default_bridges
 
-logger = get_installation_logger(__name__)
+logger = get_logger(__name__)
 
 
 class MetaDataInstallAdapter:
 
-    async def install_mysql_database(self, credentials: Credentials):
+    async def install_mysql_database(self, credentials: Credentials, version):
         ds = DatabaseService()
         await ds.bootstrap()
 
@@ -50,7 +49,7 @@ class MetaDataInstallAdapter:
                 # Install version in Mysql
 
                 vs = VersionService()
-                await vs.upsert(tracardi.version)
+                await vs.upsert(version)
 
                 # Add admin
                 us = UserService()

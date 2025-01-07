@@ -2,7 +2,7 @@ from datetime import datetime
 
 from typing import Optional, Tuple, List
 
-from tracardi.common.logging.log_handler import get_logger
+from adapter.bigdata.elastic.logging.logger import get_logger
 from tracardi.domain.entity_record import EntityRecord
 from tracardi.domain.remote_system_integration_id import RemoteSystemIntegrationId
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult

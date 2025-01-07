@@ -1,9 +1,9 @@
 from typing import Union
 
-from tracardi.common.logging.log_handler import get_logger
+from adapter.bigdata.elastic.logging.logger import get_logger
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile import *
-from tracardi.domain.storage_record import StorageRecord, StorageRecords
+from adapter.bigdata.elastic.model.storage_record import StorageRecord, StorageRecords
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 
 logger = get_logger(__name__)

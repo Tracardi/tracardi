@@ -25,6 +25,6 @@ bd_crud_profile_adapter = ElasticCrudProfileAdapter()
 bd_crud_event_adapter = ElasticCrudEventAdapter()
 bd_session_adapter = ElasticSessionAdapter()
 bd_entity_adapter = ElasticEntityAdapter()
-bd_raw_adapter = ElasticRawAdapter()
 bd_install_adapter = ElasticInstallAdapter()
+bd_raw_adapter = ElasticRawAdapter()
 

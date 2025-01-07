@@ -1,10 +1,10 @@
 from typing import Optional, List, Union, Set
 
 from tracardi.domain.session import Session
-from tracardi.domain.storage_aggregate_result import StorageAggregateResult
-from tracardi.domain.storage_record import StorageRecord
+from adapter.bigdata.elastic.model.storage_aggregate_result import StorageAggregateResult
+from adapter.bigdata.elastic.model.storage_record import StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.common.logging.log_handler import get_logger
+from adapter.bigdata.elastic.logging.logger import get_logger
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 
 logger = get_logger(__name__)

@@ -4,8 +4,8 @@ from adapter.bigdata.elastic.client.elastic_client import ElasticClient
 from tracardi.domain.event import Event
 from tracardi.domain.flat_event import FlatEvent
 
-from tracardi.domain.storage_record import StorageRecord
-from tracardi.common.logging.log_handler import get_logger
+from adapter.bigdata.elastic.model.storage_record import StorageRecord
+from adapter.bigdata.elastic.logging.logger import get_logger
 from adapter.bigdata.elastic.client.elastic_index import index
 from typing import List, Optional, Union, Set
 

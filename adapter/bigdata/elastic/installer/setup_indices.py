@@ -1,11 +1,9 @@
 import json
 import os
-from tracardi.service.dependency import *
 from typing import List, Tuple, Generator, Any
-
 from elasticsearch.exceptions import TransportError, NotFoundError
-
-from tracardi.common.logging.log_handler import get_logger
+from tracardi.service.dependency import *
+from adapter.bigdata.elastic.logging.logger import get_logger
 from tracardi.service.storage.index import Resource, Index
 
 __local_dir = os.path.dirname(__file__)

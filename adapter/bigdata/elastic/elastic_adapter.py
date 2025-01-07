@@ -3,7 +3,7 @@ from typing import Union, List, Set, Optional
 
 from tracardi.config import elastic
 from tracardi.domain.entity import FlatEntity
-from tracardi.domain.storage_record import StorageRecord, StorageRecords
+from adapter.bigdata.elastic.model.storage_record import StorageRecord, StorageRecords
 
 from adapter.bigdata.elastic.client.elastic_client import ElasticClient
 from adapter.bigdata.elastic.client.elastic_index import ElasticIndex

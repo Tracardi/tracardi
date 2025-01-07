@@ -1,5 +1,7 @@
 from typing import Dict
-from tracardi.service.license import License, SCHEDULER
+
+from tracardi.service.license import License
+from tracardi.service.license_type import SCHEDULER
 from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, PluginTest
 from tracardi.process_engine.action.v1.ux.question_popup.plugin import QuestionPopupPlugin
 from tracardi.process_engine.action.v1.ux.cta.plugin import CtaMessageUx

@@ -5,8 +5,8 @@ from typing import List, Optional, Tuple
 from tracardi.common.time.date import now_in_utc
 from tracardi.domain.entity import Entity, NullableEntity
 from tracardi.domain.entity_record import EntityRecord, EntityRecordMetadata, EntityRecordTime
-from tracardi.domain.storage_aggregate_result import StorageAggregateResult
-from tracardi.domain.storage_record import StorageRecords
+from adapter.bigdata.elastic.model.storage_aggregate_result import StorageAggregateResult
+from adapter.bigdata.elastic.model.storage_record import StorageRecords
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.storage.elastic.driver.factory import storage_manager
 

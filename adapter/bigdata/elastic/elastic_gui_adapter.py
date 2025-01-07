@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from tracardi.common.logging.log_handler import get_logger
+from adapter.bigdata.elastic.logging.logger import get_logger
 from tracardi.domain.event import Event
 from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from adapter.bigdata.elastic.helpers.gui_helper import load_profiles_by_segments, \

@@ -1,5 +1,5 @@
 from typing import List, TypeVar, Union, Set
-from tracardi.common.logging.log_handler import get_logger
+from adapter.bigdata.elastic.logging.logger import get_logger
 from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from tracardi.context import get_context
 from tracardi.domain.session import Session

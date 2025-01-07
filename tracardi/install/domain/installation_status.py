@@ -5,7 +5,8 @@ from pydantic import BaseModel
 
 from tracardi.domain import ExtraInfo
 from tracardi.service.dependency import *
-from tracardi.service.license import License, MULTI_TENANT
+from tracardi.service.license import License
+from tracardi.service.license_type import MULTI_TENANT
 from tracardi.common.singleton import Singleton
 from tracardi.config import tracardi, mysql
 from tracardi.context import ServerContext, get_context

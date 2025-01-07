@@ -1,6 +1,6 @@
 from typing import List
 
-from tracardi.domain.storage_record import StorageRecords
+from adapter.bigdata.elastic.model.storage_record import StorageRecords
 from tracardi.service.storage.elastic.driver.agg_result import AggResult
 from tracardi.service.storage.elastic.driver.factory import storage_manager, StorageForBulk
 

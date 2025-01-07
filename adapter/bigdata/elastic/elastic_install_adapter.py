@@ -9,7 +9,8 @@ from tracardi.common.logging.log_handler import get_installation_logger
 from tracardi.common.tools.diff import get_changed_values
 from tracardi.config import tracardi, elastic
 from tracardi.context import ServerContext, get_context, Context
-from tracardi.service.license import License, MULTI_TENANT
+from tracardi.service.license import License
+from tracardi.service.license_type import MULTI_TENANT
 from tracardi.service.plugin.plugin_install import install_default_plugins
 from tracardi.domain.credentials import Credentials
 from tracardi.service.storage.index import Resource, Index

@@ -1,7 +1,7 @@
 from typing import List, Dict
 
-from tracardi.common.logging.log_handler import get_logger
-from tracardi.domain.storage_aggregate_result import StorageAggregateResult
+from adapter.bigdata.elastic.logging.logger import get_logger
+from adapter.bigdata.elastic.model.storage_aggregate_result import StorageAggregateResult
 from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from adapter.bigdata.elastic.helpers.analytics_event_helper import aggregate_event_type, \
     aggregate_source_by_type, aggregate_source_by_tags, aggregate_event_tag, get_avg_process_time, \

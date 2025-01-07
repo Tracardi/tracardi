@@ -6,8 +6,8 @@ from typing import Union, List, Set, Tuple, AsyncGenerator, Any
 
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile import Profile
-from tracardi.domain.storage_record import RecordMetadata, StorageRecords
-from tracardi.common.logging.log_handler import get_logger
+from adapter.bigdata.elastic.model.storage_record import RecordMetadata, StorageRecords
+from adapter.bigdata.elastic.logging.logger import get_logger
 from adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from adapter.bigdata.elastic.helpers.adapter_helper import (load_profile as load_profile_helper)
 from adapter.bigdata.elastic.client.elastic_query import get_query_by_values, \

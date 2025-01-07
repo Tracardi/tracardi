@@ -2,7 +2,7 @@ from typing import List, Set
 
 from tracardi.domain.storage.index_mapping import IndexMapping
 
-from tracardi.common.logging.log_handler import get_logger
+from adapter.bigdata.elastic.logging.logger import get_logger
 from adapter.bigdata.elastic.client.elastic_index import ElasticIndex
 from adapter.bigdata.elastic.client.elastic_query import get_query_for_unique_values_from_field
 from tracardi.common.decorator.async_cache import AsyncCache
