@@ -1,10 +1,10 @@
-from typing import List, TypeVar, Union, Set
-from tracardi.context import get_context
-from tracardi.domain.session import Session
-from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.service.tracking.cache.session_cache import save_session_cache
-
-T = TypeVar("T")
+# from typing import List, TypeVar, Union, Set
+# from tracardi.context import get_context
+# from tracardi.domain.session import Session
+# from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
+# from tracardi.service.tracking.cache.session_cache import save_session_cache
+#
+# T = TypeVar("T")
 
 # async def save_session_to_db(session: Union[Session, List[Session], Set[Session]]):
 #     await session_db.save(session)

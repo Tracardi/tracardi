@@ -2,7 +2,6 @@ from tracardi.config import tracardi
 from tracardi.common.decorator.run_once import run_once
 from tracardi.service.adapter.bigdata.elastic.elastic_adapter import ElasticAdapter
 from tracardi.service.adapter.bigdata.elastic.elastic_apm_adapter import ElasticApmAdapter
-from tracardi.service.adapter.bigdata.elastic.elastic_audience_adapter import ElasticAudienceAdapter
 from tracardi.service.adapter.bigdata.elastic.elastic_collector_adapter import ElasticCollectorAdapter
 from tracardi.service.adapter.bigdata.elastic.elastic_crud_event_adapter import ElasticCrudEventAdapter
 from tracardi.service.adapter.bigdata.elastic.elastic_crud_profile_adapter import ElasticCrudProfileAdapter
@@ -81,14 +80,6 @@ def bd_gui_adapter() -> ElasticGuiAdapter:
         return ElasticGuiAdapter()
     else:
         raise ValueError(f"Unknown big data GUI adapter `{_big_data_adapter_var}`")
-
-
-@run_once
-def bd_audience_adapter() -> ElasticAudienceAdapter:
-    if _big_data_adapter_var.lower() == 'elastic':
-        return ElasticAudienceAdapter()
-    else:
-        raise ValueError(f"Unknown big data audience adapter `{_big_data_adapter_var}`")
 
 
 @run_once

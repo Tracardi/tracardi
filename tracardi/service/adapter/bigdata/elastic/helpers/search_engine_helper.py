@@ -10,7 +10,7 @@ from tracardi.service.list_default_value import list_value_at_index
 from tracardi.domain.query_result import QueryResult
 from tracardi.domain.time_range_query import DatetimeRangePayload
 from tracardi.common.exception.exception import StorageException
-from tracardi.service.storage.elastic.driver.query_parser import SqlSearchQueryParser
+from tracardi.service.storage.elastic.parser.query_parser import SqlSearchQueryParser
 
 _logger = get_logger(__name__)
 

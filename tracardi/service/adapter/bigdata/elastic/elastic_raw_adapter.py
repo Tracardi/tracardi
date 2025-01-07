@@ -71,7 +71,7 @@ class ElasticRawAdapter(ElasticAdapter):
         return await self.template.exists(template_name)
 
     async def template_create(self, template_name, template_map):
-        return self.template.insert(template_name, template_map)
+        return await self.template.insert(template_name, template_map)
 
     async def list_indices(self, index="*"):
         return await self.client.list_indices(index)

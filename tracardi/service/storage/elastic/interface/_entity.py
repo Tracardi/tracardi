@@ -1,18 +1,18 @@
-from typing import List, Optional, Tuple
-
-from tracardi.domain.entity_record import EntityRecord
-from tracardi.domain.storage_aggregate_result import StorageAggregateResult
-from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.service.storage.elastic.driver.factory import storage_manager
-
-
-async def load(entity_id) -> Optional[EntityRecord]:
-    return EntityRecord.create(await storage_manager("entity").load(entity_id))
+# from typing import List, Optional, Tuple
+#
+# from tracardi.domain.entity_record import EntityRecord
+# from tracardi.domain.storage_aggregate_result import StorageAggregateResult
+# from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
+# from tracardi.service.storage.elastic.driver.factory import storage_manager
 
 
-async def delete_by_id(entity_id: str) -> dict:
-    sm = storage_manager("entity")
-    return await sm.delete(entity_id, index=sm.get_single_storage_index())
+# async def load(entity_id) -> Optional[EntityRecord]:
+#     return EntityRecord.create(await storage_manager("entity").load(entity_id))
+#
+#
+# async def delete_by_id(entity_id: str) -> dict:
+#     sm = storage_manager("entity")
+#     return await sm.delete(entity_id, index=sm.get_single_storage_index())
 
 
 # async def _unique_entity_types(bucket_name, buckets_size=500) -> StorageAggregateResult:

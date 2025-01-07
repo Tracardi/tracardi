@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from typing import Union, List, Set, Optional
 
 from tracardi.config import elastic
@@ -33,7 +34,7 @@ class ElasticCoreAdapter:
 
         return session_record
 
-    async def save(self, index_type: str, entities: Union[FlatEntity, List[FlatEntity], Set[FlatEntity]], **kwargs):
+    async def save(self, index_type: str, entities: Union[FlatEntity, BaseModel, List[FlatEntity], Set[FlatEntity], List[BaseModel], dict, list], **kwargs):
         entity_index = self._index(index_type)
         result = await entity_index.save(entities, exclude={"operation": ...})
         if kwargs.get('refresh_after_save', False):

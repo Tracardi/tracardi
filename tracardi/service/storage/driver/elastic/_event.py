@@ -6,23 +6,23 @@ from tracardi.domain.flat_event import FlatEvent
 # from tracardi.domain.named_entity import NamedEntity
 
 # from tracardi.domain.storage_aggregate_result import StorageAggregateResult
-from tracardi.domain.storage_record import StorageRecords, StorageRecord
-from tracardi.common.logging.log_handler import get_logger
+# from tracardi.domain.storage_record import StorageRecords, StorageRecord
+# from tracardi.common.logging.log_handler import get_logger
 # from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiledSort
-from tracardi.service.storage.elastic.driver.factory import storage_manager, StorageForBulk
+# from tracardi.service.storage.elastic.driver.factory import storage_manager, StorageForBulk
 from typing import List, Optional, Dict, Tuple, Union, Set
 # from tracardi.service.storage.elastic.interface import raw as raw_db
 # from tracardi.service.storage.mysql.interface import event_source_dao
 
-logger = get_logger(__name__)
+# logger = get_logger(__name__)
 
 
 # async def load(id: str) -> Optional[StorageRecord]:
 #     return await storage_manager("event").load(id)
 
 
-async def save(events: Union[List[FlatEvent], List[Event], Set[Event]], exclude=None):
-    return await storage_manager("event").upsert(events, exclude=exclude)
+# async def save(events: Union[List[FlatEvent], List[Event], Set[Event]], exclude=None):
+#     return await storage_manager("event").upsert(events, exclude=exclude)
 
 
 # async def delete_by_id(id: str) -> dict:
@@ -39,12 +39,12 @@ async def save(events: Union[List[FlatEvent], List[Event], Set[Event]], exclude=
 #     return source_names_idx[id] if id in source_names_idx else id
 
 
-async def search(query: dict):
-    return await storage_manager("event").query({"query": query})
-
-
-async def query(query: dict) -> StorageRecords:
-    return await storage_manager("event").query(query)
+# async def search(query: dict):
+#     return await storage_manager("event").query({"query": query})
+#
+#
+# async def query(query: dict) -> StorageRecords:
+#     return await storage_manager("event").query(query)
 
 
 # async def count_events_by_type(profile_id: str, event_type: str, time_span: int) -> int:
@@ -508,12 +508,12 @@ async def query(query: dict) -> StorageRecords:
 #     return await storage_manager(index="event").aggregate(query)
 
 
-async def refresh():
-    return await storage_manager('event').refresh()
-
-
-async def flush():
-    return await storage_manager('event').flush()
+# async def refresh():
+#     return await storage_manager('event').refresh()
+#
+#
+# async def flush():
+#     return await storage_manager('event').flush()
 
 
 # async def get_nth_last_event(event_type: str, n: int, profile_id: Optional[str] = None):
@@ -665,8 +665,8 @@ async def flush():
 #         return []
 
 
-async def count(query: dict = None):
-    return await storage_manager('event').count(query)
+# async def count(query: dict = None):
+#     return await storage_manager('event').count(query)
 
 
 # async def get_avg_process_time():
@@ -709,8 +709,8 @@ async def count(query: dict = None):
 #     return await storage_manager("event").query(query)
 
 
-def scan(query: dict = None, batch: int = 1000):
-    return storage_manager('event').scan(query, batch)
+# def scan(query: dict = None, batch: int = 1000):
+#     return storage_manager('event').scan(query, batch)
 
 # async def reassign_session(new_session_id: str, old_session_id: str, profile_id: str):
 #     result = await get_events_by_session_and_profile(profile_id, old_session_id)

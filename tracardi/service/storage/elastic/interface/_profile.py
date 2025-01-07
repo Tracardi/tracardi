@@ -1,10 +1,10 @@
-from typing import Optional
-
-from tracardi.domain.flat_profile import FlatProfile
-from tracardi.common.logging.log_handler import get_logger
-from tracardi.service.storage.elastic.driver.factory import storage_manager
-
-logger = get_logger(__name__)
+# from typing import Optional
+#
+# from tracardi.domain.flat_profile import FlatProfile
+# from tracardi.common.logging.log_handler import get_logger
+# from tracardi.service.storage.elastic.driver.factory import storage_manager
+#
+# logger = get_logger(__name__)
 
 
 # async def profile_count_in_db(query: dict = None) -> dict:

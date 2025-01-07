@@ -1,12 +1,12 @@
-from typing import Union, Tuple
-
-from tracardi.domain.flat_profile import FlatProfile
-from tracardi.domain.profile import *
-from tracardi.domain.storage_record import StorageRecord, StorageRecords
+# from typing import Union, Tuple
+#
+# from tracardi.domain.flat_profile import FlatProfile
+# from tracardi.domain.profile import *
+# from tracardi.domain.storage_record import StorageRecord, StorageRecords
 from tracardi.common.logging.log_handler import get_logger
 # from tracardi.service.storage.elastic.interface import raw as raw_db
 # from tracardi.service.storage.elastic.driver.elastic_storage import ElasticFiledSort
-from tracardi.service.storage.elastic.driver.factory import storage_manager
+# from tracardi.service.storage.elastic.driver.factory import storage_manager
 
 logger = get_logger(__name__)
 
@@ -148,67 +148,67 @@ logger = get_logger(__name__)
 #     return await storage_manager('profile').query(query)
 
 
-async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]] = None):
-    return await storage_manager('profile').load_all(start, limit, sort)
+# async def load_all(start: int = 0, limit: int = 100, sort: List[Dict[str, Dict]] = None):
+#     return await storage_manager('profile').load_all(start, limit, sort)
 
 
-async def save(profile: Union[FlatProfile, Profile, List[Profile], Set[Profile]], refresh_after_save=False):
-    if isinstance(profile, (list, set)):
-        for _profile in profile:
-            if isinstance(_profile, Profile):
-                _profile.mark_for_update()
-    elif isinstance(profile, Profile):
-        profile.mark_for_update()
-    result = await storage_manager('profile').upsert(profile, exclude={"operation": ...})
-    if refresh_after_save:
-        await storage_manager('profile').flush()
-    return result
+# async def save(profile: Union[FlatProfile, Profile, List[Profile], Set[Profile]], refresh_after_save=False):
+#     if isinstance(profile, (list, set)):
+#         for _profile in profile:
+#             if isinstance(_profile, Profile):
+#                 _profile.mark_for_update()
+#     elif isinstance(profile, Profile):
+#         profile.mark_for_update()
+#     result = await storage_manager('profile').upsert(profile, exclude={"operation": ...})
+#     if refresh_after_save:
+#         await storage_manager('profile').flush()
+#     return result
 
 
-async def save_all(profiles: List[Profile]):
-    return await storage_manager("profile").upsert(profiles, exclude={"operation": ...})
+# async def save_all(profiles: List[Profile]):
+#     return await storage_manager("profile").upsert(profiles, exclude={"operation": ...})
 
 
-async def refresh():
-    return await storage_manager('profile').refresh()
+# async def refresh():
+#     return await storage_manager('profile').refresh()
 
 
-async def flush():
-    return await storage_manager('profile').flush()
+# async def flush():
+#     return await storage_manager('profile').flush()
+
+#
+# async def delete_by_id(id: str, index: str):
+#     sm = storage_manager('profile')
+#     return await sm.delete(id, index)
 
 
-async def delete_by_id(id: str, index: str):
-    sm = storage_manager('profile')
-    return await sm.delete(id, index)
+# async def bulk_delete_by_id(ids: List[str]):
+#     sm = storage_manager('profile')
+#     return await sm.bulk_delete(ids)
 
 
-async def bulk_delete_by_id(ids: List[str]):
-    sm = storage_manager('profile')
-    return await sm.bulk_delete(ids)
+# def scan(query: dict = None, batch: int = 1000):
+#     return storage_manager('profile').scan(query, batch)
 
 
-def scan(query: dict = None, batch: int = 1000):
-    return storage_manager('profile').scan(query, batch)
+# def query(query: dict = None):
+#     return storage_manager('profile').query(query)
 
 
-def query(query: dict = None):
-    return storage_manager('profile').query(query)
+# async def load_by_query_string(query: str):
+#     return await storage_manager('profile').load_by_query_string(query)
 
 
-async def load_by_query_string(query: str):
-    return await storage_manager('profile').load_by_query_string(query)
-
-
-async def update_by_query(query, conflicts: str = 'proceed', wait_for_completion: bool = False):
-    return await storage_manager('profile').update_by_query(
-        query=query,
-        conflicts=conflicts,
-        wait_for_completion=wait_for_completion
-    )
-
-
-async def count(query: dict = None) -> dict:
-    return await storage_manager('profile').count(query)
+# async def update_by_query(query, conflicts: str = 'proceed', wait_for_completion: bool = False):
+#     return await storage_manager('profile').update_by_query(
+#         query=query,
+#         conflicts=conflicts,
+#         wait_for_completion=wait_for_completion
+#     )
+#
+#
+# async def count(query: dict = None) -> dict:
+#     return await storage_manager('profile').count(query)
 
 
 # async def load_profile_by_values(key_value_pairs: List[Tuple[str, str]],

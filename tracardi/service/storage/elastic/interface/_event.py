@@ -1,9 +1,9 @@
-from typing import Optional, List, Dict
-
-from tracardi.domain.event import Event
-from tracardi.domain.flat_event import FlatEvent
-from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.service.adapter.bigdata.adapter_selector import bd_elastic_adapter
+# from typing import Optional, List, Dict
+#
+# from tracardi.domain.event import Event
+# from tracardi.domain.flat_event import FlatEvent
+# from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
+# from tracardi.service.adapter.bigdata.adapter_selector import bd_elastic_adapter
 
 
 # async def refresh_event_db():

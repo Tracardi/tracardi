@@ -1,5 +1,5 @@
-from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
-from tracardi.service.storage.elastic.driver.factory import storage_manager
+# from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
+# from tracardi.service.storage.elastic.driver.factory import storage_manager
 
 
 # async def load_by_type(type: str) -> dict:

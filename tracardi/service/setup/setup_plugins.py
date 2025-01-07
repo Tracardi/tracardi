@@ -157,7 +157,6 @@ import com_tracardi.action.v1.entity.delete.plugin
 import com_tracardi.action.v1.segmentation.memorize.plugin
 import com_tracardi.action.v1.segmentation.recall.plugin
 
-import tracardi.process_engine.action.v1.connectors.elasticsearch.query.plugin
 import tracardi.process_engine.action.v1.connectors.sms77.sendsms.plugin
 import tracardi.process_engine.action.v1.connectors.clicksend.sendsms.plugin
 import tracardi.process_engine.action.v1.connectors.influxdb.send.plugin
@@ -1373,18 +1372,6 @@ test_plugins: Dict[str, PluginMetadata] = {
     #     resource=None
     # ),
     #
-
-
-    "tracardi.process_engine.action.v1.connectors.elasticsearch.query.plugin": PluginMetadata(
-        test=PluginTest(init={'index': {'id': '1', 'name': 'Some value'}, 'query': '{"query":{"match_all":{}}}',
-                              'source': {'id': '1', 'name': 'Some value'}},
-                        resource={
-                            "url": "host",
-                            "port": 9200,
-                            'scheme': 'https',
-                            'verify_certs': False
-                        })
-    ),
 
     "tracardi.process_engine.action.v1.connectors.sms77.sendsms.plugin": PluginMetadata(
         test=PluginTest(

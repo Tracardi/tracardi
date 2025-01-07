@@ -4,7 +4,7 @@ from tracardi.context import Context, get_context
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile import Profile
 from tracardi.service.adapter.bigdata.adapter_selector import bd_collector_adapter, bd_crud_profile_adapter
-from tracardi.service.storage.elastic.driver.factory import storage_manager
+# from tracardi.service.storage.elastic.driver.factory import storage_manager
 from tracardi.service.tracking.cache.flat_profile_cache import save_flat_profile_cache, delete_flat_profile_cache
 
 _collector_adapter = bd_collector_adapter()

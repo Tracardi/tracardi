@@ -5,13 +5,13 @@ from typing import List, Optional, Dict
 from pydantic import BaseModel
 
 from tracardi.domain import ExtraInfo
+from tracardi.service.adapter.bigdata.adapter_selector import bd_install_adapter
 from tracardi.service.license import License, MULTI_TENANT
 from tracardi.common.singleton import Singleton
 from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from tracardi.config import tracardi, mysql
 from tracardi.context import ServerContext, get_context, Context
 from tracardi.common.logging.log_handler import get_installation_logger
-from tracardi.service import system
 from tracardi.service.storage.index import Resource
 
 from tracardi.service.storage.mysql.service.database_service import DatabaseService
@@ -23,7 +23,7 @@ if License.has_license() and License.has_service(MULTI_TENANT):
     from com_tracardi.service.multi_tenant_manager import MultiTenantManager
 
 logger = get_installation_logger(__name__)
-
+_bd_install_adapter = bd_install_adapter()
 
 async def check_installation() -> dict:
     """
@@ -55,9 +55,9 @@ async def check_installation() -> dict:
 
     has_admin_account = len(admin_records) > 0
 
-    is_schema_ok, indices = await system.is_schema_ok()
+    schema_ok, indices = await _bd_install_adapter.is_big_data_schema_ok()
 
-    if is_schema_ok is False:
+    if schema_ok is False:
         return {
             "schema_ok": False,
             "admin_ok": has_admin_account,
@@ -65,7 +65,7 @@ async def check_installation() -> dict:
             "warning": None
         }
 
-    if tracardi.multi_tenant and (not is_schema_ok or not has_admin_account):
+    if tracardi.multi_tenant and (not schema_ok or not has_admin_account):
         if License.has_service(MULTI_TENANT):
             mtm = MultiTenantManager()
             context = get_context()
@@ -97,7 +97,7 @@ async def check_installation() -> dict:
                 }
 
     return {
-        "schema_ok": is_schema_ok,
+        "schema_ok": schema_ok,
         "admin_ok": has_admin_account,
         "form_ok": True,
         "warning": None
