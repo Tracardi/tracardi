@@ -10,7 +10,7 @@ with ServerContext(Context(production=False, tenant=namespace)):
 
     from tracardi.domain.storage.index_mapping import IndexMapping
     from tracardi.domain.user import User
-    from tracardi.service.storage.index import Index
+    from system.adapter.os.bigdata.elastic.client.elastic_index import Index
 
     admin = User(id="1", password="pass", name="test", email="none", roles=['admin'])
     tenant = get_context().tenant

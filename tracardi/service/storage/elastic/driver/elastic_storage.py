@@ -5,12 +5,12 @@ from typing import List, Optional, Union, AsyncGenerator, Any, Dict
 import elasticsearch
 from pydantic import BaseModel
 
+from tracardi.service.dependency import *
 from tracardi.domain.entity import Entity, FlatEntity
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.common.exception.exception import DuplicatedRecordException
 from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
-from tracardi.service.storage.index import Index, Resource
 
 
 class ElasticFiledSort:
@@ -41,10 +41,7 @@ class ElasticStorage:
 
     def __init__(self, index_key):
         self.storage = ElasticClient.instance()
-        resource = Resource()
-        if index_key not in resource:
-            raise ValueError("There is no index defined for `{}`.".format(index_key))
-        self.index = resource[index_key]  # type: Index
+        self.index = bd_raw_adapter.get_index_settings(index_key)
         self.index_key = index_key
 
     async def exists(self, id) -> bool:

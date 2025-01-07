@@ -9,6 +9,7 @@ from typing import Optional, TypeVar, Type, Set, List, Union
 from uuid import uuid4
 from pydantic import BaseModel, PrivateAttr
 
+from tracardi.service.dependency import *
 from tracardi.domain import ExtraInfo
 from tracardi.domain.storage_record import RecordMetadata, StorageRecord
 from tracardi.domain.time import Time, EventTime
@@ -18,7 +19,6 @@ from tracardi.protocol.operational import Operational
 from tracardi.service.change_monitoring.field_update_logger import FieldUpdateLogger
 from tracardi.common.dot_notation.dot_notation_converter import dotter
 from tracardi.common.dot_notation.dotdict import DotDict
-from tracardi.service.storage.index import Resource
 
 logger = get_logger(__name__)
 
@@ -63,8 +63,7 @@ class Entity(Creatable):
         Used to fill metadata with default current index and id.
         """
         if not self.has_meta_data():
-            resource = Resource()
-            self.set_meta_data(RecordMetadata(id=self.id, index=resource[index_type].get_write_index()))
+            self.set_meta_data(RecordMetadata(id=self.id, index=bd_raw_adapter.get_write_index(index_type)))
 
     def dump_meta_data(self) -> Optional[dict]:
         return self._metadata.model_dump(mode='json') if isinstance(self._metadata, RecordMetadata) else None

@@ -6,14 +6,13 @@ from .metadata_field_changed import MetadataFieldChanged
 from .profile import Profile
 from .profile_data import FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
 from .storage_record import RecordMetadata, StorageRecord
+from tracardi.service.dependency import *
 from ..config import tracardi
 from ..service.tracking.profile_pii_hashing import get_allowed_piis_to_be_hashed_as_ids
 from tracardi.common.time.date import now_in_utc
 from tracardi.domain.profile_data import PREFIX_EMAIL_BUSINESS, PREFIX_EMAIL_MAIN, PREFIX_EMAIL_PRIVATE, \
     PREFIX_PHONE_MAIN, PREFIX_PHONE_BUSINESS, PREFIX_PHONE_MOBILE, PREFIX_PHONE_WHATSUP
 from tracardi.common.security.hashing.hasher import hash_id, has_hash_id
-from tracardi.service.storage.index import Resource
-
 
 class FlatProfile(FlatEntity):
 
@@ -118,8 +117,7 @@ class FlatProfile(FlatEntity):
         Used to fill metadata with default current index and id.
         """
         if not self.has_meta_data():
-            resource = Resource()
-            self.set_meta_data(RecordMetadata(id=self.id, index=resource[index_type].get_write_index()))
+            self.set_meta_data(RecordMetadata(id=self.id, index=bd_raw_adapter.get_write_index(index_type)))
 
     def add_auto_merge_hashed_id(self, flat_field: str) -> Optional[str]:
         field_closure = FLAT_PROFILE_MAPPING.get(flat_field, None)
