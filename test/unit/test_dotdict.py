@@ -11,6 +11,13 @@ def test_dotdict_set_as_dotdict():
     with pytest.raises(TypeError):
         cd = DotDict(d)
 
+    d = DotDict({"a": 1})
+    d['a'] = DotDict({"b": {"c": [2,1]}})
+    assert isinstance(d['a'], dict)
+    assert d['a.b.c.0'] == 2
+    assert d['a']['b']['c'][0] == 2
+
+
 # Define tests for DotDict functionality
 def test_dotdict_set_get_delete_check():
     d = {

@@ -88,6 +88,8 @@ class DotDict:
         is_leaf_a_list_item = key == ''
         _pointer = self._set_reference(path, is_leaf_a_list_item)
         try:
+            if isinstance(value, DotDict):
+                value = value.to_dict()
             if is_leaf_a_list_item:
                 _pointer.append(value)
             else:
