@@ -9,7 +9,6 @@ from typing import Optional, TypeVar, Type, Set, List, Union
 from uuid import uuid4
 from pydantic import BaseModel, PrivateAttr
 
-from tracardi.service.dependency import *
 from tracardi.domain import ExtraInfo
 from tracardi.domain.storage_record import RecordMetadata, StorageRecord
 from tracardi.domain.time import Time, EventTime
@@ -58,12 +57,12 @@ class Entity(Creatable):
     def get_meta_data(self) -> Optional[RecordMetadata]:
         return self._metadata if isinstance(self._metadata, RecordMetadata) else None
 
-    def _fill_meta_data(self, index_type: str):
-        """
-        Used to fill metadata with default current index and id.
-        """
-        if not self.has_meta_data():
-            self.set_meta_data(RecordMetadata(id=self.id, index=bd_raw_adapter.get_write_index(index_type)))
+    # def _fill_meta_data(self, index_type: str):
+    #     """
+    #     Used to fill metadata with default current index and id.
+    #     """
+    #     if not self.has_meta_data():
+    #         self.set_meta_data(RecordMetadata(id=self.id, index=bd_raw_adapter.get_write_index(index_type)))
 
     def dump_meta_data(self) -> Optional[dict]:
         return self._metadata.model_dump(mode='json') if isinstance(self._metadata, RecordMetadata) else None

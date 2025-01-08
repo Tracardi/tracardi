@@ -1,15 +1,13 @@
-import pytest
-from unittest.mock import AsyncMock
+import pytest, pytest_asyncio
+from unittest.mock import AsyncMock, patch
 
 from tracardi.context import ServerContext, Context
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.entity import Entity, PrimaryEntity
-from tracardi.domain.event_metadata import EventPayloadMetadata
-from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.session import SessionMetadata, Session
-from tracardi.domain.time import Time
-from tracardi.service.tracking.profile_loading import load_profile_and_session
+from tracardi.service.tracking.profile_loading import load_profile_and_session1
 
+pytest_plugins = ('pytest_asyncio',)
 
 @pytest.mark.asyncio
 async def test_load_profile_and_session():
@@ -18,25 +16,23 @@ async def test_load_profile_and_session():
 
         # Arrange
         profile_id = "4"
-        tracker_payload = TrackerPayload(
-            source=Entity(id="1"),
-            session=None,
-            metadata=EventPayloadMetadata(time=Time()),
-            profile=PrimaryEntity(id=profile_id),
-            context={},
-            request={},
-            properties={},
-            events=[],
-            options={},
-            profile_less=False
-        )
 
         session = Session(id="session-101", profile=Entity(id=profile_id), metadata=SessionMetadata())
 
-        tracker_payload._get_profile = AsyncMock(return_value=(FlatProfile(dict(id=profile_id)), session))
-
         # Act
-        flat_profile, session_result = await load_profile_and_session(session, True, tracker_payload)
+        with patch('tracardi.service.tracking.profile_loading._has_profile_id_in_session') as has_profile_id_in_session, \
+                patch('tracardi.service.tracking.profile_loading._get_profile', AsyncMock()) as get_profile:
+
+            has_profile_id_in_session.return_value = True
+            get_profile.return_value = (FlatProfile(dict(id=profile_id)), session, None, None)
+
+            flat_profile, session_result, _, _ = await load_profile_and_session1(
+                session,
+                True,
+                False,
+                PrimaryEntity(id=profile_id),
+                None
+            )
 
         # Assert
         assert isinstance(flat_profile, FlatProfile), "Profile should be of type FlatProfile"

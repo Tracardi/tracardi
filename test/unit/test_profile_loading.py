@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Tuple
 
 import pytest
 from unittest.mock import patch, AsyncMock
@@ -11,22 +11,24 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.session import Session
 from tracardi.domain.time import Time
-from tracardi.service.tracking.profile_loading import load_profile_and_session
+from tracardi.service.tracking.profile_loading import load_profile_and_session1
 
 
-async def _check_loading(loaded_session, profile_from_db, tracker_payload, expected_loads_no):
+async def _check_loading(loaded_session, profile_from_db, tracker_payload, expected_loads_no) -> Tuple[
+    FlatProfile, Session, DefaultEntity, Entity]:
     # Use `patch` to mock the `load_session` function
-    with patch("tracardi.domain.payload.tracker_payload.load_flat_profile",
+    with patch(f"{load_profile_and_session1.__module__}.load_flat_profile",
                new_callable=AsyncMock,
                return_value=profile_from_db) as mock_load_session:
-
         if isinstance(profile_from_db, Callable):
             mock_load_session.side_effect = profile_from_db
 
-        result = await load_profile_and_session(
+        result = await load_profile_and_session1(
             loaded_session,
             False,
-            tracker_payload
+            tracker_payload.profile_less,
+            tracker_payload.profile,
+            tracker_payload.session
         )
         assert mock_load_session.call_count == expected_loads_no
 
@@ -36,7 +38,6 @@ async def _check_loading(loaded_session, profile_from_db, tracker_payload, expec
 @pytest.mark.asyncio
 async def test_profile_loading_test_1():
     with ServerContext(Context(production=False)):
-
         # Test 1 - This test is loading profile by profile id in payload. Positive path.
         # Loaded profile ID equal to requested profile in payload
         # Both session and profile are correct
@@ -57,10 +58,10 @@ async def test_profile_loading_test_1():
 
         profile_from_db = profile
 
-        loaded_profile, loaded_session = await _check_loading(existing_session,
-                                                              profile_from_db,
-                                                              tracker_payload,
-                                                              expected_loads_no=1)
+        loaded_profile, loaded_session, tracker_profile, tracker_session = await _check_loading(existing_session,
+                                                                                                profile_from_db,
+                                                                                                tracker_payload,
+                                                                                                expected_loads_no=1)
 
         assert loaded_profile.id == profile.id
         assert loaded_session.id == existing_session.id
@@ -99,10 +100,10 @@ async def test_profile_loading_test_2():
 
         profile_from_db = returned_profile
 
-        loaded_profile, loaded_session = await _check_loading(existing_session,
-                                                              profile_from_db,
-                                                              tracker_payload,
-                                                              expected_loads_no=1)
+        loaded_profile, loaded_session, tracker_profile, tracker_session = await _check_loading(existing_session,
+                                                                                                profile_from_db,
+                                                                                                tracker_payload,
+                                                                                                expected_loads_no=1)
         # Expecting profile id to be x123
         assert loaded_profile.id == returned_profile.id
         assert loaded_profile.id != 'p123'
@@ -146,10 +147,10 @@ async def test_profile_loading_test_3():
         profile_from_db.ids = ['p123']
         profile_from_db.set_new(False)
 
-        loaded_profile, loaded_session = await _check_loading(existing_session,
-                                                              profile_from_db,
-                                                              tracker_payload,
-                                                              expected_loads_no=1)
+        loaded_profile, loaded_session, tracker_profile, tracker_session = await _check_loading(existing_session,
+                                                                                                profile_from_db,
+                                                                                                tracker_payload,
+                                                                                                expected_loads_no=1)
         # Expecting profile id to be x123
         assert loaded_profile.id == profile_from_db.id
         assert loaded_profile.id != 'p123'
@@ -224,16 +225,16 @@ async def test_profile_loading_test_5():
         # Returned profile
         profile_from_db = None
 
-        profile, session = await _check_loading(existing_session,
-                                                profile_from_db,
-                                                tracker_payload,
-                                                expected_loads_no=0)
+        profile, session, tracker_profile, tracker_session = await _check_loading(existing_session,
+                                                                                  profile_from_db,
+                                                                                  tracker_payload,
+                                                                                  expected_loads_no=0)
 
         assert profile.is_new()
         assert session.profile.id == profile.id
 
-        assert tracker_payload.profile.id == profile.id
-        assert tracker_payload.session.id == session.id
+        assert tracker_profile.id == profile.id
+        assert tracker_session.id == session.id
 
 
 @pytest.mark.asyncio
@@ -274,10 +275,10 @@ async def test_profile_loading_test_6():
                 profile.set_new(False)
                 return profile
 
-        profile, session = await _check_loading(existing_session,
-                                                loading_function,
-                                                tracker_payload,
-                                                expected_loads_no=2)  # Profile was loaded twice
+        profile, session, tracker_profile, tracker_session = await _check_loading(existing_session,
+                                                                                  loading_function,
+                                                                                  tracker_payload,
+                                                                                  expected_loads_no=2)  # Profile was loaded twice
 
         assert not profile.is_new()
         assert profile.id == 'x123'
@@ -285,6 +286,9 @@ async def test_profile_loading_test_6():
 
         assert tracker_payload.profile.id == profile.id
         assert tracker_payload.session.id == session.id
+
+        assert tracker_profile.id == profile.id
+        assert tracker_session.id == session.id
 
 
 @pytest.mark.asyncio
@@ -322,10 +326,10 @@ async def test_profile_loading_test_7():
             else:
                 assert False  # This should never be called
 
-        profile, session = await _check_loading(existing_session,
-                                                loading_function,
-                                                tracker_payload,
-                                                expected_loads_no=1)  # Profile was loaded once
+        profile, session, tracker_profile, tracker_session = await _check_loading(existing_session,
+                                                                                  loading_function,
+                                                                                  tracker_payload,
+                                                                                  expected_loads_no=1)  # Profile was loaded once
 
         assert profile.is_new()
         assert profile.id != "this-profile-does-not-exist"
@@ -333,6 +337,10 @@ async def test_profile_loading_test_7():
 
         assert tracker_payload.profile.id == profile.id
         assert tracker_payload.session.id == session.id
+
+        assert tracker_profile.id == profile.id
+        assert tracker_session.id == session.id
+
 
 @pytest.mark.asyncio
 async def test_profile_loading_test_8():
@@ -372,10 +380,10 @@ async def test_profile_loading_test_8():
             else:
                 assert False  # This should never be called
 
-        profile, session = await _check_loading(existing_session,
-                                                loading_function,
-                                                tracker_payload,
-                                                expected_loads_no=2)  # Profile was loaded twice
+        profile, session, tracker_profile, tracker_session = await _check_loading(existing_session,
+                                                                                  loading_function,
+                                                                                  tracker_payload,
+                                                                                  expected_loads_no=2)  # Profile was loaded twice
 
         assert profile.is_new()
         assert profile.id != "this-profile-does-not-exist"
@@ -383,6 +391,9 @@ async def test_profile_loading_test_8():
 
         assert tracker_payload.profile.id == profile.id
         assert tracker_payload.session.id == session.id
+
+        assert tracker_profile.id == profile.id
+        assert tracker_session.id == session.id
 
 
 @pytest.mark.asyncio
@@ -420,23 +431,25 @@ async def test_profile_loading_test_9():
             else:
                 assert False  # This should never be called
 
-        profile, session = await _check_loading(existing_session,
-                                                loading_function,
-                                                tracker_payload,
-                                                expected_loads_no=1)  # Profile was once twice
+        profile, session, tracker_profile, tracker_session = await _check_loading(existing_session,
+                                                                                  loading_function,
+                                                                                  tracker_payload,
+                                                                                  expected_loads_no=1)  # Profile was once twice
 
         assert profile.is_new()
         assert profile.id != "this-profile-does-not-exist"
         assert session.profile.id == profile.id
 
-        assert tracker_payload.profile.id == profile.id
-        assert tracker_payload.session.id == session.id
+        assert tracker_payload.profile is None
+        assert tracker_payload.session.id == existing_session.id
+
+        assert tracker_profile.id == profile.id
+        assert tracker_session.id == session.id
 
 
 @pytest.mark.asyncio
 async def test_profile_loading_test_10():
     with ServerContext(Context(production=False)):
-
         # Test 10 - This test is fully corrupted:
         # It loads profile and session both exists. But there is no connection between them.
         # Session profile ID is not equal to profile ID or IDS.
@@ -472,10 +485,10 @@ async def test_profile_loading_test_10():
         loaded_profile_from_db.ids = ['B']
         loaded_profile_from_db.set_new(False)
 
-        profile, session = await _check_loading(existing_session,
-                                                loaded_profile_from_db,
-                                                tracker_payload,
-                                                expected_loads_no=1)  # Profile was once twice
+        profile, session, tracker_profile, tracker_session = await _check_loading(existing_session,
+                                                                                  loaded_profile_from_db,
+                                                                                  tracker_payload,
+                                                                                  expected_loads_no=1)  # Profile was once twice
 
         assert profile.id == loaded_profile_from_db.id
         assert 'B' in loaded_profile_from_db.ids

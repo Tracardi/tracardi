@@ -5,7 +5,7 @@ from typing import List, Optional, Union, AsyncGenerator, Any, Dict
 import elasticsearch
 from pydantic import BaseModel
 
-from tracardi.service.dependency import *
+import tracardi.service.dependency as dependency
 from tracardi.domain.entity import Entity, FlatEntity
 from tracardi.domain.storage_record import StorageRecords, StorageRecord
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
@@ -41,7 +41,7 @@ class ElasticStorage:
 
     def __init__(self, index_key):
         self.storage = ElasticClient.instance()
-        self.index = bd_raw_adapter.get_index_settings(index_key)
+        self.index = dependency.bd_raw_adapter.get_index_settings(index_key)
         self.index_key = index_key
 
     async def exists(self, id) -> bool:

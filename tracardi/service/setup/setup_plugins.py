@@ -26,8 +26,7 @@ from tracardi.process_engine.action.v1.password_generator_action import Password
 from tracardi.process_engine.action.v1.genai_action import GenAIAction
 
 import tracardi.process_engine.action.v1.weekdays_checker_action
-import tracardi.process_engine.action.v1.flow.start.start_action
-import tracardi.process_engine.action.v1.flow.start_segmentation.plugin
+# import tracardi.process_engine.action.v1.flow.start.start_action
 import tracardi.process_engine.action.v1.flow.property_exists.plugin
 import tracardi.process_engine.action.v1.end_action
 import tracardi.process_engine.action.v1.raise_error_action
@@ -413,11 +412,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
     "tracardi.process_engine.action.v1.flow.start.start_action": PluginMetadata(
         test=PluginTest(init={'debug': False, 'event_id': None, 'event_type': {'id': '', 'name': ''}, 'event_types': [],
                               'profile_less': False, 'properties': '{}', 'session_less': False},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.flow.start_segmentation.plugin": PluginMetadata(
-        test=PluginTest(init={'profile_id': "id"},
                         resource=None)
     ),
 

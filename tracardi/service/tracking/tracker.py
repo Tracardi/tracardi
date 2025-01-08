@@ -39,7 +39,10 @@ async def os_tracker(
 
         # Load profile and session
         is_static_profile_id = tracker_config.static_profile_id is True or tracker_payload.has_static_profile_id()
-        flat_profile, session = await tracker_loading(tracker_payload, is_static_profile_id)
+        flat_profile, session, tracker_profile, tracker_session = await tracker_loading(tracker_payload, is_static_profile_id)
+
+        tracker_payload.profile = tracker_profile
+        tracker_payload.session = tracker_session
 
         session = await compute_session(
             session,
