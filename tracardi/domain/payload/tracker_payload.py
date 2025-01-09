@@ -86,7 +86,6 @@ class TrackerPayload(BaseModel):
             ))
         super().__init__(**data)
         self._is_frozen = False  # Internal flag to manage mutability
-        self._id = str(uuid4())
         self._tracardi_referer = self.get_tracardi_data_referer()
         self._timestamp = time.time()
         if 'scheduledFlowId' in self.options and 'scheduledNodeId' in self.options:
@@ -219,6 +218,9 @@ class TrackerPayload(BaseModel):
 
     def get_id(self) -> str:
         return self._id
+
+    def set_id(self, value: Optional[str]):
+        self._id = value
 
     def get_finger_print(self) -> str:
         jdump = json.dumps(self.model_dump(exclude={'events': ..., 'metadata': ...}), sort_keys=True, default=str)

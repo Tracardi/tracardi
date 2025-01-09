@@ -26,6 +26,7 @@ class Context:
     warnings: int = 0
     event_type: Optional[str] = None
     metadata: Optional[dict] = None
+    request_id: Optional[str] = None
 
     def __init__(self,
                  production: bool = None,
