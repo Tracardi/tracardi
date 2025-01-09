@@ -2,6 +2,15 @@ import pytest
 
 from tracardi.common.dot_notation.dotdict import DotDict
 
+def test_dotdict_spread():
+    d1 = DotDict({
+        "a": "1"
+    })
+    d2 = DotDict({
+        "b": "2"
+    })
+
+    print({**d1, **d2})
 
 def test_dotdict_set_as_dotdict():
     d = DotDict({
