@@ -4,7 +4,6 @@ from pydantic import BaseModel
 from typing import Optional, Any
 from uuid import uuid4
 
-from defer.model.transport_context import TransportContext
 from tracardi.version import version as system_version
 from tracardi.domain.user import User
 from tracardi.common.singleton import Singleton
@@ -156,9 +155,6 @@ class Context:
             host=context.get('host'),
             version=context.get('version')
         )
-
-    def to_transport_context(self) -> TransportContext:
-        return TransportContext(tenant=self.tenant, production=self.production, properties={})
 
 class ContextManager(metaclass=Singleton):
 
