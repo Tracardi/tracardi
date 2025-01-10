@@ -245,7 +245,7 @@ class FlatEntity(DotDict):
         return self._metadata if isinstance(self._metadata, RecordMetadata) else None
 
     def has_meta_data(self) -> bool:
-        return self._metadata is not None
+        return self._metadata is not None and isinstance(self._metadata, RecordMetadata)
 
     def set_meta_data(self, metadata: RecordMetadata = None) -> 'FlatEntity':
         self._metadata = metadata
