@@ -35,7 +35,8 @@ class Tracker:
         # TODO permanent_profile_id is kept in tracker_payload.source.permanent_profile_id
         # TODO GUI should change it in tracker_payload.source. That is why we copy it
 
-        tracker_payload.source.config['static_profile_id'] = tracker_payload.source.permanent_profile_id
+        if isinstance(tracker_payload.source, EventSource) and isinstance(tracker_payload.source.config, dict):
+            tracker_payload.source.config['static_profile_id'] = tracker_payload.source.permanent_profile_id
 
         if 'webhook' in tracker_payload.source.type:
             return WebHookBridge(
