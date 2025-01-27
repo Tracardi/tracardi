@@ -7,6 +7,7 @@ from system.adapter.os.bigdata.elastic.elastic_log_adapter import ElasticLogAdap
 from system.adapter.os.bigdata.elastic.elastic_gui_search_adapter import ElasticSearchAdapter
 from system.adapter.os.bigdata.elastic.elastic_profile_adapter import ElasticProfileAdapter
 from system.adapter.os.bigdata.elastic.elastic_raw_adapter import ElasticRawAdapter
+from system.adapter.os.bigdata.elastic.elastic_report_adapter import ElasticReportAdapter
 from system.adapter.os.bigdata.elastic.elastic_session_adapter import ElasticSessionAdapter
 
 bd_elastic_adapter = ElasticAdapter()
@@ -19,4 +20,5 @@ bd_raw_adapter = ElasticRawAdapter()
 bd_session_adapter = ElasticSessionAdapter()
 bd_event_adapter = ElasticEventAdapter()
 bd_profile_adapter = ElasticProfileAdapter()
+bd_report_adapter = ElasticReportAdapter()
 

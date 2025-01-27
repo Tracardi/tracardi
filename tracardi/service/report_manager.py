@@ -1,4 +1,3 @@
-
 from tracardi.domain.report import Report
 from tracardi.service.dependency import *
 from tracardi.service.storage.mysql.mapping.report_mapping import map_to_report
@@ -30,11 +29,5 @@ class ReportManager:
         return self.report.expected_query_params
 
     async def get_report(self, params: dict) -> dict:
-        built_query = self.report.get_built_query(**params)
-        result = await bd_elastic_adapter.index(self.report.index).query(built_query)
-        aggregations = result.aggregations()
-        result = result.dict()
-        if aggregations is not None:
-            result["aggregations"] = aggregations
-
-        return result
+        query = self.report.get_built_query(**params)
+        return await  bd_report_adapter.query(query, self.report.index)
