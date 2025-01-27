@@ -4,7 +4,8 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from tracardi.domain import ExtraInfo
-from tracardi.service.dependency import *
+from tracardi.service.dependency.adapters.big_data_adapter import bd_install_adapter
+
 from tracardi.service.license import License
 from tracardi.service.license_type import MULTI_TENANT
 from tracardi.common.singleton import Singleton
@@ -16,6 +17,7 @@ from tracardi.service.storage.mysql.service.database_service import DatabaseServ
 from tracardi.service.storage.mysql.service.table_service import TableService
 from tracardi.service.storage.mysql.service.user_service import UserService
 
+_bd_install_adapter = bd_install_adapter()
 
 if License.has_license() and License.has_service(MULTI_TENANT):
     from com_tracardi.service.multi_tenant_manager import MultiTenantManager
@@ -52,7 +54,7 @@ async def check_installation() -> dict:
 
     has_admin_account = len(admin_records) > 0
 
-    schema_ok, indices = await bd_install_adapter.is_big_data_schema_ok()
+    schema_ok, indices = await _bd_install_adapter.is_big_data_schema_ok()
 
     if schema_ok is False:
         return {
