@@ -76,7 +76,7 @@ class StartAction(ActionRunner):
         # Replace event
 
         if self.config.event_id:
-            event: Optional[Event] = await bd_crud_event_adapter.load_event_from_db(self.config.event_id)
+            event: Optional[Event] = await bd_event_adapter.load_event_from_db(self.config.event_id)
             if event is None:
                 raise ValueError(f"Can not load event with id {self.config.event_id}")
             event.profile =profile

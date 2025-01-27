@@ -34,7 +34,7 @@ class InjectProfileByField(ActionRunner):
                 return Result(port="error", value={"message": "Could not find profile."})
 
         else:
-            result = await bd_plugin_adapter.load_active_profile_by_field(self.config.field, value, start=0, limit=2)
+            result = await bd_profile_adapter.load_active_profile_by_field(self.config.field, value, start=0, limit=2)
 
             if result.total != 1:
                 message = "Found {} records for {} = {}.".format(result.total, self.config.field, value)

@@ -1,4 +1,4 @@
-import tracardi.service.dependency as dependency
+from tracardi.service.dependency import *
 
 from typing import Optional
 
@@ -21,7 +21,7 @@ async def load_flat_profile(profile_id: str, context: Optional[Context] = None, 
 
     # This load is acceptable
 
-    flat_profile = await dependency.bd_crud_profile_adapter.load_flat_profile_by_id(profile_id)
+    flat_profile = await bd_profile_adapter.load_flat_profile_by_id(profile_id)
     save_flat_profile_cache(flat_profile, context)
 
     # Monitor change in flat profile

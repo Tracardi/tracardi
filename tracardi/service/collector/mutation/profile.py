@@ -9,7 +9,7 @@ from tracardi.service.tracking.cache.flat_profile_cache import save_flat_profile
 
 async def save_profiles_in_db(profiles: Union[FlatProfile, Profile, List[FlatProfile], List[Profile], Set[Profile]],
                               refresh_after_save=False):
-    return await bd_collector_adapter.save_profiles(profiles, refresh_after_save=refresh_after_save)
+    return await bd_profile_adapter.save_profiles(profiles, refresh_after_save=refresh_after_save)
 
 
 async def save_flat_profile(profiles: Union[FlatProfile, List[FlatProfile], Set[FlatProfile]],
@@ -42,8 +42,8 @@ async def delete_profile(id: str,
     if context is None:
         context = get_context()
 
-    result = await bd_crud_profile_adapter.delete_profile_by_id(id, index)
-    await bd_collector_adapter.core.refresh('profile')
+    result = await bd_profile_adapter.delete_profile_by_id(id, index)
+    await bd_profile_adapter.core.refresh('profile')
     if cache:
         delete_flat_profile_cache(profile_id=id, context=context)
 

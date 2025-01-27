@@ -79,7 +79,7 @@ async def os_tracker(
         # Save events
         if flat_events:
             # Sync save
-            await bd_collector_adapter.save_events(list(_exclude_ephemeral(flat_events)))
+            await bd_event_adapter.save_events(list(_exclude_ephemeral(flat_events)))
 
         # Clean up so can not be used. It is already in session
         if 'location' in tracker_payload.context:
