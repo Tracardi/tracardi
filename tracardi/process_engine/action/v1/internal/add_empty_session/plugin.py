@@ -3,7 +3,7 @@ from tracardi.domain.entity import PrimaryEntity
 from tracardi.domain.event_session import EventSession
 from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.value_object.operation import Operation
-from tracardi.service.dependency import *
+from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner

@@ -1,4 +1,4 @@
-from tracardi.service.dependency import *
+from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from .model.config import Config

@@ -8,7 +8,6 @@
 #
 # logger = get_logger(__name__)
 # _db_raw_adapter = bd_raw_adapter()
-# # _bd_install_adapter = bd_install_adapter()
 #
 #
 # def _is_elastic_on_localhost():
@@ -21,7 +20,7 @@
 # async def is_system_installed(no_of_tries: int = 10, pause: int = 15) -> bool:
 #     success = False
 #     while True:
-#         is_installed, indices = await _bd_install_adapter.is_big_data_schema_ok()
+#         is_installed, indices = await bd_install_adapter.is_big_data_schema_ok()
 #
 #         if is_installed:
 #             success = True

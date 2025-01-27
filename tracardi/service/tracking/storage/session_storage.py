@@ -1,6 +1,6 @@
 from typing import Optional, Union, List, Set
 
-from tracardi.service.dependency import *
+from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.service.tracking.cache.session_cache import load_session_cache, save_session_cache
 from tracardi.context import Context, get_context
 from tracardi.domain.session import Session

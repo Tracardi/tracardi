@@ -2,7 +2,7 @@
 # from elasticsearch import NotFoundError
 #
 # from tracardi.context import get_context
-# from tracardi.service.dependency import *
+# from tracardi.service.dependency.adapters.big_data_adapter import *
 # from tracardi.service.storage.index import Resource, Index
 # from tracardi.common.tools.diff import get_changed_values
 

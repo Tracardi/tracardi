@@ -3,7 +3,7 @@ from typing import Union, List, Set, Optional
 from tracardi.context import Context, get_context
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile import Profile
-from tracardi.service.dependency import *
+from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.service.tracking.cache.flat_profile_cache import save_flat_profile_cache, delete_flat_profile_cache
 
 

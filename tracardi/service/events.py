@@ -9,7 +9,7 @@ from tracardi.domain.field_change import FieldChange
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.service.dependency import *
+from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.service.license import License
 from tracardi.common.tools.string_manager import capitalize_event_type_id
 

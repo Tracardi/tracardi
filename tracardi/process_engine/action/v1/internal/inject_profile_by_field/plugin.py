@@ -1,4 +1,4 @@
-from tracardi.service.dependency import *
+from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.service.collector.load.profile import load_profile
 from tracardi.domain.profile import Profile
 from tracardi.service.plugin.runner import ActionRunner

@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
 from tracardi.domain.profile import Profile
-from tracardi.service.dependency import *
+from tracardi.service.dependency.adapters.big_data_adapter import *
 
 
 async def load_duplicated_profiles_with_ids(profile_ids) -> List[Profile]:

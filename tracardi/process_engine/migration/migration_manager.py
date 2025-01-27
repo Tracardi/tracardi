@@ -1,4 +1,4 @@
-from tracardi.service.dependency import *
+from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.config import tracardi
 from tracardi.context import get_context, Context
 from tracardi.domain import ExtraInfo

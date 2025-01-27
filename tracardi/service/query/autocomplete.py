@@ -5,7 +5,7 @@ from lark import Lark, Token
 from lark.lexer import TerminalDef
 
 from .tql_schema import schema
-from tracardi.service.dependency import *
+from tracardi.service.dependency.adapters.big_data_adapter import *
 
 # ([^\s\"]+|(?<!\\)([\"].*?(?<!\\)[\"]))
 # %import common.ESCAPED_STRING

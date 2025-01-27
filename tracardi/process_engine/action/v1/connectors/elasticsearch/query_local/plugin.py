@@ -1,5 +1,5 @@
 import json
-from tracardi.service.dependency import *
+from tracardi.service.dependency.adapters.big_data_adapter import *
 
 from tracardi.common.dot_notation.dict_traverser import DictTraverser
 

@@ -4,7 +4,7 @@ import time
 
 from tracardi.context import get_context
 from tracardi.domain.flat_event import FlatEvent
-from tracardi.service.dependency import *
+from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
 from tracardi.service.tracking.process.loading import tracker_loading
 from tracardi.service.collector.mutation import profile as mutation_profile_db

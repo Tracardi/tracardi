@@ -6,7 +6,7 @@ from defer.model.transport_context import TransportContext
 from tracardi.context import ServerContext, Context
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.rule_invoke_result import RuleInvokeResult
-from tracardi.service.dependency import *
+from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.service.wf.field_mappings_cache import add_new_field_mappings
 from tracardi.service.collector.mutation.profile import save_profile_in_db_and_cache
 from tracardi.service.storage.redis.collections import Collection

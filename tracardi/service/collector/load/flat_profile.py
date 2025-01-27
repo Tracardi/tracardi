@@ -1,4 +1,4 @@
-from tracardi.service.dependency import *
+from tracardi.service.dependency.adapters.big_data_adapter import *
 
 from typing import Optional
 
