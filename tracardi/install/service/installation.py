@@ -1,7 +1,8 @@
+from tracardi.config import tracardi
 from tracardi.domain.credentials import Credentials
 from tracardi.common.logging.log_handler import get_installation_logger
-from tracardi.config import tracardi
 from tracardi.service.dependency.adapters.big_data_adapter import *
+from tracardi.service.dependency.adapters.mysql import md_install_adapter
 
 logger = get_installation_logger(__name__)
 
