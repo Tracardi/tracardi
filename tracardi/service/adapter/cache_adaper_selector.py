@@ -1,22 +1,22 @@
 from tracardi.config import tracardi
-from tracardi.service.adapter.cache.cache_protocol import CacheProtocol
-from tracardi.service.adapter.cache.hcache_protocol import HCacheProtocol
-from tracardi.service.adapter.cache.member_cache_protocol import MemberCacheProtocol
-from tracardi.service.adapter.cache.pubsub_protocol import PubSubProtocol
+from system.adapter.os.cache.cache_protocol import CacheProtocol
+from system.adapter.os.cache.hcache_protocol import HCacheProtocol
+from system.adapter.os.cache.member_cache_protocol import MemberCacheProtocol
+from system.adapter.os.cache.pubsub_protocol import PubSubProtocol
 from tracardi.common.decorator.run_once import run_once
 
 _cache_adapter_var = tracardi.cache_adapter
 
 if _cache_adapter_var == 'redis':
-    from tracardi.service.adapter.cache.redis.redis_cache_adapter import RedisCacheAdapter
-    from tracardi.service.adapter.cache.redis.redis_hcache_adapter import RedisHCacheAdapter
-    from tracardi.service.adapter.cache.redis.redis_members_adapter import RedisMembersCacheAdapter
-    from tracardi.service.adapter.cache.redis.redis_pubsub_adapter import RedisPubSubAdapter
+    from system.adapter.os.cache.redis.redis_cache_adapter import RedisCacheAdapter
+    from system.adapter.os.cache.redis.redis_hcache_adapter import RedisHCacheAdapter
+    from system.adapter.os.cache.redis.redis_members_adapter import RedisMembersCacheAdapter
+    from system.adapter.os.cache.redis.redis_pubsub_adapter import RedisPubSubAdapter
 elif _cache_adapter_var == 'upstash':
-    from tracardi.service.adapter.cache.upstash.upstash_redis_cache_adapter import UpStashRedisCacheAdapter
-    from tracardi.service.adapter.cache.upstash.upstash_redis_hcache_adapter import UpStashRedisHCacheAdapter
-    from tracardi.service.adapter.cache.upstash.upstash_redis_members_adapter import UpStashRedisMembersCacheAdapter
-    from tracardi.service.adapter.cache.upstash.upstash_redis_pubsub_adapter import UpStashRedisPubSubAdapter
+    from system.adapter.os.cache.upstash.upstash_redis_cache_adapter import UpStashRedisCacheAdapter
+    from system.adapter.os.cache.upstash.upstash_redis_hcache_adapter import UpStashRedisHCacheAdapter
+    from system.adapter.os.cache.upstash.upstash_redis_members_adapter import UpStashRedisMembersCacheAdapter
+    from system.adapter.os.cache.upstash.upstash_redis_pubsub_adapter import UpStashRedisPubSubAdapter
 
 
 @run_once

@@ -1,11 +1,11 @@
 import copy
 import json
 from typing import Union
-
+from collections.abc import Mapping, MutableMapping
 import dotdict_parser
 
 
-class DotDict:
+class DotDict(MutableMapping):
     def __init__(self, dictionary: Union[dict | list]):
         if not isinstance(dictionary, (dict, list)):
             raise TypeError(f"Expected dictionary or list as DotDict. Got {type(dictionary)}.")

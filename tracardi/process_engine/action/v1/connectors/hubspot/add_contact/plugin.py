@@ -1,4 +1,4 @@
-from tracardi.service.storage.elastic.interface.integration_id import save_integration_id
+from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.common.dot_notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
@@ -58,7 +58,7 @@ class HubSpotContactAdder(ActionRunner):
 
             if 'id' in result:
                 contact_id = result['id']
-                await save_integration_id(self.profile.id, 'hubspot', contact_id)
+                await bd_entity_adapter.save_integration_id(self.profile.id, 'hubspot', contact_id)
 
             return Result(port="response", value=result)
 

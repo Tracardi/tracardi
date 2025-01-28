@@ -1,4 +1,5 @@
 import json
+from tracardi.service.dependency.adapters.big_data_adapter import *
 
 from tracardi.common.dot_notation.dict_traverser import DictTraverser
 
@@ -7,8 +8,6 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Docu
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.result import Result
 from .model.config import Config
-from tracardi.service.storage.elastic.interface import raw as raw_db
-
 
 def validate(config: dict):
     config = Config(**config)
@@ -46,7 +45,7 @@ class QueryLocalDatabase(ActionRunner):
             if self.config.log:
                 self.console.log(f"Executed query {query}")
 
-            result = await raw_db.query_by_index(
+            result = await bd_elastic_adapter.client.search(
                 index=self.config.index,
                 query=query
             )

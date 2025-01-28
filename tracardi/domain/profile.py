@@ -139,11 +139,11 @@ class Profile(PrimaryEntity):
                 return True
         return False
 
-    def fill_meta_data(self):
-        """
-        Used to fill metadata with default current index and id.
-        """
-        self._fill_meta_data('profile')
+    # def fill_meta_data(self):
+    #     """
+    #     Used to fill metadata with default current index and id.
+    #     """
+    #     self._fill_meta_data('profile')
 
     def set_updated_in_workflow(self, state=True):
         self._updated_in_workflow = state
@@ -270,12 +270,13 @@ class Profile(PrimaryEntity):
 
         profile = Profile(
             id=str(uuid.uuid4()) if not id else id,
-            metadata=ProfileMetadata(time=ProfileTime(
+            metadata=ProfileMetadata(
+                time=ProfileTime(
                 create=_now,
                 insert=_now
             ))
         )
-        profile.fill_meta_data()
+        # profile.fill_meta_data()
         profile.set_new()
         return profile
 

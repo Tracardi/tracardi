@@ -10,7 +10,7 @@ from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.domain import resource as resource_db
 from tracardi.service.storage.redis.collections import Collection
 from .model.config import Config
-from tracardi.service.adapter.cache.redis.client.redis_client import RedisClient
+from system.adapter.os.cache.redis.client.redis_client import RedisClient
 from tracardi.service.plugin.domain.result import Result
 from tracardi.common.security.encrypt.secrets import b64_decoder
 

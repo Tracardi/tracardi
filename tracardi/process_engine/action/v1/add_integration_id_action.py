@@ -2,7 +2,7 @@ import json
 
 from pydantic import field_validator
 
-from tracardi.service.storage.elastic.interface.integration_id import save_integration_id
+from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.common.dot_notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.config import PluginConfig
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -62,7 +62,7 @@ class AddIntegrationIdAction(ActionRunner):
             data = traverser.reshape(data)
             system_name = self.config.name.lower().replace(" ","-")
 
-            await save_integration_id(self.profile.id, system_name, external_id, data)
+            await bd_entity_adapter.save_integration_id(self.profile.id, system_name, external_id, data)
 
             return Result(port="payload", value=payload)
         except Exception as e:

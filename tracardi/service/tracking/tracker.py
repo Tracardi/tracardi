@@ -2,13 +2,12 @@ from typing import List
 
 import time
 
-from tracardi.config import tracardi
 from tracardi.context import get_context
 from tracardi.domain.flat_event import FlatEvent
-from tracardi.service.adapter.bigdata.adapter_selector import bd_collector_adapter
+from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.service.tracking.destination.dispatcher import sync_event_destination, sync_profile_destination
 from tracardi.service.tracking.process.loading import tracker_loading
-from tracardi.service.storage.elastic.interface.collector.mutation import profile as mutation_profile_db
+from tracardi.service.collector.mutation import profile as mutation_profile_db
 from tracardi.service.tracking.compute.session_computer import compute_session
 from tracardi.service.tracking.storage.session_storage import save_session
 from tracardi.service.tracking.track_data_computation import compute_data
@@ -20,7 +19,6 @@ from tracardi.common.tools.getters import get_entity_id
 from tracardi.service.wf.triggers import exec_workflow
 
 logger = get_logger(__name__)
-_collector_adapter = bd_collector_adapter()
 
 def _exclude_ephemeral(flat_events: List[FlatEvent]):
     for flat_event in flat_events:
@@ -41,7 +39,10 @@ async def os_tracker(
 
         # Load profile and session
         is_static_profile_id = tracker_config.static_profile_id is True or tracker_payload.has_static_profile_id()
-        flat_profile, session = await tracker_loading(tracker_payload, is_static_profile_id)
+        flat_profile, session, tracker_profile, tracker_session = await tracker_loading(tracker_payload, is_static_profile_id)
+
+        tracker_payload.profile = tracker_profile
+        tracker_payload.session = tracker_session
 
         session = await compute_session(
             session,
@@ -78,7 +79,7 @@ async def os_tracker(
         # Save events
         if flat_events:
             # Sync save
-            await _collector_adapter.save_events(list(_exclude_ephemeral(flat_events)))
+            await bd_event_adapter.save_events(list(_exclude_ephemeral(flat_events)))
 
         # Clean up so can not be used. It is already in session
         if 'location' in tracker_payload.context:

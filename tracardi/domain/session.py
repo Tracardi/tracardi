@@ -102,11 +102,11 @@ class Session(Entity):
     def is_updated_in_workflow(self) -> bool:
         return self._updated_in_workflow
 
-    def fill_meta_data(self):
-        """
-        Used to fill metadata with default current index and id.
-        """
-        self._fill_meta_data('session')
+    # def fill_meta_data(self):
+    #     """
+    #     Used to fill metadata with default current index and id.
+    #     """
+    #     self._fill_meta_data('session')
 
     def replace(self, session):
         if isinstance(session, Session):
@@ -185,7 +185,7 @@ class Session(Entity):
             id=str(uuid.uuid4()) if not id else id,
             metadata=SessionMetadata.new()
         )
-        session.fill_meta_data()
+        # session.fill_meta_data()
         session.set_new()
         if profile_id is not None:
             session.profile = Entity(id=profile_id)

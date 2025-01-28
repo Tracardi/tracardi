@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime
 
-from tracardi.service.storage.index import Index
+from system.adapter.os.bigdata.elastic.client.elastic_resource import Index
 
 
 def test_month_partitioning():

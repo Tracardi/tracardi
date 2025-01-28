@@ -34,7 +34,6 @@ aiodns
 urllib3>=1.26,<2
 geoip2~=4.2.0
 aiomysql
-kombu==5.2.4
 asyncpg==0.30.0
 aiobotocore~=2.12.1
 google-api-python-client == 2.33.0
@@ -48,9 +47,7 @@ certifi==2024.12.14
 celery==5.2.6
 random-password-generator==2.2.0
 aiomqtt==1.0.0
-tweepy==4.10.1
 strsimpy==0.2.1
-python-whois==0.8.0
 PyYAML>=6.0
 telebot==0.0.4
 msgpack==1.0.5
@@ -61,6 +58,12 @@ SQLAlchemy==2.0.36
 speedict==0.3.12
 boto3==1.34.41
 dotdict_parser>=0.7.2
+
+# Plugins
+langchain==0.3.14
+python-whois==0.8.0
+tweepy==4.10.1
+kombu==5.4.2
 geopy
 jwt==1.3.1
 langchain==0.3.14

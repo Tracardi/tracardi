@@ -1,3 +1,4 @@
+from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.config import tracardi
 from tracardi.context import get_context, Context
 from tracardi.domain import ExtraInfo
@@ -6,7 +7,6 @@ from typing import Optional, List, Dict
 import json
 
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.service.storage.elastic.driver.elastic_client import ElasticClient
 from hashlib import sha1
 from pathlib import Path
 from tracardi.domain.version import Version
@@ -96,8 +96,7 @@ class MigrationManager:
         if production:
             template = f"prod-{template}"
 
-        es = ElasticClient.instance()
-        return [index for index in await es.list_indices() if re.fullmatch(template, index)]
+        return [index for index in await bd_raw_adapter.list_indices() if re.fullmatch(template, index)]
 
     async def get_available_schemas(self) -> Dict[str, Union[bool, List[MigrationSchema]]]:
 
@@ -131,8 +130,7 @@ class MigrationManager:
                     schema.copy_index.to_index,
                     production=context.production)
 
-                es = ElasticClient.instance()
-                if await es.exists_index(schema.copy_index.from_index):
+                if await bd_raw_adapter.index_exists(schema.copy_index.from_index):
                     set_of_schemas_to_migrate.append(schema)
                 else:
                     logger.warning(
@@ -206,8 +204,7 @@ class MigrationManager:
                     schema.copy_index.to_index,
                     production=context.production)
 
-                es = ElasticClient.instance()
-                if await es.exists_index(schema.copy_index.from_index):
+                if await bd_raw_adapter.index_exists(schema.copy_index.from_index):
                     set_of_schemas_to_migrate.append(schema)
                 else:
                     logger.warning(

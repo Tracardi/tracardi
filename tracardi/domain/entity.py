@@ -18,7 +18,6 @@ from tracardi.protocol.operational import Operational
 from tracardi.service.change_monitoring.field_update_logger import FieldUpdateLogger
 from tracardi.common.dot_notation.dot_notation_converter import dotter
 from tracardi.common.dot_notation.dotdict import DotDict
-from tracardi.service.storage.index import Resource
 
 logger = get_logger(__name__)
 
@@ -58,13 +57,12 @@ class Entity(Creatable):
     def get_meta_data(self) -> Optional[RecordMetadata]:
         return self._metadata if isinstance(self._metadata, RecordMetadata) else None
 
-    def _fill_meta_data(self, index_type: str):
-        """
-        Used to fill metadata with default current index and id.
-        """
-        if not self.has_meta_data():
-            resource = Resource()
-            self.set_meta_data(RecordMetadata(id=self.id, index=resource[index_type].get_write_index()))
+    # def _fill_meta_data(self, index_type: str):
+    #     """
+    #     Used to fill metadata with default current index and id.
+    #     """
+    #     if not self.has_meta_data():
+    #         self.set_meta_data(RecordMetadata(id=self.id, index=bd_raw_adapter.get_write_index(index_type)))
 
     def dump_meta_data(self) -> Optional[dict]:
         return self._metadata.model_dump(mode='json') if isinstance(self._metadata, RecordMetadata) else None
@@ -247,7 +245,7 @@ class FlatEntity(DotDict):
         return self._metadata if isinstance(self._metadata, RecordMetadata) else None
 
     def has_meta_data(self) -> bool:
-        return self._metadata is not None
+        return self._metadata is not None and isinstance(self._metadata, RecordMetadata)
 
     def set_meta_data(self, metadata: RecordMetadata = None) -> 'FlatEntity':
         self._metadata = metadata

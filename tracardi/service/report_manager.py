@@ -1,5 +1,5 @@
 from tracardi.domain.report import Report
-from tracardi.service.storage.elastic.interface import raw as raw_db
+from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.service.storage.mysql.mapping.report_mapping import map_to_report
 from tracardi.service.storage.mysql.service.report_service import ReportService
 
@@ -19,7 +19,6 @@ class ReportManager:
             raise ReportManagerException(f"Report with ID `{report_id}` does not exist.")
 
         report = record.map_to_object(map_to_report)
-        # report = await report_db.load(report_id)
 
         return ReportManager(report)
 
@@ -30,11 +29,5 @@ class ReportManager:
         return self.report.expected_query_params
 
     async def get_report(self, params: dict) -> dict:
-        built_query = self.report.get_built_query(**params)
-        result = await raw_db.query_by_index(self.report.index, built_query)
-        aggregations = result.aggregations()
-        result = result.dict()
-        if aggregations is not None:
-            result["aggregations"] = aggregations
-
-        return result
+        query = self.report.get_built_query(**params)
+        return await  bd_report_adapter.query(query, self.report.index)

@@ -1,5 +1,7 @@
 from typing import Dict
-from tracardi.service.license import License, SCHEDULER
+
+from tracardi.service.license import License
+from tracardi.service.license_type import SCHEDULER
 from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, PluginTest
 from tracardi.process_engine.action.v1.ux.question_popup.plugin import QuestionPopupPlugin
 from tracardi.process_engine.action.v1.ux.cta.plugin import CtaMessageUx
@@ -21,10 +23,10 @@ from tracardi.process_engine.action.v1.connectors.whois.plugin import WhoisActio
 from tracardi.process_engine.action.v1.operations.contains_pattern.plugin import ContainsPatternAction
 from tracardi.process_engine.action.v1.memory.collect.plugin import PayloadMemoryCollector
 from tracardi.process_engine.action.v1.password_generator_action import PasswordGeneratorAction
+from tracardi.process_engine.action.v1.genai_action import GenAIAction
 
 import tracardi.process_engine.action.v1.weekdays_checker_action
-import tracardi.process_engine.action.v1.flow.start.start_action
-import tracardi.process_engine.action.v1.flow.start_segmentation.plugin
+# import tracardi.process_engine.action.v1.flow.start.start_action
 import tracardi.process_engine.action.v1.flow.property_exists.plugin
 import tracardi.process_engine.action.v1.end_action
 import tracardi.process_engine.action.v1.raise_error_action
@@ -126,7 +128,36 @@ import tracardi.process_engine.action.v1.connectors.ghost.plugin
 import tracardi.process_engine.action.v1.group_and_rank_interests_action
 import tracardi.process_engine.action.v1.sitemap_action
 import tracardi.process_engine.action.v1.beautifulsoup_action
-import tracardi.process_engine.action.v1.connectors.elasticsearch.query.plugin
+import com_tracardi.action.v1.events.events_summary.plugin
+import com_tracardi.action.v1.background.plugin
+import com_tracardi.action.v1.wait.plugin
+import com_tracardi.action.v1.ux.chats.chatwoot.plugin
+import com_tracardi.action.v1.ux.chats.intercom.plugin
+import com_tracardi.action.v1.ux.chats.livechat.plugin
+import com_tracardi.action.v1.ux.chats.zendesk.plugin
+import com_tracardi.action.v1.sms.twilio.plugin
+import com_tracardi.action.v1.ai.weaviate.delete.plugin
+import com_tracardi.action.v1.ai.weaviate.exists.plugin
+import com_tracardi.action.v1.ai.weaviate.get.plugin
+import com_tracardi.action.v1.ai.weaviate.save.plugin
+import com_tracardi.action.v1.ux.open_replay.plugin
+import com_tracardi.action.v1.ux.youtube_player.plugin
+import com_tracardi.action.v1.ux.demo_form.plugin
+import com_tracardi.action.v1.ux.generic.plugin
+import com_tracardi.action.v1.ux.rating_popup.plugin
+import com_tracardi.action.v1.sequencer.query.plugin
+import com_tracardi.action.v1.sequencer.matcher.plugin
+import com_tracardi.action.v1.ai.openai.chatgpt.plugin
+import com_tracardi.action.v1.limiter.plugin
+import com_tracardi.action.v1.events.event_counter.plugin
+import com_tracardi.action.v1.events.event_aggregator.plugin
+import com_tracardi.action.v1.load_report.plugin
+import com_tracardi.action.v1.entity.upsert.plugin
+import com_tracardi.action.v1.entity.load.plugin
+import com_tracardi.action.v1.entity.delete.plugin
+import com_tracardi.action.v1.segmentation.memorize.plugin
+import com_tracardi.action.v1.segmentation.recall.plugin
+
 import tracardi.process_engine.action.v1.connectors.sms77.sendsms.plugin
 import tracardi.process_engine.action.v1.connectors.clicksend.sendsms.plugin
 import tracardi.process_engine.action.v1.connectors.influxdb.send.plugin
@@ -183,39 +214,8 @@ import tracardi.process_engine.action.v1.connectors.mailchimp.remove_from_audien
 import tracardi.process_engine.action.v1.operations.write_to_memory.plugin
 import tracardi.process_engine.action.v1.operations.read_from_memory.plugin
 
-if License.has_license():
-    import com_tracardi.action.v1.events.events_summary.plugin
-    import com_tracardi.action.v1.background.plugin
-    import com_tracardi.action.v1.wait.plugin
-    import com_tracardi.action.v1.ux.chats.chatwoot.plugin
-    import com_tracardi.action.v1.ux.chats.intercom.plugin
-    import com_tracardi.action.v1.ux.chats.livechat.plugin
-    import com_tracardi.action.v1.ux.chats.zendesk.plugin
-    import com_tracardi.action.v1.sms.twilio.plugin
-    import com_tracardi.action.v1.ai.weaviate.delete.plugin
-    import com_tracardi.action.v1.ai.weaviate.exists.plugin
-    import com_tracardi.action.v1.ai.weaviate.get.plugin
-    import com_tracardi.action.v1.ai.weaviate.save.plugin
-    import com_tracardi.action.v1.ux.open_replay.plugin
-    import com_tracardi.action.v1.ux.youtube_player.plugin
-    import com_tracardi.action.v1.ux.demo_form.plugin
-    import com_tracardi.action.v1.ux.generic.plugin
-    import com_tracardi.action.v1.ux.rating_popup.plugin
-    import com_tracardi.action.v1.sequencer.query.plugin
-    import com_tracardi.action.v1.sequencer.matcher.plugin
-    import com_tracardi.action.v1.ai.openai.chatgpt.plugin
-    import com_tracardi.action.v1.limiter.plugin
-    import com_tracardi.action.v1.events.event_counter.plugin
-    import com_tracardi.action.v1.events.event_aggregator.plugin
-    import com_tracardi.action.v1.load_report.plugin
-    import com_tracardi.action.v1.entity.upsert.plugin
-    import com_tracardi.action.v1.entity.load.plugin
-    import com_tracardi.action.v1.entity.delete.plugin
-    import com_tracardi.action.v1.segmentation.memorize.plugin
-    import com_tracardi.action.v1.segmentation.recall.plugin
-
 installed_plugins: Dict[str, PluginMetadata] = {
-    "tracardi.process_engine.action.v1.genai_action": PluginMetadata(
+    GenAIAction.__module__: PluginMetadata(
         test=PluginTest(init={
             'provider': '',
             'model': '',
@@ -223,10 +223,10 @@ installed_plugins: Dict[str, PluginMetadata] = {
             'max_tokens': '',
             'temperature': '',
         },
-            resource={
-                "api_url": "<api-url>",
-                "api_key": "<api-key>"
-            })
+        resource={
+            "api_url": "<api-url>",
+            "api_key": "<api-key>"
+        })
     ),
     QuestionPopupPlugin.__module__: PluginMetadata(
         test=PluginTest(
@@ -325,29 +325,29 @@ installed_plugins: Dict[str, PluginMetadata] = {
 
     SetOperationPlugin.__module__: PluginMetadata(
         test=PluginTest(init={
-            "set1": "",
-            "set2": "",
-            "operation": "intersection"
-        }, resource=None),
+                "set1": "",
+                "set2": "",
+                "operation": "intersection"
+            }, resource=None),
     ),
 
     FindMaxValuePlugin.__module__: PluginMetadata(
         test=PluginTest(init={
-            "source": "abc"
-        }, resource=None),
+                "source": "abc"
+            }, resource=None),
     ),
 
     DateConverter.__module__: PluginMetadata(
         test=PluginTest(init={
-            "string": "abc"
-        }, resource=None),
+                "string": "abc"
+            }, resource=None),
     ),
 
     StringStripper.__module__: PluginMetadata(
         test=PluginTest(init={
-            "string": "abc",
-            "to_remove": "a",
-        }, resource=None),
+                "string": "abc",
+                "to_remove": "a",
+            }, resource=None),
     ),
 
     LastVisitAction.__module__: PluginMetadata(
@@ -412,11 +412,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
     "tracardi.process_engine.action.v1.flow.start.start_action": PluginMetadata(
         test=PluginTest(init={'debug': False, 'event_id': None, 'event_type': {'id': '', 'name': ''}, 'event_types': [],
                               'profile_less': False, 'properties': '{}', 'session_less': False},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.flow.start_segmentation.plugin": PluginMetadata(
-        test=PluginTest(init={'profile_id': "id"},
                         resource=None)
     ),
 
@@ -990,7 +985,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
 
     "tracardi.process_engine.action.v1.connectors.elasticsearch.write_local.plugin": PluginMetadata(
         test=PluginTest(
-            init={'index': '', 'documents': '', 'identifier': ''},
+            init={'index': '', 'documents':'', 'identifier':''},
             resource=None)
     ),
 
@@ -1001,18 +996,18 @@ installed_plugins: Dict[str, PluginMetadata] = {
                             "api_key": "<api-key>"
                         })
     ),
-
+    
     "tracardi.process_engine.action.v1.group_and_rank_interests_action": PluginMetadata(
-        test=PluginTest(init={'interests': 'profile@interests', 'segment_mapping': '{}', 'segments_to_apply': ''},
-                        resource=None)
+        test=PluginTest(init={'interests': 'profile@interests', 'segment_mapping': '{}','segments_to_apply':''},
+        resource=None)
     ),
-
+    
     "tracardi.process_engine.action.v1.sitemap_action": PluginMetadata(
         test=PluginTest(
             init={
                 'sitemap_path': '',
-
-            },
+                
+            }, 
             resource=None),
     ),
 
@@ -1021,14 +1016,15 @@ installed_plugins: Dict[str, PluginMetadata] = {
             init={
                 'HTML': '',
                 'method': 'get_text',
-
-            },
+                
+            }, 
             resource=None),
     ),
-
+        
 }
 
 if License.has_service(SCHEDULER):
+
     installed_plugins["com_tracardi.action.v1.events.events_summary.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
@@ -1062,6 +1058,7 @@ if License.has_service(SCHEDULER):
     )
 
 if License.has_license():
+
     installed_plugins["com_tracardi.action.v1.ux.chats.chatwoot.plugin"] = PluginMetadata(
         test=PluginTest(
             init={
@@ -1371,17 +1368,6 @@ test_plugins: Dict[str, PluginMetadata] = {
     #     resource=None
     # ),
     #
-
-    "tracardi.process_engine.action.v1.connectors.elasticsearch.query.plugin": PluginMetadata(
-        test=PluginTest(init={'index': {'id': '1', 'name': 'Some value'}, 'query': '{"query":{"match_all":{}}}',
-                              'source': {'id': '1', 'name': 'Some value'}},
-                        resource={
-                            "url": "host",
-                            "port": 9200,
-                            'scheme': 'https',
-                            'verify_certs': False
-                        })
-    ),
 
     "tracardi.process_engine.action.v1.connectors.sms77.sendsms.plugin": PluginMetadata(
         test=PluginTest(
@@ -1771,8 +1757,7 @@ test_plugins: Dict[str, PluginMetadata] = {
     # ),
     "tracardi.process_engine.action.v1.connectors.novu.trigger.plugin": PluginMetadata(
         test=PluginTest(
-            init={'payload': '{}', 'recipient_email': 'profile@data.contact.email.main',
-                  'source': {'id': '', 'name': ''},
+            init={'payload': '{}', 'recipient_email': 'profile@data.contact.email.main', 'source': {'id': '', 'name': ''},
                   'subscriber_id': 'profile@id', 'template': {'id': '', 'name': ''}},
             resource={
                 "token": "token"

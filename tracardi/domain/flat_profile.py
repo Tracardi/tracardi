@@ -5,15 +5,13 @@ from .entity import PrimaryEntity, Entity, FlatEntity
 from .metadata_field_changed import MetadataFieldChanged
 from .profile import Profile
 from .profile_data import FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
-from .storage_record import RecordMetadata, StorageRecord
+from .storage_record import StorageRecord
 from ..config import tracardi
 from ..service.tracking.profile_pii_hashing import get_allowed_piis_to_be_hashed_as_ids
 from tracardi.common.time.date import now_in_utc
 from tracardi.domain.profile_data import PREFIX_EMAIL_BUSINESS, PREFIX_EMAIL_MAIN, PREFIX_EMAIL_PRIVATE, \
     PREFIX_PHONE_MAIN, PREFIX_PHONE_BUSINESS, PREFIX_PHONE_MOBILE, PREFIX_PHONE_WHATSUP
 from tracardi.common.security.hashing.hasher import hash_id, has_hash_id
-from tracardi.service.storage.index import Resource
-
 
 class FlatProfile(FlatEntity):
 
@@ -86,7 +84,7 @@ class FlatProfile(FlatEntity):
                 }
             }
         )
-        flat_profile.fill_meta_data()
+        # flat_profile.fill_meta_data()
         flat_profile.set_new()
         flat_profile.set_updated()
         flat_profile['active'] = True
@@ -99,11 +97,11 @@ class FlatProfile(FlatEntity):
     def needs_update(self) -> bool:
         return bool(self.get('operation.update', False))
 
-    def fill_meta_data(self):
-        """
-        Used to fill metadata with default current index and id.
-        """
-        self._fill_meta_data('profile')
+    # def fill_meta_data(self):
+    #     """
+    #     Used to fill metadata with default current index and id.
+    #     """
+    #     self._fill_meta_data('profile')
 
     def dump(self) -> dict:
         dump = self.to_dict()
@@ -113,13 +111,12 @@ class FlatProfile(FlatEntity):
             pass
         return dump
 
-    def _fill_meta_data(self, index_type: str):
-        """
-        Used to fill metadata with default current index and id.
-        """
-        if not self.has_meta_data():
-            resource = Resource()
-            self.set_meta_data(RecordMetadata(id=self.id, index=resource[index_type].get_write_index()))
+    # def _fill_meta_data(self, index_type: str):
+    #     """
+    #     Used to fill metadata with default current index and id.
+    #     """
+    #     if not self.has_meta_data():
+    #         self.set_meta_data(RecordMetadata(id=self.id, index=bd_raw_adapter.get_write_index(index_type)))
 
     def add_auto_merge_hashed_id(self, flat_field: str) -> Optional[str]:
         field_closure = FLAT_PROFILE_MAPPING.get(flat_field, None)

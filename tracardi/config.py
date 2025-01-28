@@ -286,6 +286,7 @@ class TracardiConfig(metaclass=Singleton):
 
         self.cache_adapter = env.get('CACHE_ADAPTER', 'redis')
         self.big_data_adapter = env.get('BIG_DATA_ADAPTER', 'elastic')
+        self.meta_data_adapter = env.get('META_DATA_ADAPTER', 'mysql')
 
         self._config = None
         self._unset_secrets()

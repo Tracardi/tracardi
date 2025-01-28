@@ -1,0 +1,50 @@
+from typing import Union, List, Set, Optional
+
+from tracardi.context import Context, get_context
+from tracardi.domain.flat_profile import FlatProfile
+from tracardi.domain.profile import Profile
+from tracardi.service.dependency.adapters.big_data_adapter import *
+from tracardi.service.tracking.cache.flat_profile_cache import save_flat_profile_cache, delete_flat_profile_cache
+
+
+async def save_profiles_in_db(profiles: Union[FlatProfile, Profile, List[FlatProfile], List[Profile], Set[Profile]],
+                              refresh_after_save=False):
+    return await bd_profile_adapter.save_profiles(profiles, refresh_after_save=refresh_after_save)
+
+
+async def save_flat_profile(profiles: Union[FlatProfile, List[FlatProfile], Set[FlatProfile]],
+                            context: Optional[Context] = None,
+                            refresh: bool = False,
+                            cache: bool = True) -> None:
+    if context is None:
+        context = get_context()
+
+    print(await save_profiles_in_db(profiles, refresh_after_save=refresh))
+
+    if cache:
+        save_flat_profile_cache(profiles, context)
+
+
+async def save_profile_in_db_and_cache(profile: Profile):
+
+    flat_profile = FlatProfile(profile.model_dump(mode="json"))
+    flat_profile.set_meta_data(profile.get_meta_data())
+
+    save_flat_profile_cache(flat_profile)
+    # Save to database - do not defer
+    await save_profiles_in_db(flat_profile, refresh_after_save=True)
+
+
+async def delete_profile(id: str,
+                         index: str,
+                         context: Optional[Context] = None,
+                         cache: bool = True):
+    if context is None:
+        context = get_context()
+
+    result = await bd_profile_adapter.delete_profile_by_id(id, index)
+    await bd_profile_adapter.core.refresh('profile')
+    if cache:
+        delete_flat_profile_cache(profile_id=id, context=context)
+
+    return result
