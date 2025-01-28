@@ -128,36 +128,6 @@ import tracardi.process_engine.action.v1.connectors.ghost.plugin
 import tracardi.process_engine.action.v1.group_and_rank_interests_action
 import tracardi.process_engine.action.v1.sitemap_action
 import tracardi.process_engine.action.v1.beautifulsoup_action
-import com_tracardi.action.v1.events.events_summary.plugin
-import com_tracardi.action.v1.background.plugin
-import com_tracardi.action.v1.wait.plugin
-import com_tracardi.action.v1.ux.chats.chatwoot.plugin
-import com_tracardi.action.v1.ux.chats.intercom.plugin
-import com_tracardi.action.v1.ux.chats.livechat.plugin
-import com_tracardi.action.v1.ux.chats.zendesk.plugin
-import com_tracardi.action.v1.sms.twilio.plugin
-import com_tracardi.action.v1.ai.weaviate.delete.plugin
-import com_tracardi.action.v1.ai.weaviate.exists.plugin
-import com_tracardi.action.v1.ai.weaviate.get.plugin
-import com_tracardi.action.v1.ai.weaviate.save.plugin
-import com_tracardi.action.v1.ux.open_replay.plugin
-import com_tracardi.action.v1.ux.youtube_player.plugin
-import com_tracardi.action.v1.ux.demo_form.plugin
-import com_tracardi.action.v1.ux.generic.plugin
-import com_tracardi.action.v1.ux.rating_popup.plugin
-import com_tracardi.action.v1.sequencer.query.plugin
-import com_tracardi.action.v1.sequencer.matcher.plugin
-import com_tracardi.action.v1.ai.openai.chatgpt.plugin
-import com_tracardi.action.v1.limiter.plugin
-import com_tracardi.action.v1.events.event_counter.plugin
-import com_tracardi.action.v1.events.event_aggregator.plugin
-import com_tracardi.action.v1.load_report.plugin
-import com_tracardi.action.v1.entity.upsert.plugin
-import com_tracardi.action.v1.entity.load.plugin
-import com_tracardi.action.v1.entity.delete.plugin
-import com_tracardi.action.v1.segmentation.memorize.plugin
-import com_tracardi.action.v1.segmentation.recall.plugin
-
 import tracardi.process_engine.action.v1.connectors.sms77.sendsms.plugin
 import tracardi.process_engine.action.v1.connectors.clicksend.sendsms.plugin
 import tracardi.process_engine.action.v1.connectors.influxdb.send.plugin
@@ -213,6 +183,37 @@ import tracardi.process_engine.action.v1.connectors.mailchimp.add_to_audience.pl
 import tracardi.process_engine.action.v1.connectors.mailchimp.remove_from_audience.plugin
 import tracardi.process_engine.action.v1.operations.write_to_memory.plugin
 import tracardi.process_engine.action.v1.operations.read_from_memory.plugin
+
+if License.has_license():
+    import com_tracardi.action.v1.events.events_summary.plugin
+    import com_tracardi.action.v1.background.plugin
+    import com_tracardi.action.v1.wait.plugin
+    import com_tracardi.action.v1.ux.chats.chatwoot.plugin
+    import com_tracardi.action.v1.ux.chats.intercom.plugin
+    import com_tracardi.action.v1.ux.chats.livechat.plugin
+    import com_tracardi.action.v1.ux.chats.zendesk.plugin
+    import com_tracardi.action.v1.sms.twilio.plugin
+    import com_tracardi.action.v1.ai.weaviate.delete.plugin
+    import com_tracardi.action.v1.ai.weaviate.exists.plugin
+    import com_tracardi.action.v1.ai.weaviate.get.plugin
+    import com_tracardi.action.v1.ai.weaviate.save.plugin
+    import com_tracardi.action.v1.ux.open_replay.plugin
+    import com_tracardi.action.v1.ux.youtube_player.plugin
+    import com_tracardi.action.v1.ux.demo_form.plugin
+    import com_tracardi.action.v1.ux.generic.plugin
+    import com_tracardi.action.v1.ux.rating_popup.plugin
+    import com_tracardi.action.v1.sequencer.query.plugin
+    import com_tracardi.action.v1.sequencer.matcher.plugin
+    import com_tracardi.action.v1.ai.openai.chatgpt.plugin
+    import com_tracardi.action.v1.limiter.plugin
+    import com_tracardi.action.v1.events.event_counter.plugin
+    import com_tracardi.action.v1.events.event_aggregator.plugin
+    import com_tracardi.action.v1.load_report.plugin
+    import com_tracardi.action.v1.entity.upsert.plugin
+    import com_tracardi.action.v1.entity.load.plugin
+    import com_tracardi.action.v1.entity.delete.plugin
+    import com_tracardi.action.v1.segmentation.memorize.plugin
+    import com_tracardi.action.v1.segmentation.recall.plugin
 
 installed_plugins: Dict[str, PluginMetadata] = {
     GenAIAction.__module__: PluginMetadata(
