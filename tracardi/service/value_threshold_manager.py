@@ -41,7 +41,7 @@ class ValueThresholdManager:
         return True
 
     async def load_last_value(self) -> Optional[ValueThreshold]:
-        record = cache.get(self._get_key(self.id))
+        record = _cache.get(self._get_key(self.id))
         if record is not None:
             return ValueThreshold.decode(record)
         return None
