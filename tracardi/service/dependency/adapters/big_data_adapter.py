@@ -125,7 +125,7 @@ def _bd_session_adapter():
 
     return _bd_adapter
 
-
+bd_elastic_adapter = _bd_elastic_adapter()
 bd_install_adapter = _bd_install_adapter()
 bd_report_adapter = _bd_report_adapter()
 bd_raw_adapter = _bd_raw_adapter()
