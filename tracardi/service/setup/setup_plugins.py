@@ -6,8 +6,6 @@ from tracardi.service.setup.domain.plugin_metadata import PluginMetadata, Plugin
 from tracardi.process_engine.action.v1.ux.question_popup.plugin import QuestionPopupPlugin
 from tracardi.process_engine.action.v1.ux.cta.plugin import CtaMessageUx
 from tracardi.process_engine.action.v1.connectors.aws.s3.upload_segments.plugin import S3SegmentsUploaderPlugin
-from tracardi.process_engine.action.v1.get_integration_id_action import GetIntegrationIdAction
-from tracardi.process_engine.action.v1.add_integration_id_action import AddIntegrationIdAction
 from tracardi.process_engine.action.v1.time.time_delay.plugin import TimeDelay
 from tracardi.process_engine.action.v1.strings.string_replace.plugin import StringReplaceAction
 from tracardi.process_engine.action.v1.connectors.clicksend.sendsms.plugin import ClicksendSendSmsAction
@@ -25,195 +23,194 @@ from tracardi.process_engine.action.v1.memory.collect.plugin import PayloadMemor
 from tracardi.process_engine.action.v1.password_generator_action import PasswordGeneratorAction
 from tracardi.process_engine.action.v1.genai_action import GenAIAction
 
-import tracardi.process_engine.action.v1.weekdays_checker_action
-# import tracardi.process_engine.action.v1.flow.start.start_action
-import tracardi.process_engine.action.v1.flow.property_exists.plugin
-import tracardi.process_engine.action.v1.end_action
-import tracardi.process_engine.action.v1.raise_error_action
-import tracardi.process_engine.action.v1.inject_action
-import tracardi.process_engine.action.v1.increment_action
-import tracardi.process_engine.action.v1.decrement_action
-import tracardi.process_engine.action.v1.if_action
-import tracardi.process_engine.action.v1.starts_with_action
-import tracardi.process_engine.action.v1.ends_with_action
-import tracardi.process_engine.action.v1.new_visit_action
-import tracardi.process_engine.action.v1.new_profile_action
-import tracardi.process_engine.action.v1.template_action
-import tracardi.process_engine.action.v1.sort_dictionary
-import tracardi.process_engine.action.v1.misc.uuid4.plugin
-import tracardi.process_engine.action.v1.traits.copy_trait_action
-import tracardi.process_engine.action.v1.traits.append_trait_action
-import tracardi.process_engine.action.v1.traits.cut_out_trait_action
-import tracardi.process_engine.action.v1.traits.delete_trait_action
-import tracardi.process_engine.action.v1.traits.auto_merge_properties_to_profile_action
-import tracardi.process_engine.action.v1.traits.assign_condition_result.plugin
-import tracardi.process_engine.action.v1.traits.condition_set.plugin
-import tracardi.process_engine.action.v1.traits.hash_traits_action
-import tracardi.process_engine.action.v1.traits.mask_traits_action
-import tracardi.process_engine.action.v1.operations.join_payloads.plugin
-import tracardi.process_engine.action.v1.operations.merge_profiles_action
-import tracardi.process_engine.action.v1.operations.update_profile_action
-import tracardi.process_engine.action.v1.operations.discard_profile_update_action
-import tracardi.process_engine.action.v1.operations.update_session_action
-import tracardi.process_engine.action.v1.operations.reduce_array.plugin
-import tracardi.process_engine.action.v1.calculator_action
-import tracardi.process_engine.action.v1.mapping_action
-import tracardi.process_engine.action.v1.return_random_element_action
-import tracardi.process_engine.action.v1.log_action
-import tracardi.process_engine.action.v1.scrapper.xpath.plugin
-import tracardi.process_engine.action.v1.operations.threshold.plugin
-import tracardi.process_engine.action.v1.geo.fence.circular.plugin
-import tracardi.process_engine.action.v1.geo.distance.plugin
-import tracardi.process_engine.action.v1.traits.reshape_payload_action
-import tracardi.process_engine.action.v1.detect_client_agent_action
-import tracardi.process_engine.action.v1.traits.field_type_action
-import tracardi.process_engine.action.v1.strings.string_operations.plugin
-import tracardi.process_engine.action.v1.strings.regex_match.plugin
-import tracardi.process_engine.action.v1.strings.regex_validator.plugin
-import tracardi.process_engine.action.v1.strings.string_validator.plugin
-import tracardi.process_engine.action.v1.strings.string_splitter.plugin
-import tracardi.process_engine.action.v1.strings.string_join.plugin
-import tracardi.process_engine.action.v1.strings.url_parser.plugin
-import tracardi.process_engine.action.v1.strings.regex_replace.plugin
-import tracardi.process_engine.action.v1.strings.string_similarity.plugin
-import tracardi.process_engine.action.v1.time.sleep_action
-import tracardi.process_engine.action.v1.time.today_action
-import tracardi.process_engine.action.v1.time.day_night.plugin
-import tracardi.process_engine.action.v1.time.local_time_span.plugin
-import tracardi.process_engine.action.v1.time.profile_live_time.plugin
-import tracardi.process_engine.action.v1.time.time_difference.plugin
-import tracardi.process_engine.action.v1.ux.consent.plugin
-import tracardi.process_engine.action.v1.ux.custom_js.plugin
-import tracardi.process_engine.action.v1.connectors.html.fetch.plugin
-import tracardi.process_engine.action.v1.connectors.api_call.plugin
-import tracardi.process_engine.action.v1.connectors.smtp_call.plugin
-import tracardi.process_engine.action.v1.segmentation.force.plugin
-import tracardi.process_engine.action.v1.segmentation.has.plugin
-import tracardi.process_engine.action.v1.segmentation.conditional.plugin
-import tracardi.process_engine.action.v1.segmentation.add.plugin
-import tracardi.process_engine.action.v1.segmentation.delete.plugin
-import tracardi.process_engine.action.v1.segmentation.move.plugin
-import tracardi.process_engine.action.v1.interest.add.plugin
-import tracardi.process_engine.action.v1.interest.increase.plugin
-import tracardi.process_engine.action.v1.interest.decrease.plugin
-import tracardi.process_engine.action.v1.converters.data_to_json.plugin
-import tracardi.process_engine.action.v1.converters.json_to_data.plugin
-import tracardi.process_engine.action.v1.connectors.discord.push.plugin
-import tracardi.process_engine.action.v1.connectors.maxmind.geoip.plugin
-import tracardi.process_engine.action.v1.connectors.weather.msn_weather.plugin
-import tracardi.process_engine.action.v1.connectors.oauth2_token.plugin
-import tracardi.process_engine.action.v1.connectors.slack.send_message.plugin
-import tracardi.process_engine.action.v1.connectors.google.sheets.modify.plugin
-import tracardi.process_engine.action.v1.connectors.twitter.tweet.plugin
-import tracardi.process_engine.action.v1.internal.event_source_fetcher.plugin
-import tracardi.process_engine.action.v1.internal.inject_profile_by_field.plugin
-import tracardi.process_engine.action.v1.internal.add_empty_profile.plugin
-import tracardi.process_engine.action.v1.internal.get_prev_event.plugin
-import tracardi.process_engine.action.v1.internal.get_prev_session.plugin
-import tracardi.process_engine.action.v1.internal.query_string.plugin
-import tracardi.process_engine.action.v1.internal.add_empty_session.plugin
-import tracardi.process_engine.action.v1.internal.add_response.plugin
-import tracardi.process_engine.action.v1.metrics.key_counter.plugin
-import tracardi.process_engine.action.v1.consents.add_consent_action.plugin
-import tracardi.process_engine.action.v1.consents.require_consents_action.plugin
-import tracardi.process_engine.action.v1.contains_string_action
-import tracardi.process_engine.action.v1.converters.base64.encode.plugin
-import tracardi.process_engine.action.v1.converters.base64.decode.plugin
-import tracardi.process_engine.action.v1.sort_array_action
-import tracardi.process_engine.action.v1.connectors.github.issues.list.plugin
-import tracardi.process_engine.action.v1.connectors.github.issues.get.plugin
-import tracardi.process_engine.action.v1.connectors.elasticsearch.query_local.plugin
-import tracardi.process_engine.action.v1.connectors.elasticsearch.write_local.plugin
-import tracardi.process_engine.action.v1.connectors.ghost.plugin
-import tracardi.process_engine.action.v1.group_and_rank_interests_action
-import tracardi.process_engine.action.v1.sitemap_action
-import tracardi.process_engine.action.v1.beautifulsoup_action
-import tracardi.process_engine.action.v1.connectors.sms77.sendsms.plugin
-import tracardi.process_engine.action.v1.connectors.clicksend.sendsms.plugin
-import tracardi.process_engine.action.v1.connectors.influxdb.send.plugin
-import tracardi.process_engine.action.v1.connectors.influxdb.fetch.plugin
-import tracardi.process_engine.action.v1.connectors.elastic_email.add_contact.plugin
-import tracardi.process_engine.action.v1.connectors.elastic_email.contact_status_change.plugin
-import tracardi.process_engine.action.v1.connectors.elastic_email.transactional_email.plugin
-import tracardi.process_engine.action.v1.connectors.elastic_email.bulk_email.plugin
-import tracardi.process_engine.action.v1.connectors.sendgrid.add_contact_to_list.plugin
-import tracardi.process_engine.action.v1.connectors.sendgrid.add_email_to_global_suppression.plugin
-import tracardi.process_engine.action.v1.connectors.sendgrid.send_email.plugin
-import tracardi.process_engine.action.v1.connectors.postgresql.query.plugin
-import tracardi.process_engine.action.v1.connectors.mongo.query.plugin
-import tracardi.process_engine.action.v1.connectors.mysql.query.plugin
-import tracardi.process_engine.action.v1.connectors.salesforce.marketing_cloud.send.plugin
-import tracardi.process_engine.action.v1.connectors.zapier.webhook.plugin
-import tracardi.process_engine.action.v1.connectors.mqtt.publish.plugin
-import tracardi.process_engine.action.v1.connectors.mixpanel.send.plugin
-import tracardi.process_engine.action.v1.connectors.mixpanel.fetch_funnel.plugin
-import tracardi.process_engine.action.v1.connectors.airtable.send_record.plugin
-import tracardi.process_engine.action.v1.connectors.airtable.fetch_records.plugin
-import tracardi.process_engine.action.v1.connectors.matomo.send_event.plugin
-import tracardi.process_engine.action.v1.connectors.hubspot.add_company.plugin
-import tracardi.process_engine.action.v1.connectors.hubspot.add_contact.plugin
-import tracardi.process_engine.action.v1.connectors.hubspot.get_company.plugin
-import tracardi.process_engine.action.v1.connectors.hubspot.get_contact.plugin
-import tracardi.process_engine.action.v1.connectors.hubspot.update_company.plugin
-import tracardi.process_engine.action.v1.connectors.hubspot.update_contact.plugin
-import tracardi.process_engine.action.v1.connectors.full_contact.person_enrich.plugin
-import tracardi.process_engine.action.v1.connectors.active_campaign.fetch_by_email.plugin
-import tracardi.process_engine.action.v1.connectors.active_campaign.add_contact.plugin
-import tracardi.process_engine.action.v1.connectors.rabbitmq.publish.plugin
-import tracardi.process_engine.action.v1.connectors.civi_crm.add_contact.plugin
-import tracardi.process_engine.action.v1.connectors.amplitude.send_events.plugin
-import tracardi.process_engine.action.v1.connectors.aws.sqs.plugin
-import tracardi.process_engine.action.v1.connectors.novu.trigger.plugin
-import tracardi.process_engine.action.v1.connectors.pushover.push.plugin
-import tracardi.process_engine.action.v1.connectors.meaningcloud.sentiment_analysis.plugin
-import tracardi.process_engine.action.v1.connectors.meaningcloud.language_detection.plugin
-import tracardi.process_engine.action.v1.connectors.meaningcloud.text_classification.plugin
-import tracardi.process_engine.action.v1.connectors.meaningcloud.corporate_reputation.plugin
-import tracardi.process_engine.action.v1.connectors.meaningcloud.topics_extraction.plugin
-import tracardi.process_engine.action.v1.connectors.meaningcloud.summarization.plugin
-import tracardi.process_engine.action.v1.connectors.meaningcloud.deep_categorization.plugin
-import tracardi.process_engine.action.v1.connectors.mautic.add_contact.plugin
-import tracardi.process_engine.action.v1.connectors.mautic.fetch_contact_by_id.plugin
-import tracardi.process_engine.action.v1.connectors.mautic.fetch_contact_by_email.plugin
-import tracardi.process_engine.action.v1.connectors.mautic.edit_points.plugin
-import tracardi.process_engine.action.v1.connectors.mautic.add_remove_segment.plugin
-import tracardi.process_engine.action.v1.connectors.mailchimp.tag_contact.plugin
-import tracardi.process_engine.action.v1.connectors.mailchimp.transactional_email.plugin
-import tracardi.process_engine.action.v1.connectors.mailchimp.add_to_audience.plugin
-import tracardi.process_engine.action.v1.connectors.mailchimp.remove_from_audience.plugin
-import tracardi.process_engine.action.v1.operations.write_to_memory.plugin
-import tracardi.process_engine.action.v1.operations.read_from_memory.plugin
-
-if License.has_license():
-    import com_tracardi.action.v1.events.events_summary.plugin
-    import com_tracardi.action.v1.background.plugin
-    import com_tracardi.action.v1.wait.plugin
-    import com_tracardi.action.v1.ux.chats.chatwoot.plugin
-    import com_tracardi.action.v1.ux.chats.intercom.plugin
-    import com_tracardi.action.v1.ux.chats.livechat.plugin
-    import com_tracardi.action.v1.ux.chats.zendesk.plugin
-    import com_tracardi.action.v1.sms.twilio.plugin
-    import com_tracardi.action.v1.ai.weaviate.delete.plugin
-    import com_tracardi.action.v1.ai.weaviate.exists.plugin
-    import com_tracardi.action.v1.ai.weaviate.get.plugin
-    import com_tracardi.action.v1.ai.weaviate.save.plugin
-    import com_tracardi.action.v1.ux.open_replay.plugin
-    import com_tracardi.action.v1.ux.youtube_player.plugin
-    import com_tracardi.action.v1.ux.demo_form.plugin
-    import com_tracardi.action.v1.ux.generic.plugin
-    import com_tracardi.action.v1.ux.rating_popup.plugin
-    import com_tracardi.action.v1.sequencer.query.plugin
-    import com_tracardi.action.v1.sequencer.matcher.plugin
-    import com_tracardi.action.v1.ai.openai.chatgpt.plugin
-    import com_tracardi.action.v1.limiter.plugin
-    import com_tracardi.action.v1.events.event_counter.plugin
-    import com_tracardi.action.v1.events.event_aggregator.plugin
-    import com_tracardi.action.v1.load_report.plugin
-    import com_tracardi.action.v1.entity.upsert.plugin
-    import com_tracardi.action.v1.entity.load.plugin
-    import com_tracardi.action.v1.entity.delete.plugin
-    import com_tracardi.action.v1.segmentation.memorize.plugin
-    import com_tracardi.action.v1.segmentation.recall.plugin
+# import tracardi.process_engine.action.v1.weekdays_checker_action
+# import tracardi.process_engine.action.v1.flow.property_exists.plugin
+# import tracardi.process_engine.action.v1.end_action
+# import tracardi.process_engine.action.v1.raise_error_action
+# import tracardi.process_engine.action.v1.inject_action
+# import tracardi.process_engine.action.v1.increment_action
+# import tracardi.process_engine.action.v1.decrement_action
+# import tracardi.process_engine.action.v1.if_action
+# import tracardi.process_engine.action.v1.starts_with_action
+# import tracardi.process_engine.action.v1.ends_with_action
+# import tracardi.process_engine.action.v1.new_visit_action
+# import tracardi.process_engine.action.v1.new_profile_action
+# import tracardi.process_engine.action.v1.template_action
+# import tracardi.process_engine.action.v1.sort_dictionary
+# import tracardi.process_engine.action.v1.misc.uuid4.plugin
+# import tracardi.process_engine.action.v1.traits.copy_trait_action
+# import tracardi.process_engine.action.v1.traits.append_trait_action
+# import tracardi.process_engine.action.v1.traits.cut_out_trait_action
+# import tracardi.process_engine.action.v1.traits.delete_trait_action
+# import tracardi.process_engine.action.v1.traits.auto_merge_properties_to_profile_action
+# import tracardi.process_engine.action.v1.traits.assign_condition_result.plugin
+# import tracardi.process_engine.action.v1.traits.condition_set.plugin
+# import tracardi.process_engine.action.v1.traits.hash_traits_action
+# import tracardi.process_engine.action.v1.traits.mask_traits_action
+# import tracardi.process_engine.action.v1.operations.join_payloads.plugin
+# import tracardi.process_engine.action.v1.operations.merge_profiles_action
+# import tracardi.process_engine.action.v1.operations.update_profile_action
+# import tracardi.process_engine.action.v1.operations.discard_profile_update_action
+# import tracardi.process_engine.action.v1.operations.update_session_action
+# import tracardi.process_engine.action.v1.operations.reduce_array.plugin
+# import tracardi.process_engine.action.v1.calculator_action
+# import tracardi.process_engine.action.v1.mapping_action
+# import tracardi.process_engine.action.v1.return_random_element_action
+# import tracardi.process_engine.action.v1.log_action
+# import tracardi.process_engine.action.v1.scrapper.xpath.plugin
+# import tracardi.process_engine.action.v1.operations.threshold.plugin
+# import tracardi.process_engine.action.v1.geo.fence.circular.plugin
+# import tracardi.process_engine.action.v1.geo.distance.plugin
+# import tracardi.process_engine.action.v1.traits.reshape_payload_action
+# import tracardi.process_engine.action.v1.detect_client_agent_action
+# import tracardi.process_engine.action.v1.traits.field_type_action
+# import tracardi.process_engine.action.v1.strings.string_operations.plugin
+# import tracardi.process_engine.action.v1.strings.regex_match.plugin
+# import tracardi.process_engine.action.v1.strings.regex_validator.plugin
+# import tracardi.process_engine.action.v1.strings.string_validator.plugin
+# import tracardi.process_engine.action.v1.strings.string_splitter.plugin
+# import tracardi.process_engine.action.v1.strings.string_join.plugin
+# import tracardi.process_engine.action.v1.strings.url_parser.plugin
+# import tracardi.process_engine.action.v1.strings.regex_replace.plugin
+# import tracardi.process_engine.action.v1.strings.string_similarity.plugin
+# import tracardi.process_engine.action.v1.time.sleep_action
+# import tracardi.process_engine.action.v1.time.today_action
+# import tracardi.process_engine.action.v1.time.day_night.plugin
+# import tracardi.process_engine.action.v1.time.local_time_span.plugin
+# import tracardi.process_engine.action.v1.time.profile_live_time.plugin
+# import tracardi.process_engine.action.v1.time.time_difference.plugin
+# import tracardi.process_engine.action.v1.ux.consent.plugin
+# import tracardi.process_engine.action.v1.ux.custom_js.plugin
+# import tracardi.process_engine.action.v1.connectors.html.fetch.plugin
+# import tracardi.process_engine.action.v1.connectors.api_call.plugin
+# import tracardi.process_engine.action.v1.connectors.smtp_call.plugin
+# import tracardi.process_engine.action.v1.segmentation.force.plugin
+# import tracardi.process_engine.action.v1.segmentation.has.plugin
+# import tracardi.process_engine.action.v1.segmentation.conditional.plugin
+# import tracardi.process_engine.action.v1.segmentation.add.plugin
+# import tracardi.process_engine.action.v1.segmentation.delete.plugin
+# import tracardi.process_engine.action.v1.segmentation.move.plugin
+# import tracardi.process_engine.action.v1.interest.add.plugin
+# import tracardi.process_engine.action.v1.interest.increase.plugin
+# import tracardi.process_engine.action.v1.interest.decrease.plugin
+# import tracardi.process_engine.action.v1.converters.data_to_json.plugin
+# import tracardi.process_engine.action.v1.converters.json_to_data.plugin
+# import tracardi.process_engine.action.v1.connectors.discord.push.plugin
+# import tracardi.process_engine.action.v1.connectors.maxmind.geoip.plugin
+# import tracardi.process_engine.action.v1.connectors.weather.msn_weather.plugin
+# import tracardi.process_engine.action.v1.connectors.oauth2_token.plugin
+# import tracardi.process_engine.action.v1.connectors.slack.send_message.plugin
+# import tracardi.process_engine.action.v1.connectors.google.sheets.modify.plugin
+# import tracardi.process_engine.action.v1.connectors.twitter.tweet.plugin
+# import tracardi.process_engine.action.v1.internal.event_source_fetcher.plugin
+# import tracardi.process_engine.action.v1.internal.inject_profile_by_field.plugin
+# import tracardi.process_engine.action.v1.internal.add_empty_profile.plugin
+# import tracardi.process_engine.action.v1.internal.get_prev_event.plugin
+# import tracardi.process_engine.action.v1.internal.get_prev_session.plugin
+# import tracardi.process_engine.action.v1.internal.query_string.plugin
+# import tracardi.process_engine.action.v1.internal.add_empty_session.plugin
+# import tracardi.process_engine.action.v1.internal.add_response.plugin
+# import tracardi.process_engine.action.v1.metrics.key_counter.plugin
+# import tracardi.process_engine.action.v1.consents.add_consent_action.plugin
+# import tracardi.process_engine.action.v1.consents.require_consents_action.plugin
+# import tracardi.process_engine.action.v1.contains_string_action
+# import tracardi.process_engine.action.v1.converters.base64.encode.plugin
+# import tracardi.process_engine.action.v1.converters.base64.decode.plugin
+# import tracardi.process_engine.action.v1.sort_array_action
+# import tracardi.process_engine.action.v1.connectors.github.issues.list.plugin
+# import tracardi.process_engine.action.v1.connectors.github.issues.get.plugin
+# import tracardi.process_engine.action.v1.connectors.elasticsearch.query_local.plugin
+# import tracardi.process_engine.action.v1.connectors.elasticsearch.write_local.plugin
+# import tracardi.process_engine.action.v1.connectors.ghost.plugin
+# import tracardi.process_engine.action.v1.group_and_rank_interests_action
+# import tracardi.process_engine.action.v1.sitemap_action
+# import tracardi.process_engine.action.v1.beautifulsoup_action
+# import tracardi.process_engine.action.v1.connectors.sms77.sendsms.plugin
+# import tracardi.process_engine.action.v1.connectors.clicksend.sendsms.plugin
+# import tracardi.process_engine.action.v1.connectors.influxdb.send.plugin
+# import tracardi.process_engine.action.v1.connectors.influxdb.fetch.plugin
+# import tracardi.process_engine.action.v1.connectors.elastic_email.add_contact.plugin
+# import tracardi.process_engine.action.v1.connectors.elastic_email.contact_status_change.plugin
+# import tracardi.process_engine.action.v1.connectors.elastic_email.transactional_email.plugin
+# import tracardi.process_engine.action.v1.connectors.elastic_email.bulk_email.plugin
+# import tracardi.process_engine.action.v1.connectors.sendgrid.add_contact_to_list.plugin
+# import tracardi.process_engine.action.v1.connectors.sendgrid.add_email_to_global_suppression.plugin
+# import tracardi.process_engine.action.v1.connectors.sendgrid.send_email.plugin
+# import tracardi.process_engine.action.v1.connectors.postgresql.query.plugin
+# import tracardi.process_engine.action.v1.connectors.mongo.query.plugin
+# import tracardi.process_engine.action.v1.connectors.mysql.query.plugin
+# import tracardi.process_engine.action.v1.connectors.salesforce.marketing_cloud.send.plugin
+# import tracardi.process_engine.action.v1.connectors.zapier.webhook.plugin
+# import tracardi.process_engine.action.v1.connectors.mqtt.publish.plugin
+# import tracardi.process_engine.action.v1.connectors.mixpanel.send.plugin
+# import tracardi.process_engine.action.v1.connectors.mixpanel.fetch_funnel.plugin
+# import tracardi.process_engine.action.v1.connectors.airtable.send_record.plugin
+# import tracardi.process_engine.action.v1.connectors.airtable.fetch_records.plugin
+# import tracardi.process_engine.action.v1.connectors.matomo.send_event.plugin
+# import tracardi.process_engine.action.v1.connectors.hubspot.add_company.plugin
+# import tracardi.process_engine.action.v1.connectors.hubspot.add_contact.plugin
+# import tracardi.process_engine.action.v1.connectors.hubspot.get_company.plugin
+# import tracardi.process_engine.action.v1.connectors.hubspot.get_contact.plugin
+# import tracardi.process_engine.action.v1.connectors.hubspot.update_company.plugin
+# import tracardi.process_engine.action.v1.connectors.hubspot.update_contact.plugin
+# import tracardi.process_engine.action.v1.connectors.full_contact.person_enrich.plugin
+# import tracardi.process_engine.action.v1.connectors.active_campaign.fetch_by_email.plugin
+# import tracardi.process_engine.action.v1.connectors.active_campaign.add_contact.plugin
+# import tracardi.process_engine.action.v1.connectors.rabbitmq.publish.plugin
+# import tracardi.process_engine.action.v1.connectors.civi_crm.add_contact.plugin
+# import tracardi.process_engine.action.v1.connectors.amplitude.send_events.plugin
+# import tracardi.process_engine.action.v1.connectors.aws.sqs.plugin
+# import tracardi.process_engine.action.v1.connectors.novu.trigger.plugin
+# import tracardi.process_engine.action.v1.connectors.pushover.push.plugin
+# import tracardi.process_engine.action.v1.connectors.meaningcloud.sentiment_analysis.plugin
+# import tracardi.process_engine.action.v1.connectors.meaningcloud.language_detection.plugin
+# import tracardi.process_engine.action.v1.connectors.meaningcloud.text_classification.plugin
+# import tracardi.process_engine.action.v1.connectors.meaningcloud.corporate_reputation.plugin
+# import tracardi.process_engine.action.v1.connectors.meaningcloud.topics_extraction.plugin
+# import tracardi.process_engine.action.v1.connectors.meaningcloud.summarization.plugin
+# import tracardi.process_engine.action.v1.connectors.meaningcloud.deep_categorization.plugin
+# import tracardi.process_engine.action.v1.connectors.mautic.add_contact.plugin
+# import tracardi.process_engine.action.v1.connectors.mautic.fetch_contact_by_id.plugin
+# import tracardi.process_engine.action.v1.connectors.mautic.fetch_contact_by_email.plugin
+# import tracardi.process_engine.action.v1.connectors.mautic.edit_points.plugin
+# import tracardi.process_engine.action.v1.connectors.mautic.add_remove_segment.plugin
+# import tracardi.process_engine.action.v1.connectors.mailchimp.tag_contact.plugin
+# import tracardi.process_engine.action.v1.connectors.mailchimp.transactional_email.plugin
+# import tracardi.process_engine.action.v1.connectors.mailchimp.add_to_audience.plugin
+# import tracardi.process_engine.action.v1.connectors.mailchimp.remove_from_audience.plugin
+# import tracardi.process_engine.action.v1.operations.write_to_memory.plugin
+# import tracardi.process_engine.action.v1.operations.read_from_memory.plugin
+#
+# if License.has_license():
+#     import com_tracardi.action.v1.events.events_summary.plugin
+#     import com_tracardi.action.v1.background.plugin
+#     import com_tracardi.action.v1.wait.plugin
+#     import com_tracardi.action.v1.ux.chats.chatwoot.plugin
+#     import com_tracardi.action.v1.ux.chats.intercom.plugin
+#     import com_tracardi.action.v1.ux.chats.livechat.plugin
+#     import com_tracardi.action.v1.ux.chats.zendesk.plugin
+#     import com_tracardi.action.v1.sms.twilio.plugin
+#     import com_tracardi.action.v1.ai.weaviate.delete.plugin
+#     import com_tracardi.action.v1.ai.weaviate.exists.plugin
+#     import com_tracardi.action.v1.ai.weaviate.get.plugin
+#     import com_tracardi.action.v1.ai.weaviate.save.plugin
+#     import com_tracardi.action.v1.ux.open_replay.plugin
+#     import com_tracardi.action.v1.ux.youtube_player.plugin
+#     import com_tracardi.action.v1.ux.demo_form.plugin
+#     import com_tracardi.action.v1.ux.generic.plugin
+#     import com_tracardi.action.v1.ux.rating_popup.plugin
+#     import com_tracardi.action.v1.sequencer.query.plugin
+#     import com_tracardi.action.v1.sequencer.matcher.plugin
+#     import com_tracardi.action.v1.ai.openai.chatgpt.plugin
+#     import com_tracardi.action.v1.limiter.plugin
+#     import com_tracardi.action.v1.events.event_counter.plugin
+#     import com_tracardi.action.v1.events.event_aggregator.plugin
+#     import com_tracardi.action.v1.load_report.plugin
+#     import com_tracardi.action.v1.entity.upsert.plugin
+#     import com_tracardi.action.v1.entity.load.plugin
+#     import com_tracardi.action.v1.entity.delete.plugin
+#     import com_tracardi.action.v1.segmentation.memorize.plugin
+#     import com_tracardi.action.v1.segmentation.recall.plugin
 
 installed_plugins: Dict[str, PluginMetadata] = {
     GenAIAction.__module__: PluginMetadata(
@@ -268,7 +265,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
             resource=None)
     ),
 
-    GetIntegrationIdAction.__module__: PluginMetadata(
+    'tracardi.process_engine.action.v1.get_integration_id_action': PluginMetadata(
         test=PluginTest(
             init={
                 "name": "",
@@ -276,7 +273,7 @@ installed_plugins: Dict[str, PluginMetadata] = {
             resource=None)
     ),
 
-    AddIntegrationIdAction.__module__: PluginMetadata(
+    'tracardi.process_engine.action.v1.add_integration_id_action': PluginMetadata(
         test=PluginTest(
             init={
                 "id": "event@properties",

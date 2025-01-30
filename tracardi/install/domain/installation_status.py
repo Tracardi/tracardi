@@ -52,7 +52,7 @@ async def check_installation() -> dict:
 
     has_admin_account = len(admin_records) > 0
 
-    schema_ok, indices = await bd_install_adapter.is_big_data_schema_ok()
+    schema_ok, _ = await bd_install_adapter.is_big_data_schema_ok()
 
     if schema_ok is False:
         return {
