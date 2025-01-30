@@ -41,6 +41,7 @@ def test_dotdict_set_get_delete_check():
     # Test setting and getting using unified path notation
     cd['a3.b[3]'] = "new_value"
     assert cd['a3.b[3]'] == "new_value", "Failed to set or get value using unified path notation"
+    assert cd['a3']['b'][3] == "new_value", "Failed to set or get value using unified path notation"
 
     # Test setting and getting using attribute-style notation
     cd['a3.b'].append("another_value")

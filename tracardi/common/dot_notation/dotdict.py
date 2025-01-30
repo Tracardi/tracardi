@@ -1,6 +1,6 @@
 import copy
 import json
-from typing import Union
+from typing import Union, List
 from collections.abc import Mapping, MutableMapping
 import dotdict_parser
 
@@ -66,6 +66,10 @@ class DotDict(MutableMapping):
 
     def to_json(self, default=None, cls=None):
         return json.dumps(self.root, default=default, cls=cls)
+
+    @staticmethod
+    def as_list(data: List[dict]) -> List['DotDict']:
+        return list(map(DotDict, data))
 
     # def __getattr__(self, item) -> 'DotDict':
     #     try:
