@@ -2,6 +2,12 @@ import pytest
 
 from tracardi.common.dot_notation.dotdict import DotDict
 
+def test_dotdict_deep_set():
+    d= DotDict({})
+    d['data.bookings[0].services[0].details.airline'] = 'Air France'
+    assert d == {'data': {'bookings': [{'services': [{'details': {'airline': 'Air France'}}]}]}}
+
+
 def test_embedded_dotdict():
     d= DotDict({
         "customer_id": "12346",
