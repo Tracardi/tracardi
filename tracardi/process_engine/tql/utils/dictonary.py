@@ -1,4 +1,5 @@
 def flatten(d):
+    # Caution it mutates data
     if d == {}:
         return d
     else:

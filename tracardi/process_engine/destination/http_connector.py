@@ -52,7 +52,7 @@ class HttpConfiguration(BaseModel):
         if content_type == 'application/json':
 
             if self.method.lower() == 'get':
-                params = flatten(body)
+                params = flatten(dict(body))
                 params = {key: self._convert_params(value) for key, value in params.items() if value is not None}
                 return {
                     "params": params

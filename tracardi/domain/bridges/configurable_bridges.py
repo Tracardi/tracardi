@@ -8,7 +8,6 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.config import tracardi
 from tracardi.domain.profile_data import FLAT_PROFILE_FIELD_MAPPING
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.process_engine.tql.utils.dictonary import flatten
 from tracardi.common.dot_notation.dotdict import DotDict
 from tracardi.service.events import get_default_mappings_for
 from tracardi.domain.tracker_config import TrackerConfig
@@ -96,7 +95,7 @@ class WebHookBridge(ConfigurableBridge):
 
                 if replace_profile_id:
                     # There is always o event in webhook
-                    flat_properties = flatten(tracker_payload.events[0].properties)
+                    flat_properties = DotDict(tracker_payload.events[0].properties)
                     if replace_profile_id in flat_properties:
                         profile_id = str(flat_properties.get(replace_profile_id, None))
                         tracker_payload.replace_profile(profile_id)

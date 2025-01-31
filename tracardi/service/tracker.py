@@ -88,7 +88,7 @@ class Tracker:
             tracker_payload.source = source
 
             # If there is a configurable bridge get it and set up tracker_payload and tracker_config
-
+            print(9, tracker_payload.events[0].properties)
             configurable_bridge = self.get_bridge(tracker_payload)
 
             if configurable_bridge:
@@ -96,7 +96,7 @@ class Tracker:
                     tracker_payload,
                     self.tracker_config
                 )
-
+            print(10, tracker_payload.events[0].properties)
             # Is source ephemeral
             if tracker_payload.source.transitional is True:
                 tracker_payload.set_ephemeral()
