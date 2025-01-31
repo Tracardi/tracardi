@@ -2,6 +2,46 @@ import pytest
 
 from tracardi.common.dot_notation.dotdict import DotDict
 
+def test_embedded_dotdict():
+    d= DotDict({
+        "customer_id": "12346",
+        "cache_id": "cache_67890",
+        "gid": "gid_1234567890",
+        "user": {
+            "gid": "gid_1234567890",
+            "cache_id": "cache_67890",
+            "email": "johndoe@example.com",
+            "phone": "+1234567890"
+        },
+        "data": {
+            "bookings": [
+                {
+                    "booking_id": "BKG67810",
+                    "booking_date": "2023-10-20",
+                    "travel_dates": {
+                        "start_date": "2023-12-01",
+                        "end_date": "2023-12-10"
+                    },
+                    "destination": "Paris, France",
+                    "services": [
+                        {
+                            "type": "Flight",
+                            "details": {
+                                "airline": "Air France",
+                                "flight_number": "AF123",
+                                "departure_time": "2023-12-01T08:00:00Z"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    })
+    assert d['data.bookings[0].services[0].details.airline'] == 'Air France'
+    assert 'data.bookings[1].services[0]' not in d
+    assert 'data.bookings[0].services[0]' in d
+    assert 'data.bookings[0].services' in d
+
 def test_dotdict_spread():
     d1 = DotDict({
         "a": "1"

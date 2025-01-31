@@ -27,8 +27,18 @@ class DotDict(MutableMapping):
         data = self.root
         last = len(keys) - 1
         for pos, key in enumerate(keys):
-            if pos == last and isinstance(key, int):
-                return len(data) >= key
+            if isinstance(key, int):
+                # Is int but dat is not list
+                if not isinstance(data, list):
+                    return False
+                # Is last so check number of items
+                if pos == last:
+                    return len(data) > key
+                else:
+                    # Not last so check if key not out of range
+                    if len(data) <= key:
+                        return False
+
             elif key not in data:
                 return False
             data = data[key]
