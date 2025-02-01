@@ -1,7 +1,7 @@
 import copy
 import json
 from typing import Union, List
-from collections.abc import Mapping, MutableMapping
+from collections.abc import MutableMapping
 import dotdict_parser
 
 
@@ -11,16 +11,85 @@ class DotDict(MutableMapping):
             raise TypeError(f"Expected dictionary or list as DotDict. Got {type(dictionary)}.")
         self.root = dictionary
 
-    def _set_reference(self, path, is_leaf_a_list_item: bool):
+    def _set_path_value(self, path, value):
+        """
+        Walks through `root` (which should be a dict or list at the top level),
+        creating intermediate dicts/lists as needed so that each element in `path`
+        is valid. The final element of `path` will be set to `value`.
+        """
+        node = self.root
+
+        for i in range(len(path) - 1):
+            key = path[i]
+            next_key = path[i + 1]
+
+            if isinstance(key, str):
+                # Ensure `node` is a dict if we are using a string key
+                if not isinstance(node, dict):
+                    raise TypeError(f"Cannot use string key on non-dict: {node}")
+                # If key doesn't exist, create either a dict or list based on the next key
+                if key not in node:
+                    node[key] = [] if isinstance(next_key, int) else {}
+                node = node[key]
+
+            elif isinstance(key, int):
+                # Ensure `node` is a list if we are using an integer key
+                if not isinstance(node, list):
+                    raise TypeError(f"Cannot use integer key on non-list: {node}")
+                # Expand the list if needed
+                while len(node) <= key:
+                    node.append(None)
+                # If there's nothing at node[key], create either a dict or list for the next step
+                if node[key] is None:
+                    node[key] = [] if isinstance(next_key, int) else {}
+                node = node[key]
+
+            else:
+                raise TypeError(f"Keys must be str or int, got {type(key)}")
+
+        # Convert DotDict to dict
+        if isinstance(value, DotDict):
+            value = value.to_dict()
+
+        # Handle the last key in the path and set `value`
+        last_key = path[-1]
+        if isinstance(last_key, str):
+            if not isinstance(node, dict):
+                raise TypeError(f"Cannot assign string-key '{last_key}' to non-dict: {node}")
+            node[last_key] = value
+        elif isinstance(last_key, int):
+            if not isinstance(node, list):
+                raise TypeError(f"Cannot assign integer-key '{last_key}' to non-list: {node}")
+            while len(node) <= last_key:
+                node.append(None)
+            node[last_key] = value
+        else:
+            raise TypeError(f"Keys must be str or int, got {type(last_key)}")
+
+    def _set_reference(self, path, key):
         data = self.root
-        last_item = len(path) - 1
+        print(path)
         for item_no, item in enumerate(path):
-            if item not in data:
-                if last_item == item_no and is_leaf_a_list_item:
-                    data[item] = []
-                else:
+            print(item)
+            if isinstance(item, int):
+                if not isinstance(data, list):
+                    data = []
+                data[item] = []
+                # if not isinstance(data, list) and item == 0:
+                #     data = [{}]
+                #     data = data[item]
+                #     continue
+                #
+                # if len(data) >= item:
+                #     raise ValueError(f"Cannot set value to {item} in {path}. Position {item} out of range. List has only {len(data)} items.")
+                # else:
+                #     data[item] = {}
+            elif isinstance(item, str):
+                if item not in data:
                     data[item] = {}
-            data = data[item]
+                data = data[item]
+            else:
+                raise KeyError(f"Only string keys are allowed. Got {item} of type {type(item)}.")
         return data
 
     def _has_reference(self, keys) -> bool:
@@ -98,18 +167,18 @@ class DotDict(MutableMapping):
 
     def __setitem__(self, key, value):
         keys = dotdict_parser.parse_unified_path(key)
-        path, key = self._path_key(keys)
-        is_leaf_a_list_item = key == ''
-        _pointer = self._set_reference(path, is_leaf_a_list_item)
-        try:
-            if isinstance(value, DotDict):
-                value = value.to_dict()
-            if is_leaf_a_list_item:
-                _pointer.append(value)
-            else:
-                _pointer[key] = value
-        except Exception as e:
-            raise KeyError(f"Error at path {path} for key {key}: {str(e)}")
+        # path, key = self._path_key(keys)
+        self._set_path_value(keys, value)
+        # _pointer = self._set_reference(path, key)
+        # try:
+        #     if isinstance(value, DotDict):
+        #         value = value.to_dict()
+        #     if isinstance(key, int) and not isinstance(_pointer, list) and key == 0:
+        #         _pointer = [value]
+        #     elif isinstance(key, (str, int)):
+        #         _pointer[key] = value
+        # except Exception as e:
+        #     raise KeyError(f"Error at path {path} for key {key}: {str(e)}")
 
     def __delitem__(self, key):
         if isinstance(key, int):

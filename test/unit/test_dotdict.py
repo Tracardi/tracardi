@@ -3,39 +3,33 @@ import pytest
 from tracardi.common.dot_notation.dotdict import DotDict
 
 def test_dotdict_deep_set():
-    d= DotDict({})
-    d['data.bookings[0].services[0].details.airline'] = 'Air France'
-    assert d == {'data': {'bookings': [{'services': [{'details': {'airline': 'Air France'}}]}]}}
+    data = DotDict({})
+    data['data.bookings[0].services[0].details.airline'] = 'Air France'
+    assert data == {'data': {'bookings': [{'services': [{'details': {'airline': 'Air France'}}]}]}}
+
+    data = DotDict({})
+    data['data[0][0].detail'] = 'Air France'
+    assert data == {'data': [[{'detail': 'Air France'}]]}
+
+    data = DotDict({})
+    data['data[0][0]'] = 'Air France'
+    assert data == {'data': [['Air France']]}
+
+    data = DotDict({})
+    data['data.list[0][0]'] = {1}
+    assert data == {'data': {"list":[[{1}]]}}
 
 
 def test_embedded_dotdict():
     d= DotDict({
-        "customer_id": "12346",
-        "cache_id": "cache_67890",
-        "gid": "gid_1234567890",
-        "user": {
-            "gid": "gid_1234567890",
-            "cache_id": "cache_67890",
-            "email": "johndoe@example.com",
-            "phone": "+1234567890"
-        },
         "data": {
+            "list":[[1,2,3], [4,5,6], [7,8,9] ],
             "bookings": [
                 {
-                    "booking_id": "BKG67810",
-                    "booking_date": "2023-10-20",
-                    "travel_dates": {
-                        "start_date": "2023-12-01",
-                        "end_date": "2023-12-10"
-                    },
-                    "destination": "Paris, France",
                     "services": [
                         {
-                            "type": "Flight",
                             "details": {
                                 "airline": "Air France",
-                                "flight_number": "AF123",
-                                "departure_time": "2023-12-01T08:00:00Z"
                             }
                         }
                     ]
@@ -43,10 +37,13 @@ def test_embedded_dotdict():
             ]
         }
     })
+
     assert d['data.bookings[0].services[0].details.airline'] == 'Air France'
     assert 'data.bookings[1].services[0]' not in d
     assert 'data.bookings[0].services[0]' in d
     assert 'data.bookings[0].services' in d
+    assert 'data.list[0][1]' in d
+    assert d['data.list[0][1]'] == 2
 
 def test_dotdict_spread():
     d1 = DotDict({
@@ -148,13 +145,13 @@ def test_dotdict_set():
     data = DotDict({})
 
     # Test setting and getting using unified path notation
-    data['a.b[]'] = 123
+    data['a.b[0]'] = 123
     assert data['a.b[0]'] == 123
     data['a.b'].append("1")
     data['a.b'].append("2")
     assert data['a.b'] == [123, "1", "2"]
-    data['a.b[0].c'] = 123
-    assert data['a.b'] == [{"c": 123}, "1", "2"]
+    with pytest.raises(TypeError):
+        data['a.b[0].c'] = 123
 
 
 def test_equal():
