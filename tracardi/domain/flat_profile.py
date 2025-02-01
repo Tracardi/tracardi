@@ -1,11 +1,12 @@
 import uuid
 from time import time
 from typing import Optional, List, Set, Dict
+
+from system.adapter.os.bigdata.elastic.model.storage_record import StorageRecord
 from .entity import PrimaryEntity, Entity, FlatEntity
 from .metadata_field_changed import MetadataFieldChanged
 from .profile import Profile
 from .profile_data import FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
-from .storage_record import StorageRecord
 from ..config import tracardi
 from ..service.tracking.profile_pii_hashing import get_allowed_piis_to_be_hashed_as_ids
 from tracardi.common.time.date import now_in_utc

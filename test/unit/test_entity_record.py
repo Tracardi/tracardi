@@ -1,6 +1,6 @@
+from system.adapter.os.bigdata.elastic.model.storage_record import RecordMetadata
 from tracardi.domain.entity import PrimaryEntity
 from tracardi.domain.entity_record import EntityRecord
-from tracardi.domain.storage_record import RecordMetadata
 
 
 def test_should_set_entity_record_data():

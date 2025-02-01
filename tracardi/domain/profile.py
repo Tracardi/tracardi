@@ -3,10 +3,10 @@ from typing import Optional, List, Dict, Any, Set
 
 from pydantic import PrivateAttr
 
+from system.adapter.os.bigdata.elastic.model.storage_record import RecordMetadata
 from .entity import PrimaryEntity
 from .metadata import ProfileMetadata
 from .profile_data import ProfileData, FIELD_TO_PROPERTY_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
-from .storage_record import RecordMetadata
 from .time import ProfileTime
 from .value_object.operation import Operation
 from .value_object.storage_info import StorageInfo

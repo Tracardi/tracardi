@@ -1,9 +1,9 @@
 from typing import Optional, List, Union, Set
 
+from system.adapter.os.bigdata.elastic.model.storage_record import RecordMetadata
 from tracardi.config import tracardi
 from tracardi.context import get_context, Context
 from tracardi.domain import ExtraInfo
-from tracardi.domain.storage_record import RecordMetadata
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.tracking.cache.cache_helper import _delete_cache, _has_cache, _get_cache, _set_cache

@@ -1,6 +1,6 @@
 from typing import Protocol, Optional
 
-from tracardi.domain.storage_record import RecordMetadata, StorageRecord
+from system.adapter.os.bigdata.elastic.model.storage_record import RecordMetadata, StorageRecord
 
 
 class StorageRecordProtocol(Protocol):

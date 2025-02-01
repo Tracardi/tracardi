@@ -9,8 +9,8 @@ from typing import Optional, TypeVar, Type, Set, List, Union
 from uuid import uuid4
 from pydantic import BaseModel, PrivateAttr
 
+from system.adapter.os.bigdata.elastic.model.storage_record import StorageRecord, RecordMetadata
 from tracardi.domain import ExtraInfo
-from tracardi.domain.storage_record import RecordMetadata, StorageRecord
 from tracardi.domain.time import Time, EventTime
 from tracardi.domain.value_object.storage_info import StorageInfo
 from tracardi.common.logging.log_handler import get_logger

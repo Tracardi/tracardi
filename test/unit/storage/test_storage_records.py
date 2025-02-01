@@ -1,6 +1,7 @@
+from system.adapter.os.bigdata.elastic.model.storage_record import StorageRecords, StorageRecord, StorageAggregate, \
+    StorageAggregates, RecordMetadata
 from tracardi.domain.entity import Entity
-from tracardi.domain.storage_record import StorageRecords, StorageRecord, RecordMetadata, StorageAggregate, \
-    StorageAggregates
+
 
 
 def test_should_assign_and_read_values():

@@ -1,3 +1,4 @@
+from system.adapter.os.bigdata.elastic.model.storage_record import RecordMetadata
 from tracardi.common.dot_notation.dotdict import DotDict
 from tracardi.service.merging.storage.loaders import load_duplicated_profiles_with_merge_key
 from tracardi.service.merging.storage.mutation import save_flat_profile, delete_multiple_profiles, \
@@ -8,7 +9,6 @@ from tracardi.domain.profile_data import ProfileData
 from tracardi.context import get_context
 from tracardi.domain import ExtraInfo
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.domain.storage_record import RecordMetadata
 from datetime import datetime
 from typing import Optional, List, Dict, Tuple
 from pydantic.v1.utils import deep_update

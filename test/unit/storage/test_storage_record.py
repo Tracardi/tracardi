@@ -1,4 +1,4 @@
-from tracardi.domain.storage_record import StorageRecord, RecordMetadata
+from system.adapter.os.bigdata.elastic.model.storage_record import StorageRecord, RecordMetadata
 
 
 def test_should_assign_and_read_values():

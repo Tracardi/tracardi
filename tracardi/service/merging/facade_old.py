@@ -1,12 +1,11 @@
 from typing import List, Optional
 
+from system.adapter.os.bigdata.elastic.model.storage_record import RecordMetadata
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile import Profile
 from tracardi.service.merging.profile_merger import ProfileMerger
 from tracardi.service.merging.storage.mutation import save_flat_profile
 from tracardi.service.merging.storage.loaders import load_duplicated_profiles_with_ids
-
-from tracardi.domain.storage_record import RecordMetadata
 
 
 async def merge_profile_by_merging_keys(profile: Optional[Profile], merge_by) -> Optional[Profile]:

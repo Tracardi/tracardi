@@ -1,5 +1,6 @@
 import logging
 
+from system.adapter.os.bigdata.elastic.model.storage_record import StorageRecord
 from tracardi.domain.setting import Setting
 
 from tracardi.context import Context, ServerContext
@@ -19,7 +20,6 @@ from tracardi.domain.import_config import ImportConfig
 from tracardi.domain.report import Report
 from tracardi.domain.resource import Resource, ResourceRecord
 from tracardi.domain.rule import Rule
-from tracardi.domain.storage_record import StorageRecord
 from tracardi.domain.task import Task
 from tracardi.domain.user import User
 from tracardi.common.logging.log_handler import get_installation_logger
