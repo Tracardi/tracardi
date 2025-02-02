@@ -23,10 +23,10 @@ class FieldMergingStrategy(BaseModel):
     strategy: MergingStrategy
 
 
-def validate_list_values(values):
+def yield_valid_values(values):
     for value in values:
-        if not isinstance(value, (str, int, float, bool)):
-            raise ValueError("Invalid value in list `{}`".format(values))
+        if isinstance(value, (str, int, float, bool)):
+            yield value
 
 
 def append(base, key, value, strategy: MergingStrategy):
@@ -42,13 +42,15 @@ def append(base, key, value, strategy: MergingStrategy):
     if key in base:
         if type(base[key]) in [tuple, set]:
             base[key] = list(base[key])
+
         if isinstance(base[key], list):
-            validate_list_values(base[key])
+            base[key] = yield_valid_values(base[key])
 
     if type(value) in [set, tuple]:
         value = list(value)
+
     if isinstance(value, list):
-        validate_list_values(value)
+        value = list(yield_valid_values(value))
 
     # Merge
 
@@ -83,7 +85,7 @@ def append(base, key, value, strategy: MergingStrategy):
                     if isinstance(base[key], dict):
                         raise ValueError(f"Can not append data to dictionary.")
 
-                    validate_list_values(values=value)
+                    value = yield_valid_values(value)
                     if isinstance(base[key], list):  # The current value is a list
                         base[key] += value
                     elif isinstance(base[key], (str, int, float, bool)):  # the current value is a primitive.

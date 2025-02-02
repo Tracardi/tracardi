@@ -1,6 +1,8 @@
 from typing import List, Optional
 
 from system.adapter.os.bigdata.elastic.model.storage_record import RecordMetadata
+from tracardi.service.dependency.adapters.big_data_adapter import *
+
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.profile import Profile
 from tracardi.service.merging.profile_merger import ProfileMerger
@@ -52,7 +54,13 @@ async def deduplicate_profile(profile_id: str, profile_ids: List[str] = None) ->
 
     # Create empty profile where we will merge duplicates
     profile = Profile.new()
-    profile.set_meta_data(RecordMetadata(id=profile_id, index=profile.get_meta_data().index))
+    profile_metadata = profile.get_meta_data()
+    if profile_metadata is None:
+        index = bd_raw_adapter.get_write_index('profile')
+    else:
+        index = profile.get_meta_data().index
+
+    profile.set_meta_data(RecordMetadata(id=profile_id, index=index))
 
     # Merged profiles refresh index
     return await ProfileMerger(profile).compute_one_profile(_duplicated_profiles)
