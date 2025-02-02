@@ -19,7 +19,7 @@ async def save_flat_profile(profiles: Union[FlatProfile, List[FlatProfile], Set[
         save_flat_profile_cache(profiles, context)
 
 async def delete_multiple_profiles(records_to_delete):
-    return bd_apm_adapter.delete_multiple_profiles(records_to_delete)
+    return await bd_apm_adapter.delete_multiple_profiles(records_to_delete)
 
 
 async def move_profile_events_and_sessions(duplicate_profile_ids: List[str], merged_profile_id: str):
