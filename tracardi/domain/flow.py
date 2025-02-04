@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 
 class FlowSchema(BaseModel):
     version: str = tracardi.version.version
-    uri: str = 'http://www.tracardi.com/2021/WFSchema'
+    uri: str = '/2021/WFSchema'
     server_version: str = None
 
     def __init__(self, **data: Any):
