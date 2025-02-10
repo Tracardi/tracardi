@@ -122,17 +122,20 @@ class ProfileMerger:
     def _merge_traits_and_data(self, _traits, _data, merging_strategy: MergingStrategy) -> Tuple[
         dict, ProfileData, dict]:
 
-        old_value = {
-            'traits': _traits,
-            "data": _data
-        }
+        profiles_data = [_profile_data.get('data', {}) for _profile_data in _data]
+
+        # old_value = {
+        #     'traits': _traits,
+        #     "data": profiles_data
+        # }
 
         new_value = {
             'traits': dict_merge({}, _traits, merging_strategy),
-            'data': dict_merge({}, _data, merging_strategy)
+            'data': dict_merge({}, profiles_data, merging_strategy)
         }
 
-        conflicts_aux = get_conflicted_values(old_value, new_value)
+        # conflicts_aux = get_conflicted_values(old_value, new_value)
+        conflicts_aux = {}
 
         # This is the fix for merging error on location
         flat_new_values = DotDict(new_value)
