@@ -1,5 +1,5 @@
 from deepdiff import DeepDiff
-from tracardi.common.dot_notation.dotdict import DotDict
+from durable_dot_dict.dotdict import DotDict
 
 
 def get_changed_values(old_dict: dict, new_dict: dict) -> dict:

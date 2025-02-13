@@ -2,7 +2,7 @@ from typing import Any, Optional
 from pydantic import BaseModel
 
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.common.dot_notation.dotdict import DotDict
+from durable_dot_dict.dotdict import DotDict
 
 logger = get_logger(__name__)
 

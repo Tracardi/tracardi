@@ -17,7 +17,7 @@ from .request import Request
 from .value_object.operation import RecordFlag
 from .value_object.storage_info import StorageInfo
 from tracardi.common.tools.string_manager import capitalize_event_type_id
-from ..common.dot_notation.dotdict import DotDict
+from durable_dot_dict.dotdict import DotDict
 
 
 class Tags(BaseModel):

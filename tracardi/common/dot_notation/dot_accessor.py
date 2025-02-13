@@ -3,7 +3,7 @@ from typing import Union
 
 from pydantic import BaseModel
 
-from tracardi.common.dot_notation.dotdict import DotDict
+from durable_dot_dict.dotdict import DotDict
 
 dot_notation_regex = re.compile(
     r"(?:payload|profile|event|session|flow|memory)@([\[\]0-9a-zA-a_\-\.]+(?<![\.\[])|\.\.\.)")

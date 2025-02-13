@@ -8,7 +8,7 @@ from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.config import tracardi
 from tracardi.domain.profile_data import FLAT_PROFILE_FIELD_MAPPING
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.common.dot_notation.dotdict import DotDict
+from durable_dot_dict.dotdict import DotDict
 from tracardi.service.events import get_default_mappings_for
 from tracardi.domain.tracker_config import TrackerConfig
 from tracardi.common.security.hashing.hasher import uuid4_from_md5, hash_id

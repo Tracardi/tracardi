@@ -6,7 +6,7 @@ from typing import List, Optional, Any
 from deepdiff import DeepDiff
 from deepdiff.model import DiffLevel
 
-from tracardi.common.dot_notation.dotdict import DotDict
+from durable_dot_dict.dotdict import DotDict
 
 
 class MergingStrategy(BaseModel):

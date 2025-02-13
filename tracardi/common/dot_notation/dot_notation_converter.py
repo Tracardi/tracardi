@@ -1,4 +1,4 @@
-from tracardi.common.dot_notation.dotdict import DotDict
+from durable_dot_dict.dotdict import DotDict
 
 
 class DotNotationConverter:

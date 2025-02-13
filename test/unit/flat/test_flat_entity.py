@@ -6,7 +6,7 @@ from unittest.mock import patch
 from tracardi.domain.entity import FlatEntity, change_monitor
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.service.change_monitoring.field_update_logger import FieldUpdateLogger
-from tracardi.common.dot_notation.dotdict import DotDict
+from durable_dot_dict.dotdict import DotDict
 
 
 @pytest.fixture

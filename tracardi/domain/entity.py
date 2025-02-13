@@ -17,7 +17,7 @@ from tracardi.common.logging.log_handler import get_logger
 from tracardi.protocol.operational import Operational
 from tracardi.service.change_monitoring.field_update_logger import FieldUpdateLogger
 from tracardi.common.dot_notation.dot_notation_converter import dotter
-from tracardi.common.dot_notation.dotdict import DotDict
+from durable_dot_dict.dotdict import DotDict
 
 logger = get_logger(__name__)
 

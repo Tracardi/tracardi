@@ -27,7 +27,7 @@ from ..time import Time
 from ..entity import Entity, PrimaryEntity, DefaultEntity
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.common.dot_notation.dotdict import DotDict
+from durable_dot_dict.dotdict import DotDict
 from tracardi.common.tools.getters import get_entity_id
 
 

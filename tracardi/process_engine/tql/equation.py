@@ -1,7 +1,7 @@
 from typing import List
 from tracardi.process_engine.tql.parser import Parser
 from tracardi.process_engine.tql.transformer.calc_transformer import CalcTransformer
-from tracardi.common.dot_notation.dotdict import DotDict
+from durable_dot_dict.dotdict import DotDict
 from tracardi.common.dot_notation.dot_accessor import DotAccessor
 
 grammar = Parser.read('grammar/math_expr.lark')

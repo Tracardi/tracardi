@@ -1,5 +1,5 @@
 from system.adapter.os.bigdata.elastic.model.storage_record import RecordMetadata
-from tracardi.common.dot_notation.dotdict import DotDict
+from durable_dot_dict.dotdict import DotDict
 from tracardi.service.merging.storage.loaders import load_duplicated_profiles_with_merge_key
 from tracardi.service.merging.storage.mutation import save_flat_profile, delete_multiple_profiles, \
     move_profile_events_and_sessions
