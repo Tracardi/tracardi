@@ -6,16 +6,16 @@ from unittest.mock import patch, AsyncMock
 from tracardi.context import ServerContext, Context
 from tracardi.domain.entity import Entity, PrimaryEntity, DefaultEntity
 from tracardi.domain.event_metadata import EventPayloadMetadata
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.domain.session import Session
 from tracardi.domain.time import Time
 from tracardi.service.tracking.profile_loading import load_profile_and_session1
 
 
-async def _check_loading(loaded_session, profile_from_db, tracker_payload, expected_loads_no) -> Tuple[
-    FlatProfile, Session, DefaultEntity, Entity]:
+async def _check_loading(loaded_session: FlatSession, profile_from_db, tracker_payload, expected_loads_no) -> Tuple[
+    FlatProfile, FlatSession, DefaultEntity, Entity]:
     # Use `patch` to mock the `load_session` function
     with patch(f"{load_profile_and_session1.__module__}.load_flat_profile",
                new_callable=AsyncMock,
@@ -43,7 +43,7 @@ async def test_profile_loading_test_1():
         # Both session and profile are correct
 
         profile = FlatProfile.new(id='p123')
-        existing_session = Session.new(id='s123', profile_id='p123')
+        existing_session = FlatSession.new(id='s123', profile_id='p123')
 
         tracker_payload = TrackerPayload(
             source=Entity(id="1"),
@@ -65,7 +65,7 @@ async def test_profile_loading_test_1():
 
         assert loaded_profile.id == profile.id
         assert loaded_session.id == existing_session.id
-        assert loaded_session.profile.id == loaded_profile.id
+        assert loaded_session.get('profile.id', None) == loaded_profile.id
 
 
 @pytest.mark.asyncio
@@ -85,7 +85,7 @@ async def test_profile_loading_test_2():
         # Returned profile
         returned_profile = FlatProfile.new(id='x123')
         returned_profile.ids = ['p123']
-        existing_session = Session.new(id='s123', profile_id='p123')
+        existing_session = FlatSession.new(id='s123', profile_id='p123')
 
         tracker_payload = TrackerPayload(
             source=Entity(id="1"),
@@ -110,7 +110,7 @@ async def test_profile_loading_test_2():
 
         # Existing session should be returned
         assert loaded_session.id == existing_session.id
-        assert loaded_session.profile.id == loaded_profile.id
+        assert loaded_session.get('profile.id', None) == loaded_profile.id
 
 
 @pytest.mark.asyncio
@@ -129,7 +129,7 @@ async def test_profile_loading_test_3():
         # profile id is now x123. This can only happen if the loaded profile has p123 in profile.ids.
         # Indicating that the correct profile was loaded.
 
-        existing_session = Session.new(id='s123', profile_id='p123')
+        existing_session = FlatSession.new(id='s123', profile_id='p123')
 
         tracker_payload = TrackerPayload(
             source=Entity(id="1"),
@@ -157,7 +157,7 @@ async def test_profile_loading_test_3():
 
         # Existing session should be returned
         assert loaded_session.id == existing_session.id
-        assert loaded_session.profile.id == loaded_profile.id
+        assert loaded_session.get('profile.id', None) == loaded_profile.id
 
         assert not profile_from_db.is_new()
 
@@ -173,7 +173,7 @@ async def test_profile_loading_test_4():
         # Requested profile ID (ID from session) was p123 but loaded profile has x123, The p123 IS NOT IN IDS.
         # Expected behaviour: loading error
 
-        existing_session = Session.new(id='s123', profile_id='p123')
+        existing_session = FlatSession.new(id='s123', profile_id='p123')
 
         tracker_payload = TrackerPayload(
             source=Entity(id="1"),
@@ -209,7 +209,7 @@ async def test_profile_loading_test_5():
         # Expected behaviour: New profile returned, session has new profile
         # Tracker payload has corrected values
 
-        existing_session = Session.new(id='s123')
+        existing_session = FlatSession.new(id='s123')
 
         tracker_payload = TrackerPayload(
             source=Entity(id="1"),
@@ -225,26 +225,26 @@ async def test_profile_loading_test_5():
         # Returned profile
         profile_from_db = None
 
-        profile, session, tracker_profile, tracker_session = await _check_loading(existing_session,
-                                                                                  profile_from_db,
-                                                                                  tracker_payload,
-                                                                                  expected_loads_no=0)
+        profile, flat_session, tracker_profile, tracker_session = await _check_loading(existing_session,
+                                                                                       profile_from_db,
+                                                                                       tracker_payload,
+                                                                                       expected_loads_no=0)
 
         assert profile.is_new()
-        assert session.profile.id == profile.id
+        assert flat_session.get('profile.id', None) == profile.id
 
         assert tracker_profile.id == profile.id
-        assert tracker_session.id == session.id
+        assert tracker_session.id == flat_session.id
 
 
 @pytest.mark.asyncio
 async def test_profile_loading_test_6():
     with ServerContext(Context(production=False)):
-        # Test 6 - This test tries to load profile but it does not exists then it fallback to loading via session
+        # Test 6 - This test tries to load profile, but it does not exists then it fallback to loading via session
         # ID, and it succeeds
         #
-        # There is profile ID in tracker payload but it returns None for profile (profile for this ID does not exist)
-        # There is session ID in payload and it has existing profile id.
+        # There is profile ID in tracker payload, but it returns None for profile (profile for this ID does not exist)
+        # There is session ID in payload, and it has existing profile id.
         #
         # Expected behaviour:
         # Profile is loaded twice
@@ -253,7 +253,7 @@ async def test_profile_loading_test_6():
         # Correct profile is returned
         # Tracker payload is corrected
 
-        existing_session = Session.new(id='s123', profile_id='x123')
+        existing_session = FlatSession.new(id='s123', profile_id='x123')
 
         tracker_payload = TrackerPayload(
             source=Entity(id="1"),
@@ -282,7 +282,7 @@ async def test_profile_loading_test_6():
 
         assert not profile.is_new()
         assert profile.id == 'x123'
-        assert session.profile.id == profile.id
+        assert session.get('profile.id', None) == profile.id
 
         assert tracker_payload.profile.id == profile.id
         assert tracker_payload.session.id == session.id
@@ -306,7 +306,7 @@ async def test_profile_loading_test_7():
         # NEW Profile is created
         # Tracker payload is corrected
 
-        existing_session = Session.new(id='s123', profile_id="this-profile-does-not-exist")
+        existing_session = FlatSession.new(id='s123', profile_id="this-profile-does-not-exist")
 
         tracker_payload = TrackerPayload(
             source=Entity(id="1"),
@@ -333,7 +333,7 @@ async def test_profile_loading_test_7():
 
         assert profile.is_new()
         assert profile.id != "this-profile-does-not-exist"
-        assert session.profile.id == profile.id
+        assert session.get('profile.id', None) == profile.id
 
         assert tracker_payload.profile.id == profile.id
         assert tracker_payload.session.id == session.id
@@ -358,7 +358,7 @@ async def test_profile_loading_test_8():
         # NEW Profile is created
         # Tracker payload is corrected
 
-        existing_session = Session.new(id='s123', profile_id="this-profile-does-not-exist-2")
+        existing_session = FlatSession.new(id='s123', profile_id="this-profile-does-not-exist-2")
 
         tracker_payload = TrackerPayload(
             source=Entity(id="1"),
@@ -387,7 +387,7 @@ async def test_profile_loading_test_8():
 
         assert profile.is_new()
         assert profile.id != "this-profile-does-not-exist"
-        assert session.profile.id == profile.id
+        assert session.get('profile.id', None) == profile.id
 
         assert tracker_payload.profile.id == profile.id
         assert tracker_payload.session.id == session.id
@@ -411,7 +411,7 @@ async def test_profile_loading_test_9():
         # Then NEW Profile is created
         # Tracker payload is corrected
 
-        existing_session = Session.new(id='s123', profile_id="this-profile-does-not-exist")
+        existing_session = FlatSession.new(id='s123', profile_id="this-profile-does-not-exist")
 
         tracker_payload = TrackerPayload(
             source=Entity(id="1"),
@@ -438,7 +438,7 @@ async def test_profile_loading_test_9():
 
         assert profile.is_new()
         assert profile.id != "this-profile-does-not-exist"
-        assert session.profile.id == profile.id
+        assert session.get('profile.id', None) == profile.id
 
         assert tracker_payload.profile is None
         assert tracker_payload.session.id == existing_session.id
@@ -467,7 +467,7 @@ async def test_profile_loading_test_10():
         # Loaded profile is returned has ID = "D", IDS=['B']
         # New shadow session generated.
 
-        existing_session = Session.new(id='s123', profile_id="A")
+        existing_session = FlatSession.new(id='s123', profile_id="A")
 
         tracker_payload = TrackerPayload(
             source=Entity(id="1"),
@@ -485,16 +485,16 @@ async def test_profile_loading_test_10():
         loaded_profile_from_db.ids = ['B']
         loaded_profile_from_db.set_new(False)
 
-        profile, session, tracker_profile, tracker_session = await _check_loading(existing_session,
+        profile, flat_session, tracker_profile, tracker_session = await _check_loading(existing_session,
                                                                                   loaded_profile_from_db,
                                                                                   tracker_payload,
                                                                                   expected_loads_no=1)  # Profile was once twice
 
         assert profile.id == loaded_profile_from_db.id
         assert 'B' in loaded_profile_from_db.ids
-        assert session.id.startswith('shd-')
+        assert flat_session.id.startswith('shd-')
 
         assert not profile.is_new()
 
         assert tracker_payload.profile.id == profile.id
-        assert tracker_payload.session.id == session.id
+        assert tracker_payload.session.id == flat_session.id

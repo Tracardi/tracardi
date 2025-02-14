@@ -3,7 +3,6 @@ from uuid import uuid4
 
 from typing import Optional
 
-from tracardi.domain.entity import Entity
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.domain.flat_session import FlatSession
 from tracardi.service.tracking.storage.session_storage import load_flat_session
@@ -33,16 +32,13 @@ def _create_session_1(session_id: Optional[str], profile_id: Optional[str], inse
             f"Tracker payload delivered with empty session ID. Session created on server side with random ID.")
         session_id = str(uuid4())
 
-    flat_session = FlatSession.new(id=session_id)
+    # Set profile from tracker payload to session
+    flat_session = FlatSession.new(id=session_id, profile_id=profile_id)
     assert (flat_session.is_new() is True)
 
-    session = _copy_tracker_payload_session_metadata_1(flat_session, insert, update, create)
+    flat_session = _copy_tracker_payload_session_metadata_1(flat_session, insert, update, create)
 
-    # Set profile from tracker payload to session
-    if profile_id:
-        session.profile = Entity(id=profile_id)
-
-    return session
+    return flat_session
 
 
 async def load_or_create_session_1(session_id: Optional[str], profile_id: Optional[str], insert, update,

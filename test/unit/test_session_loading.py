@@ -161,7 +161,7 @@ async def test_load_or_create_session_with_session_but_on_session_in_db():
 async def test_load_or_create_session_profile_conflict():
     with ServerContext(Context(production=False)):
         # Test 5 - Session and profile in payload.
-        # Database loads the session but it has different profile then the one in tracker payload.
+        # Database loads the session, but it has different profile then the one in tracker payload.
         # Conflicting profiles.
         # Expected behaviour:
         # Conflict resolution must wait until the profile is loaded and checked if the profile in payload
@@ -180,12 +180,12 @@ async def test_load_or_create_session_profile_conflict():
 
         # What db should return
 
-        session_from_db = Session.new(id='s123')
-        session_from_db.profile = Profile.new(id="incorrect-pid")
+        session_from_db = FlatSession.new(id='s123')
+        session_from_db['profile'] = Profile.new(id="incorrect-pid").model_dump()
 
         session = await _check_loading(session_from_db, tracker_payload, 1)
 
         # New session must be created
         assert session.id == 's123'
         # For delivered profile
-        assert session.profile.id != tracker_payload.profile.id
+        assert session['profile.id'] != tracker_payload.profile.id
