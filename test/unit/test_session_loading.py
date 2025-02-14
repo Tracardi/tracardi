@@ -4,6 +4,7 @@ from unittest.mock import patch, AsyncMock
 from tracardi.context import ServerContext, Context
 from tracardi.domain.entity import Entity, PrimaryEntity, DefaultEntity
 from tracardi.domain.event_metadata import EventPayloadMetadata
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
@@ -13,12 +14,10 @@ from tracardi.service.tracking.session_loading import load_or_create_session_1
 
 
 async def _check_loading(session, tracker_payload, expected_loads_no):
-
     # Use `patch` to mock the `load_session` function
-    with patch("tracardi.service.tracking.session_loading.load_session",
+    with patch("tracardi.service.tracking.session_loading.load_flat_session",
                new_callable=AsyncMock,
                return_value=session) as mock_load_session:
-
         # Call your async function
 
         result = await load_or_create_session_1(*tracker_payload.for_session_creation())
@@ -30,7 +29,6 @@ async def _check_loading(session, tracker_payload, expected_loads_no):
 @pytest.mark.asyncio
 async def test_load_or_create_session_all_data():
     with ServerContext(Context(production=False)):
-
         # Test 1 - All data provided. Positive path
         # Session, Profile in payload.
         # Correct session loaded with the correct profile attached.
@@ -50,18 +48,17 @@ async def test_load_or_create_session_all_data():
             events=[EventPayload(type="111222", properties={})],
         )
 
-        session_from_db = Session.new(id=session_id)
-        session_from_db.profile = Entity(id=profile.id)
+        flat_session_from_db = FlatSession.new(id=session_id, profile_id=profile.id)
 
         # Expecting to load the profile and session as defined in tracker payload
 
-        session = await _check_loading(session_from_db, tracker_payload, 1)
+        flat_session = await _check_loading(flat_session_from_db, tracker_payload, 1)
+        assert flat_session.id == session_id
+        assert flat_session.get('profile.id', None) == profile.id
 
-        assert session.id == session_id
-        assert session.profile.id == profile.id
 
 @pytest.mark.asyncio
-async def test_load_or_create_session__only_session():
+async def test_load_or_create_session_only_session():
     with ServerContext(Context(production=False)):
         # Test 2 - Only session provided.
         # Session, Profile in payload.
@@ -83,15 +80,15 @@ async def test_load_or_create_session__only_session():
 
         # What db should return
 
-        session_from_db = Session.new(id=session_id)
-        session_from_db.profile = Profile.new(id="pid")
+        session_from_db = FlatSession.new(id=session_id)
+        session_from_db['profile'] = Profile.new(id="pid").model_dump()
 
         # Expecting to load the profile and session as defined in tracker payload
 
-        session = await _check_loading(session_from_db, tracker_payload, 1)
+        flat_session = await _check_loading(session_from_db, tracker_payload, 1)
 
-        assert session.id == session_id
-        assert session.profile.id == session_from_db.profile.id
+        assert flat_session.id == session_id
+        assert flat_session['profile.id'] == session_from_db['profile.id']
 
 
 @pytest.mark.asyncio
@@ -118,17 +115,17 @@ async def test_load_or_create_session_no_session():
 
         # Expecting to load the profile and session as defined in tracker payload
 
-        session = await _check_loading(session_from_db, tracker_payload, 0)
+        flat_session = await _check_loading(session_from_db, tracker_payload, 0)
 
-        assert session.id is not None
-        assert session.profile is None
+        assert flat_session.id is not None
+        assert flat_session.get('profile', None) is None
 
 
 @pytest.mark.asyncio
 async def test_load_or_create_session_with_session_but_on_session_in_db():
     with ServerContext(Context(production=False)):
         # Test 4 - Session and profile in payload.
-        # Both the session anf profile does not exist in DB.
+        # Both the session and profile does not exist in DB.
         # Session is generated ID from payload and empty now has ID.
 
         # TODO poninna miec sessja profile przypiety czy nie. Chyba nie nie wiem czy jest w bazie.TO wszystko jest
@@ -152,12 +149,12 @@ async def test_load_or_create_session_with_session_but_on_session_in_db():
 
         # Expecting to load the profile and session as defined in tracker payload
 
-        session = await _check_loading(session_from_db, tracker_payload, 1)
+        flat_session = await _check_loading(session_from_db, tracker_payload, 1)
 
         # Nie ma sesji to przyjmij jaką podano, nie generuj
 
-        assert session.id == 's123'
-        assert session.profile.id == 'p123'
+        assert flat_session.id == 's123'
+        assert flat_session.get('profile.id', None) == 'p123'
 
 
 @pytest.mark.asyncio
@@ -192,4 +189,3 @@ async def test_load_or_create_session_profile_conflict():
         assert session.id == 's123'
         # For delivered profile
         assert session.profile.id != tracker_payload.profile.id
-

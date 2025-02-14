@@ -5,23 +5,23 @@ from typing import Optional
 
 from tracardi.domain.entity import Entity
 from tracardi.common.logging.log_handler import get_logger
-from tracardi.service.tracking.storage.session_storage import load_session
-from tracardi.domain.session import Session
+from tracardi.domain.flat_session import FlatSession
+from tracardi.service.tracking.storage.session_storage import load_flat_session
 
 logger = get_logger(__name__)
 
 
-def _copy_tracker_payload_session_metadata_1(session: Session, insert: Optional[datetime], update: Optional[datetime], create: Optional[datetime]) -> Session:
+def _copy_tracker_payload_session_metadata_1(session: FlatSession, insert: Optional[datetime], update: Optional[datetime], create: Optional[datetime]) -> FlatSession:
     if insert:
-        session.metadata.time.insert = insert
+        session['metadata.time.insert'] = insert
     if update:
-        session.metadata.time.update = update
+        session['metadata.time.update'] = update
     if create:
-        session.metadata.time.create = create
+        session['metadata.time.create'] = create
     return session
 
 
-def _create_session_1(session_id: Optional[str], profile_id: Optional[str], insert: Optional[datetime], update: Optional[datetime], create: Optional[datetime]) -> Session:
+def _create_session_1(session_id: Optional[str], profile_id: Optional[str], insert: Optional[datetime], update: Optional[datetime], create: Optional[datetime]) -> FlatSession:
     # Artificial session (Mutates tracker Payload)
 
     # If no session in tracker payload this means that we do not need session.
@@ -33,10 +33,10 @@ def _create_session_1(session_id: Optional[str], profile_id: Optional[str], inse
             f"Tracker payload delivered with empty session ID. Session created on server side with random ID.")
         session_id = str(uuid4())
 
-    session = Session.new(id=session_id)
-    assert (session.operation.new is True)
+    flat_session = FlatSession.new(id=session_id)
+    assert (flat_session.is_new() is True)
 
-    session = _copy_tracker_payload_session_metadata_1(session, insert, update, create)
+    session = _copy_tracker_payload_session_metadata_1(flat_session, insert, update, create)
 
     # Set profile from tracker payload to session
     if profile_id:
@@ -46,22 +46,22 @@ def _create_session_1(session_id: Optional[str], profile_id: Optional[str], inse
 
 
 async def load_or_create_session_1(session_id: Optional[str], profile_id: Optional[str], insert, update,
-                                   create) -> Session:
+                                   create) -> FlatSession:
     if session_id is None or session_id.strip() == "":
         return _create_session_1(session_id, profile_id, insert, update, create)
 
     # Loads session from ES
-    session = await load_session(session_id)
+    flat_session = await load_flat_session(session_id)
 
-    if session is None:
+    if flat_session is None:
         # Creates session with delivered session id
         return _create_session_1(session_id, profile_id, insert, update, create)
 
     # Only loaded session must have profile.
-    if session.profile is None or not session.profile.id:  # If session profile is none then it is corrupted
+    if not flat_session.get('profile.id', None):  # If session profile is none then it is corrupted
         # New session created because it is corrupted
-        session = _create_session_1(session_id, profile_id, insert, update, create)
+        flat_session = _create_session_1(session_id, profile_id, insert, update, create)
         logger.warning(f"Session {session_id} has no profile and is corrupted. "
-                       f"New session (ID: {session.id}) created.")
+                       f"New session (ID: {flat_session.id}) created.")
 
-    return session
+    return flat_session
