@@ -109,7 +109,7 @@ def _load_default_profile(tracker_profile, flat_session: FlatSession, static: bo
         else:
             tracker_profile.id = flat_profile.id
 
-    if not flat_session.get('profile.id', None):
+    if flat_session.get('profile.id', None) != flat_profile.id:
         flat_session['profile.id'] = flat_profile.id
 
     return flat_profile, flat_session, tracker_profile
