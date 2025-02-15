@@ -4,12 +4,12 @@ from pydantic import ValidationError
 
 from tracardi.config import tracardi
 from tracardi.common.exception.exception import BlockedException
+from tracardi.domain.flat_session import FlatSession
 from tracardi.service.tracking.bot import _has_google_bot_header
 from tracardi.service.tracking.user_agent import _get_user_agent
 from tracardi.service.tracking.utils.languages import get_spoken_languages
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.marketing import UTM
-from tracardi.domain.session import Session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.geo import Geo
 from tracardi.common.logging.log_handler import get_logger
@@ -18,100 +18,70 @@ from tracardi.domain.tracker_config import TrackerConfig
 logger = get_logger(__name__)
 
 
-def _compute_session_referer(session: Session, tracker_payload: TrackerPayload) -> Session:
+def _compute_session_referer(flat_session: FlatSession, tracker_payload: TrackerPayload) -> FlatSession:
     referer = tracker_payload.context.get('referer', None)
     if referer:
-        session.context['referer'] = referer
+        flat_session['context.referer'] = referer
 
     # Compute channel
     if isinstance(tracker_payload.source, EventSource):
-        session.metadata.channel = tracker_payload.source.channel
+        flat_session['metadata.channel'] = tracker_payload.source.channel
 
     # Compute if BOT
-    session.app.bot = _has_google_bot_header(tracker_payload.request)
+    flat_session['app.bot'] = _has_google_bot_header(tracker_payload.request)
 
-    return session
+    return flat_session
 
+def _or_value(a, b):
+    try:
+        return a
+    except Exception:
+        return b
 
-def _compute_data_from_user_agent(session: Session, tracker_payload: TrackerPayload) -> Session:
-    user_agent = _get_user_agent(session, tracker_payload)
+def _compute_data_from_user_agent(flat_session: FlatSession, tracker_payload: TrackerPayload) -> FlatSession:
+    user_agent = _get_user_agent(flat_session, tracker_payload)
     if user_agent:
-        try:
-            session.os.name = user_agent.os.family
-        except Exception:
-            if 'os' in session.context:
-                session.os.name = session.context['os'].get('name', None)
+
+        flat_session['os.name'] = _or_value(user_agent.os.family, flat_session.get('context.os.name', None))
+        flat_session['os.version'] = _or_value(user_agent.os.version_string,
+                                               flat_session.get('context.os.version', None))
+
+        device_type = 'mobile' if user_agent.is_mobile else \
+            'pc' if user_agent.is_pc else \
+                'tablet' if user_agent.is_tablet else \
+                    'email' if user_agent.is_email_client else None
+        flat_session['device.type'] = _or_value(device_type, flat_session.get('context.device.type', None))
+
+        flat_session['device.name'] = _or_value(user_agent.device.family, flat_session.get('context.device.name', None))
+        flat_session['device.brand'] = _or_value(user_agent.device.brand,
+                                                 flat_session.get('context.device.brand', None))
+        flat_session['device.model'] = _or_value(user_agent.device.model,
+                                                 flat_session.get('context.device.model', None))
+
 
         try:
-            session.os.version = user_agent.os.version_string
-        except Exception:
-            if 'os' in session.context:
-                session.os.version = session.context['os'].get('version', None)
-
-        try:
-            device_type = 'mobile' if user_agent.is_mobile else \
-                'pc' if user_agent.is_pc else \
-                    'tablet' if user_agent.is_tablet else \
-                        'email' if user_agent.is_email_client else None
-            session.device.type = device_type
-
-        except Exception:
-            if 'device' in session.context:
-                session.device.type = session.context['device'].get('type', None)
-
-        try:
-            session.device.name = user_agent.device.family
-        except Exception:
-            if 'device' in session.context:
-                session.device.name = session.context['device'].get('name', None)
-
-        try:
-            session.device.brand = user_agent.device.brand
-        except Exception:
-            if 'device' in session.context:
-                session.device.brand = session.context['device'].get('brand', None)
-
-        try:
-            session.device.model = user_agent.device.model
-        except Exception:
-            if 'device' in session.context:
-                session.device.model = session.context['device'].get('model', None)
-
-        try:
-            session.device.touch = user_agent.is_touch_capable
+            flat_session['device.touch'] = user_agent.is_touch_capable
         except Exception:
             pass
 
-        try:
-            session.app.name = user_agent.browser.family  # returns 'Mobile Safari'
-            session.app.version = user_agent.browser.version_string
-            session.app.type = "browser"
-
-            session.app.bot = user_agent.is_bot
-        except Exception:
-            if 'app' in session.context:
-                session.app.name = session.context['app'].get('name', None)
-                session.app.version = session.context['app'].get('version', None)
-                session.app.type = session.context['app'].get('type', "unknown")
+        flat_session['app.name'] = _or_value(user_agent.browser.family, flat_session.get('context.app.name', None))
+        flat_session['app.version'] = _or_value(user_agent.browser.version_string, flat_session.get('context.app.version', None))
+        flat_session['app.bot'] = _or_value(user_agent.is_bot, flat_session.get('context.app.type', "unknown"))
 
     else:
 
-        if 'os' in session.context:
-            session.os.name = session.context['os'].get('name', None)
+        flat_session['os.name'] = flat_session.get('context.os.name', None)
 
-        if 'device' in session.context:
-            session.device.name = session.context['device'].get('name', None)
-            session.device.brand = session.context['device'].get('brand', None)
-            session.device.model = session.context['device'].get('model', None)
-            session.device.touch = session.context['device'].get('model', None)
-            session.device.type = session.context['device'].get('type', None)
+        flat_session['device.type'] =flat_session.get('context.device.type', None)
+        flat_session['device.name'] =flat_session.get('context.device.name', None)
+        flat_session['device.brand'] = flat_session.get('context.device.brand', None)
+        flat_session['device.model'] = flat_session.get('context.device.model', None)
 
-        if 'app' in session.context:
-            session.app.name = session.context['app'].get('name', None)
-            session.app.version = session.context['app'].get('version', None)
-            session.app.type = session.context['app'].get('type', "unknown")
+        flat_session['app.name'] = flat_session.get('context.app.name', None)
+        flat_session['app.version'] = flat_session.get('context.app.version', None)
+        flat_session['app.bot'] = flat_session.get('context.app.type', "unknown")
 
-    return session
+    return flat_session
 
 
 def _get_tracker_geo(tracker_payload) -> Optional[Geo]:
@@ -135,85 +105,85 @@ def _get_tracker_utm(tracker_payload) -> Optional[UTM]:
     return None
 
 
-async def update_device_geo(tracker_payload: TrackerPayload, session: Session) -> Session:
+async def update_device_geo(tracker_payload: TrackerPayload, flat_session: FlatSession) -> FlatSession:
     """
     Tries to find out the geolocation of device.
     """
 
-    if session.device.geo.is_empty():
+    if flat_session.get('device.geo.country.name', None) is None:
 
         _geo = _get_tracker_geo(tracker_payload)
 
         # If client-side location is sent but not available in session - update session
         if _geo:
-            session.device.geo = _geo
-            session.set_updated()
-            return session
+            flat_session['device.geo'] = _geo.model_dump()
+            flat_session.set_updated()
+            return flat_session
 
-    return session
+    return flat_session
 
 
-def update_session_utm_with_client_data(tracker_payload: TrackerPayload, session: Session) -> Session:
-    if session.utm.is_empty():
+def update_session_utm_with_client_data(tracker_payload: TrackerPayload, flat_session: FlatSession) -> FlatSession:
+    if flat_session.get('utm.source', None) is None:
         _utm = _get_tracker_utm(tracker_payload)
 
         # If client-side utm is sent but not available in session - update session
         if _utm:
-            session.utm = _utm
-            session.set_updated()
+            flat_session['utm'] = _utm.model_dump()
+            flat_session.set_updated()
 
-    return session
+    return flat_session
 
 
-def _compute_utm(session, tracker_payload_context: dict) -> Session:
+def _compute_utm(flat_session: FlatSession, tracker_payload_context: dict) -> FlatSession:
     if 'utm' in tracker_payload_context:
         try:
-            session.utm = UTM(**tracker_payload_context['utm'])
+            flat_session['utm'] = UTM(**tracker_payload_context['utm']).model_dump()  # TODO tracker_payload_context['utm'] should be enough
             del tracker_payload_context['utm']
         except ValidationError:
             pass
-    return session
+    return flat_session
 
 
-def _compute_screen_size(session: Session, tracker_payload: TrackerPayload):
+def _compute_screen_size(flat_session: FlatSession, tracker_payload: TrackerPayload) -> FlatSession:
     _value = tracker_payload.get_resolution()
     if _value:
-        session.device.resolution = _value
+        flat_session['device.resolution'] = _value
 
     _value = tracker_payload.get_color_depth()
     if _value:
-        session.device.color_depth = _value
+        flat_session['device.color_depth'] = _value
 
     _value = tracker_payload.get_screen_orientation()
     if _value:
-        session.device.orientation = _value
+        flat_session['device.orientation'] = _value
 
-    return session
+    return flat_session
 
 
-def _compute_languages(session, tracker_payload):
+def _compute_languages(flat_session: FlatSession, tracker_payload) -> FlatSession:
     try:
-        session.app.language = session.context['browser']['local']['browser']['language']
+        flat_session['app.language'] = flat_session['context.browser.local.browser.language']
     except Exception:
         pass
 
-    spoken_languages, language_codes = get_spoken_languages(session, tracker_payload.request)
+    spoken_languages, language_codes = get_spoken_languages(flat_session, tracker_payload.request)
     if spoken_languages:
-        session.context['language'] = list(set(spoken_languages))
+        flat_session['context.language'] = list(set(spoken_languages))
     if language_codes:
-        session.context['language_codes'] = list(set(language_codes))
+        flat_session['context.language_codes'] = list(set(language_codes))
 
-    return session
+    return flat_session
 
 
-def _compute_ip(session, tracker_payload, tracker_config):
+def _compute_ip(flat_session: FlatSession, tracker_payload, tracker_config) -> FlatSession:
     _value = tracker_payload.get_ip()
     if _value:
-        session.device.ip = _value
+        flat_session['device.ip'] = _value
 
-    session.context['ip'] = tracker_config.ip
+    flat_session['context.ip'] = tracker_config.ip
 
-    return session
+    return flat_session
 
 
 def _compute_bot(session, tracker_payload):
@@ -225,40 +195,40 @@ def _compute_bot(session, tracker_payload):
         pass
 
 
-async def compute_session(session: Session,
+async def compute_session(flat_session: Optional[FlatSession],
                           tracker_payload: TrackerPayload,
                           tracker_config: TrackerConfig
-                          ) -> Session:
-    if session:
+                          ) -> FlatSession:
+    if flat_session:
 
         # Is new session
-        if session.is_new():
+        if flat_session.is_new():
             # Compute session. Session is filled only when new
 
             # Compute the User Agent data
-            session = _compute_data_from_user_agent(session, tracker_payload)
+            flat_session = _compute_data_from_user_agent(flat_session, tracker_payload)
 
             # Compute UTM
-            session = _compute_utm(session, tracker_payload.context)
+            flat_session = _compute_utm(flat_session, tracker_payload.context)
 
             # Compute Screen size
-            session = _compute_screen_size(session, tracker_payload)
+            flat_session = _compute_screen_size(flat_session, tracker_payload)
 
             # Compute session referer, channel and bot
-            session = _compute_session_referer(session, tracker_payload)
+            flat_session = _compute_session_referer(flat_session, tracker_payload)
 
             # Compute device ip
-            session = _compute_ip(session, tracker_payload, tracker_config)
+            flat_session = _compute_ip(flat_session, tracker_payload, tracker_config)
 
             # Compute languages
-            session = _compute_languages(session, tracker_payload)
+            flat_session = _compute_languages(flat_session, tracker_payload)
 
         # Update missing data
-        session = await update_device_geo(tracker_payload, session)
-        session = update_session_utm_with_client_data(tracker_payload, session)
+        flat_session = await update_device_geo(tracker_payload, flat_session)
+        flat_session = update_session_utm_with_client_data(tracker_payload, flat_session)
 
         # If agent is a bot stop
-        if (session.app.bot or _has_google_bot_header(tracker_payload.request)) and tracardi.disallow_bot_traffic:
+        if (flat_session.get('app.bot', False) or _has_google_bot_header(tracker_payload.request)) and tracardi.disallow_bot_traffic:
             raise BlockedException(f"Traffic from bot is not allowed.")
 
-    return session
+    return flat_session

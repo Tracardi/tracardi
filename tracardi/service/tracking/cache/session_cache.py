@@ -4,6 +4,7 @@ from system.adapter.os.bigdata.elastic.model.storage_record import RecordMetadat
 from tracardi.config import tracardi
 from tracardi.context import Context
 from tracardi.domain import ExtraInfo
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.session import Session
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.redis.collections import Collection
@@ -37,40 +38,45 @@ def load_session_cache(session_id: str, context: Context):
     return session
 
 
-def _save_single_session(session, context):
-    index = session.get_meta_data()
+def _save_single_session(flat_session: FlatSession, context):
+    index = flat_session.get_meta_data()
 
     if index is None:
         logger.warning("Empty session metadata. Index is not set. Cached session removed.",
                        extra=ExtraInfo.exact(origin="cache", package=__name__))
-        _delete_cache(session.id, get_session_key_namespace(session.id, context))
+        _delete_cache(flat_session.id, get_session_key_namespace(flat_session.id, context))
     else:
+        session_dict = flat_session.to_dict()
+        try:
+            del session_dict['operation']
+        except Exception:
+            pass
         _set_cache(
-            session.id,
+            flat_session.id,
             (
                 {
                     "production": context.production,
                     "tenant": context.tenant
                 },
-                session.model_dump(mode="json", exclude_defaults=True, exclude={"operation": ...}),
+                session_dict,
                 None,
                 index.model_dump(mode="json")
             ),
-            get_session_key_namespace(session.id, context),
+            get_session_key_namespace(flat_session.id, context),
             ttl=tracardi.keep_session_in_cache_for
         )
 
 
-def save_session_cache(session: Union[Optional[Session], List[Session]], context: Context):
-    if session:
+def save_session_cache(flat_session: Union[Optional[FlatSession], List[FlatSession]], context: Context):
+    if flat_session:
 
-        if isinstance(session, Session):
-            _save_single_session(session, context)
-        elif isinstance(session, list):
-            for _session in session:
+        if isinstance(flat_session, FlatSession):
+            _save_single_session(flat_session, context)
+        elif isinstance(flat_session, list):
+            for _session in flat_session:
                 _save_single_session(_session, context)
         else:
-            raise ValueError(f"Incorrect session value. Expected Session or list of Sessions. Got {type(session)}")
+            raise ValueError(f"Incorrect session value. Expected Session or list of Sessions. Got {type(flat_session)}")
 
 
 def delete_session_cache(session_id: str, context: Context):

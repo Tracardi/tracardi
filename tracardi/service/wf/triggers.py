@@ -4,6 +4,7 @@ from typing import List, Optional, Tuple, Dict, Set
 
 from defer.model.transport_context import TransportContext
 from tracardi.context import ServerContext, Context
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.rule_invoke_result import RuleInvokeResult
 from tracardi.service.dependency.adapters.big_data_adapter import *
@@ -318,7 +319,7 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
     return profile, session, events, ux, response, changed_fields, is_wf_triggered
 
 
-async def exec_workflow(profile_id: Optional[str], session: Session, flat_events: List[FlatEvent],
+async def exec_workflow(profile_id: Optional[str], flat_session: FlatSession, flat_events: List[FlatEvent],
                         tracker_payload: TrackerPayload) -> Optional[Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict], Dict[str, list], bool]]:
 
@@ -326,8 +327,9 @@ async def exec_workflow(profile_id: Optional[str], session: Session, flat_events
         return None
 
     # Convert to events. Workflow needs Events
-    # TODO EOFE - End of FlatEvent
+    # TODO EOFE - End of FlatEvent, FlatSession
     events = flat_events_to_event(flat_events)
+    session = Session(**flat_session)
 
     if profile_id is None:
         # Profile less execution
@@ -349,9 +351,9 @@ async def exec_workflow(profile_id: Optional[str], session: Session, flat_events
 
 async def exec_workflow_in_queue(context: TransportContext,
                                  profile_id: Optional[str],
-                                 session: Session,
+                                 flat_session: FlatSession,
                                  flat_events: List[FlatEvent],
                                  tracker_payload: TrackerPayload) -> Optional[Tuple[
     Profile, Session, List[Event], Optional[list], Optional[dict], Dict[str, list], bool]]:
     with ServerContext(Context(**context.as_context())) as c:
-        return await exec_workflow(profile_id, session, flat_events, tracker_payload)
+        return await exec_workflow(profile_id, flat_session, flat_events, tracker_payload)

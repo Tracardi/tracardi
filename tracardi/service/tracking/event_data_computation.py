@@ -6,13 +6,13 @@ from tracardi.domain.entity import PrimaryEntity
 from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.field_change import FieldChange
 from tracardi.common.logging.log_handler import get_logger
+from tracardi.domain.flat_session import FlatSession
 from tracardi.service.tracking.compute.event.event_construction import event_payload_to_event
 from tracardi.service.tracking.profile_data_computation import map_event_to_profile
 from tracardi.domain.event_source import EventSource
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.domain.session import Session
 from tracardi.domain.flat_event import EventDict, FlatEvent
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracking.utils.function_call import default_event_call_function
@@ -96,7 +96,7 @@ def _auto_index_default_event_type(flat_event: FlatEvent) -> FlatEvent:
 async def event_properties_to_profile(custom_event_to_profile_mapping_schemas: List[EventToProfile],
                                       flat_event: FlatEvent,
                                       flat_profile: FlatProfile,
-                                      session: Session) -> AsyncGenerator[FieldChange, None, None]:
+                                      flat_session: FlatSession) -> AsyncGenerator[FieldChange, None, None]:
     # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
 
     # Map event data to profile
@@ -104,7 +104,7 @@ async def event_properties_to_profile(custom_event_to_profile_mapping_schemas: L
         custom_event_to_profile_mapping_schemas,
         flat_event,
         flat_profile,
-        session
+        flat_session
     ):
         # Add what event changed it
         item.event_type = flat_event.type
@@ -122,7 +122,7 @@ async def make_event_from_event_payload(
         request,
         event_payload,
         profile_entity: Optional[PrimaryEntity],
-        session,
+        flat_session: FlatSession,
         source: EventSource,
         metadata,
         profile_less) -> EventDict:
@@ -132,7 +132,7 @@ async def make_event_from_event_payload(
         event_payload,
         metadata,
         source,
-        session,
+        flat_session,
         profile_entity.id,
         profile_less)
 
@@ -156,11 +156,11 @@ async def make_event_from_event_payload(
 async def compute_events(events: List[EventPayload],
                          metadata,
                          source: EventSource,
-                         session: Session,
+                         flat_session: FlatSession,
                          flat_profile: Optional[FlatProfile],
                          profile_less: bool,
                          tracker_payload: TrackerPayload
-                         ) -> Tuple[List[FlatEvent], Session, Optional[FlatProfile]]:
+                         ) -> Tuple[List[FlatEvent], FlatSession, Optional[FlatProfile]]:
     event_objects = []
 
     # Data that is not needed for any mapping or compliance
@@ -172,7 +172,7 @@ async def compute_events(events: List[EventPayload],
             tracker_payload.request,
             event_payload,
             profile_entity,
-            session,
+            flat_session,
             source,
             metadata,
             profile_less
@@ -193,11 +193,11 @@ async def compute_events(events: List[EventPayload],
                     custom_event_to_profile_mapping_schemas,
                     flat_event,
                     flat_profile,
-                    session
+                    flat_session
                 ):
                     flat_profile.set(field_change.field,
                                      field_change.value,
-                                     session_id=session.id,
+                                     session_id=flat_session.id,
                                      event_type=flat_event.type,
                                      timestamp=field_change.ts
                                      )
@@ -208,26 +208,26 @@ async def compute_events(events: List[EventPayload],
         flat_event['metadata.debug'] = debugging
 
         # todo Maybe check not needed
-        if isinstance(session, Session):
+        if isinstance(flat_session, FlatSession):
 
-            if session.metadata.status != 'active':
-                session.metadata.status = 'active'
-                session.set_updated()
+            if flat_session.get('metadata.status', None) != 'active':
+                flat_session['metadata.status'] = 'active'
+                flat_session.set_updated()
 
             # Add session status
             if flat_event.type == 'visit-started':
-                session.metadata.status = 'started'
-                session.set_updated()
+                flat_session['metadata.status'] = 'started'
+                flat_session.set_updated()
 
             if flat_event.type == 'visit-ended':
-                session.metadata.status = 'ended'
-                session.set_updated()
+                flat_session['metadata.status'] = 'ended'
+                flat_session.set_updated()
 
-            flat_event['session.start'] = session.metadata.time.insert
-            flat_event['session.duration'] = session.metadata.time.duration
+            flat_event['session.start'] = flat_session['metadata.time.insert']
+            flat_event['session.duration'] = flat_session['metadata.time.duration']
 
         # Collect event objects
 
         event_objects.append(flat_event)
 
-    return event_objects, session, flat_profile
+    return event_objects, flat_session, flat_profile

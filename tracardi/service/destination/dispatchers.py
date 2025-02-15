@@ -7,6 +7,7 @@ from tracardi.domain import ExtraInfo
 from tracardi.domain.destination_work_package import DestinationWorkPackage
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.flat_event import FlatEvent
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.session import Session
 from tracardi.common.exception.exception_service import get_traceback
 from tracardi.common.logging.log_handler import get_logger
@@ -59,12 +60,12 @@ async def yield_event_destination_work_package(flat_events: List[FlatEvent],
 
 
 async def event_destination_dispatch(flat_profile: Optional[FlatProfile],
-                                     session: Optional[Session],
+                                     flat_session: Optional[FlatSession],
                                      flat_events: List[FlatEvent],
                                      debug,
                                      metadata=None
                                      ):
-    dot = DotAccessor(flat_profile, session)
+    dot = DotAccessor(flat_profile, flat_session)
     for flat_event in flat_events:
 
         try:
@@ -85,7 +86,7 @@ async def event_destination_dispatch(flat_profile: Optional[FlatProfile],
 
                 await destination_instance.dispatch_event(destination_work_package.data,
                                                           profile_id=get_entity_id(flat_profile),
-                                                          session_id=get_entity_id(session),
+                                                          session_id=get_entity_id(flat_session),
                                                           flat_event=flat_event,
                                                           metadata=metadata)
         except Exception as e:

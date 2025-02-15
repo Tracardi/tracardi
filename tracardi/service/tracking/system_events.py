@@ -3,18 +3,18 @@ from uuid import uuid4
 from datetime import timedelta
 
 from tracardi.config import tracardi
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.session import Session
 from tracardi.domain.time import Time
 from tracardi.common.time.date import now_in_utc
 
 
-def add_system_events(is_profile_new: bool, session: Session, tracker_payload: TrackerPayload) -> Tuple[
-    TrackerPayload, Session]:
+def add_system_events(is_profile_new: bool, flat_session: FlatSession, tracker_payload: TrackerPayload) -> Tuple[
+    TrackerPayload, FlatSession]:
     # Visit ended never creates system events.
     if tracker_payload.has_event_type('visit-ended'):
-        return tracker_payload, session
+        return tracker_payload, flat_session
 
     """
     Mutates tracker payload
@@ -43,15 +43,15 @@ def add_system_events(is_profile_new: bool, session: Session, tracker_payload: T
             )
         )
 
-    if session:
+    if flat_session:
 
         if tracker_payload.is_on('saveSession', default=True):
 
-            if session.is_reopened():
+            if flat_session.is_reopened():
                 # Session can not be reopened with event type visit started.
 
-                session.metadata.status = 'started'
-                session.set_updated()
+                flat_session['metadata.status'] = 'started'
+                flat_session.set_updated()
                 _time = _now_utc - timedelta(seconds=1)
                 tracker_payload.events.append(
                     EventPayload(
@@ -71,7 +71,7 @@ def add_system_events(is_profile_new: bool, session: Session, tracker_payload: T
                     )
                 )
 
-            if session.is_new():
+            if flat_session.is_new():
                 # Add session created event to the registered events
                 _time = _now_utc - timedelta(seconds=2)
                 tracker_payload.events.append(
@@ -90,4 +90,4 @@ def add_system_events(is_profile_new: bool, session: Session, tracker_payload: T
                     )
                 )
 
-    return tracker_payload, session
+    return tracker_payload, flat_session

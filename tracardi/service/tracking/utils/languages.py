@@ -1,5 +1,6 @@
 from typing import Optional, Tuple
 
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.session import Session
 from tracardi.common.db.languages import language_codes_dict
 from tracardi.common.tools.parser import parse_accept_language
@@ -19,7 +20,7 @@ def get_continent(tracker_payload) -> Optional[str]:
     return None
 
 
-def get_spoken_languages(session: Session, request: dict) -> Tuple[list, list]:
+def get_spoken_languages(flat_session: FlatSession, request: dict) -> Tuple[list, list]:
     spoken_languages = []
     language_codes = []
     try:
@@ -32,8 +33,8 @@ def get_spoken_languages(session: Session, request: dict) -> Tuple[list, list]:
                         spoken_languages += language_codes_dict[lang_code]
                         language_codes.append(lang_code)
 
-        if session.device.geo.country.code:
-            lang_code = session.device.geo.country.code.lower()
+        if flat_session.get('device.geo.country.code', None):
+            lang_code = flat_session['device.geo.country.code'].lower()
             if lang_code in language_codes_dict:
                 spoken_languages += language_codes_dict[lang_code]
                 language_codes.append(lang_code)

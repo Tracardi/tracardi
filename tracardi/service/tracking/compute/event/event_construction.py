@@ -1,4 +1,5 @@
 from tracardi.domain.event_source import EventSource
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.payload.event_payload import EventPayload
 
 from tracardi.common.time.date import now_in_utc
@@ -18,13 +19,13 @@ from tracardi.domain.session import Session
 from tracardi.common.tools.string_manager import capitalize_event_type_id
 
 
-def _get_event_session(session: Union[Session, Entity]) -> Optional[EventSession]:
-    if session is None:
+def _get_event_session(flat_session: Union[FlatSession, Entity]) -> Optional[EventSession]:
+    if flat_session is None:
         return None
 
-    tz = session.get_time_zone()
+    tz = flat_session.get_time_zone()
     event_session = EventSession(
-        id=session.id,
+        id=flat_session.id,
         tz=tz
     )
 
@@ -90,7 +91,7 @@ def event_payload_to_event(
         event_payload: EventPayload,
         tracker_payload_metadata: EventPayloadMetadata,
         source: EventSource,
-        session: Union[Optional[Entity], Optional[Session]],
+        flat_session: Union[Optional[Entity], Optional[FlatSession]],
         profile_id: Optional[str],
         profile_less: bool) -> Tuple[EventDict, bool]:
     id = str(uuid4()) if not event_payload.id else event_payload.id
@@ -102,7 +103,7 @@ def event_payload_to_event(
     source_dict = {"id": source.id} if not event_payload.has_source_id() else dict(id=event_payload.get_source_id())
     profile_entity_dict = {"id": profile_id} if profile_id else None
 
-    if isinstance(session, Session):
+    if isinstance(flat_session, FlatSession):
 
         hit_dict = _get_hit(event_payload)
 
@@ -110,16 +111,16 @@ def event_payload_to_event(
             id=id,
             name=event_name,
             metadata=meta_dict,
-            session=_get_event_session(session).model_dump(mode="json"),
+            session=_get_event_session(flat_session).model_dump(mode="json"),
             profile=profile_entity_dict,  # profile can be None when profile_less event.
             type=event_type,
 
-            os=session.os.model_dump(mode="json", exclude_unset=True),
-            app=session.app.model_dump(mode="json", exclude_unset=True),
-            device=session.device.model_dump(mode="json", exclude_unset=True),
+            os=flat_session.get('os', {}),
+            app=flat_session.get('app', {}),
+            device=flat_session.get('device', {}),
             hit=hit_dict,
 
-            utm=session.utm.model_dump(mode="json"),
+            utm=flat_session.get('utm', {}),
 
             properties=event_payload.properties,
             source=source_dict,  # Entity

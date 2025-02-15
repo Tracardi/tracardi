@@ -3,6 +3,7 @@ from typing import Optional, List
 from tracardi.config import tracardi
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.session import Session
 from tracardi.service.destination.dispatchers import profile_destination_dispatch, event_destination_dispatch
 
@@ -21,12 +22,12 @@ async def sync_profile_destination(flat_profile: Optional[FlatProfile], changed_
         )
 
 
-async def sync_event_destination(flat_profile: Optional[FlatProfile], session: Session, flat_events: List[FlatEvent],
+async def sync_event_destination(flat_profile: Optional[FlatProfile], flat_session: FlatSession, flat_events: List[FlatEvent],
                                  debug):
     if tracardi.enable_event_destinations and len(flat_events) > 0:
         await event_destination_dispatch(
             flat_profile,
-            session,
+            flat_session,
             flat_events,
             debug,
             metadata={

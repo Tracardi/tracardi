@@ -39,21 +39,21 @@ async def os_tracker(
 
         # Load profile and session
         is_static_profile_id = tracker_config.static_profile_id is True or tracker_payload.has_static_profile_id()
-        flat_profile, session, tracker_profile, tracker_session = await tracker_loading(tracker_payload, is_static_profile_id)
+        flat_profile, flat_session, tracker_profile, tracker_session = await tracker_loading(tracker_payload, is_static_profile_id)
 
         tracker_payload.profile = tracker_profile
         tracker_payload.session = tracker_session
 
-        session = await compute_session(
-            session,
+        flat_session = await compute_session(
+            flat_session,
             tracker_payload,
             tracker_config
         )
 
         # Lock profile and session for changes and compute data
-        flat_profile, session, flat_events, tracker_payload = await compute_data(
+        flat_profile, flat_session, flat_events, tracker_payload = await compute_data(
             flat_profile,
-            session,
+            flat_session,
             tracker_payload,
             source
         )
@@ -72,9 +72,9 @@ async def os_tracker(
                 await mutation_profile_db.save_flat_profile(flat_profile)
 
         # Save session
-        if session and session.has_not_saved_changes():
+        if flat_session and flat_session.has_not_saved_changes():
             # Sync save
-            await save_session(session)
+            await save_session(flat_session)
 
         # Save events
         if flat_events:
@@ -91,7 +91,7 @@ async def os_tracker(
         # Dispatch events SYNCHRONOUSLY
         await sync_event_destination(
             flat_profile,
-            session,
+            flat_session,
             flat_events,
             tracker_payload.debug)
 
@@ -124,7 +124,7 @@ async def os_tracker(
 
             workflow_result = await exec_workflow(
                 get_entity_id(flat_profile),
-                session,
+                flat_session,
                 flat_events,
                 tracker_payload)
 
@@ -162,7 +162,7 @@ async def os_tracker(
                 "id": get_entity_id(flat_profile)
             },
             "session": {
-                "id": get_entity_id(session)
+                "id": get_entity_id(flat_session)
             },
             "errors": [],
             "warnings": []

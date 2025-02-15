@@ -3,10 +3,10 @@ from uuid import uuid4
 
 from tracardi.domain.event_metadata import EventPayloadMetadata
 from tracardi.domain.flat_event import EventDict
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.event_source import EventSource
-from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.time import Time
 from tracardi.service.tracking.compute.event.event_construction import event_payload_to_event
 
@@ -35,14 +35,13 @@ def test_event_payload_to_event():
         timestamp=datetime.utcnow()
     )
 
-    session = Session(
+    flat_session = FlatSession.new(
         id=str(uuid4()),
-        metadata=SessionMetadata(),
-        context={"time_zone": "UTC"}
+        default={"context":{"time_zone": "UTC"}}
     )
 
     # Call the function under test
-    event, is_valid = event_payload_to_event({"test": 1}, event_payload, metadata, source, session, "1", profile_less=False)
+    event, is_valid = event_payload_to_event({"test": 1}, event_payload, metadata, source, flat_session, "1", profile_less=False)
 
     # Validate the result
     assert isinstance(event, EventDict)
@@ -50,7 +49,7 @@ def test_event_payload_to_event():
     assert event['name'] == "Test Event"
     assert event['properties'] == {"key": "value"}
     assert event['metadata']['status'] == "collected"
-    assert event['session']['id'] == session.id
+    assert event['session']['id'] == flat_session.id
     assert event['profile']['id'] == "1"
     assert event['tags']['values'] == ("test", "event")
     assert event['hit']['name'] == "Test Page"

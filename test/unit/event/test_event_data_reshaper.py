@@ -1,12 +1,12 @@
 from uuid import uuid4
 
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from tracardi.domain.event import Event, EventMetadata
 from tracardi.domain.event_session import EventSession
 from tracardi.domain.entity import Entity
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.time import EventTime
 from tracardi.domain.event_reshaping_schema import ReshapeSchema, EventReshapingSchema, EventReshapeDefinition
 from copy import deepcopy
@@ -92,10 +92,7 @@ def test_removing_event_properties():
 
 def test_should_return_none_if_no_reshaping():
     profile = Profile(id="1")
-    session = Session(
-        id='1',
-        metadata=SessionMetadata()
-    )
+    session = FlatSession.new(id='1')
     props = {
         "prop1": 1,
         "prop2": 2,
@@ -141,10 +138,7 @@ def test_should_return_none_if_no_reshaping():
 
 def test_should_reshape_event_properties():
     profile = Profile(id="1")
-    session = Session(
-        id='1',
-        metadata=SessionMetadata()
-    )
+    session = FlatSession.new(id='1')
     props = {
         "prop1": 1,
         "prop2": 2,
@@ -213,10 +207,7 @@ def test_should_reshape_whole_objects():
     Check line 72 in dict_traverser.py
     """
     profile = Profile(id="1")
-    session = Session(
-        id='1',
-        metadata=SessionMetadata()
-    )
+    session = FlatSession.new(id='1')
     props = {
         "prop1": 1,
         "prop2": 2,

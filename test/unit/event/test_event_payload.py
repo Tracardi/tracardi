@@ -2,10 +2,10 @@ import datetime
 
 from tracardi.domain.event_metadata import EventPayloadMetadata
 from tracardi.domain.event_source import EventSource
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.named_entity import NamedEntity
 
 from tracardi.domain.payload.event_payload import EventPayload
-from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.time import Time
 from tracardi.service.tracking.compute.event.event_construction import event_payload_to_event
 
@@ -30,7 +30,7 @@ def test_event_payload_time_fallback():
         ep,
         tracker_payload_metadata,
         source=EventSource(id="1", name="test", type=["rest"], bridge=NamedEntity(id="1", name="rest")),
-        session=Session(id="1", metadata=SessionMetadata()),
+        flat_session=FlatSession.new(id="1"),
         profile_id="1",
         profile_less=False
     )
@@ -53,7 +53,7 @@ def test_event_payload_should_have_tags():
                                       epm,
                                       source=EventSource(id="1", name="test", type=["rest"],
                                                          bridge=NamedEntity(id="1", name="rest")),
-                                      session=Session(id="1", metadata=SessionMetadata()),
+                                      flat_session=FlatSession.new(id="1"),
                                       profile_id="1",
                                       profile_less=False
                                       )

@@ -1,17 +1,13 @@
 from user_agents.parsers import UserAgent
 
 from tracardi.domain.entity import Entity
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.payload.tracker_payload import TrackerPayload
-from tracardi.domain.session import Session, SessionMetadata
 from tracardi.service.tracking.user_agent import _get_user_agent
 
 
 def test_user_agent_string_from_tracker_payload():
     # Setup
-    session = Session(
-        id="1",
-        metadata=SessionMetadata()
-    )
     tracker_payload = TrackerPayload(
         source=Entity(id="1"),
         request={
@@ -32,10 +28,7 @@ def test_user_agent_string_from_tracker_payload():
 
 def test_user_agent_string():
     # Setup
-    session = Session(
-        id="1",
-        metadata=SessionMetadata()
-    )
+    session = FlatSession.new(id="1")
     tracker_payload = TrackerPayload(
         source=Entity(id="1"),
     )
@@ -56,10 +49,7 @@ def test_user_agent_string():
 
 def test_fail_user_agent_string():
     # Setup
-    session = Session(
-        id="1",
-        metadata=SessionMetadata()
-    )
+    session = FlatSession.new(id="1")
     tracker_payload = TrackerPayload(
         source=Entity(id="1"),
     )
@@ -89,10 +79,7 @@ def test_fail_user_agent_string():
 
 def test_user_agent_string_bot():
     # Setup
-    session = Session(
-        id="1",
-        metadata=SessionMetadata()
-    )
+
     tracker_payload = TrackerPayload(
         source=Entity(id="1"),
         request={

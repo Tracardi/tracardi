@@ -40,7 +40,7 @@ async def load_session(session_id: str,
     return session
 
 
-async def save_session(sessions: Union[Session, List[Session], Set[Session]],
+async def save_session(flat_sessions: Union[FlatSession, List[FlatSession], Set[FlatSession]],
                        context: Optional[Context] = None,
                        refresh: bool = False,
                        cache: bool = True
@@ -48,9 +48,9 @@ async def save_session(sessions: Union[Session, List[Session], Set[Session]],
     if context is None:
         context = get_context()
 
-    await bd_session_adapter.save_session_to_db(sessions)
+    await bd_session_adapter.save_session_to_db(flat_sessions)
     if refresh:
         await bd_session_adapter.refresh_session_db()
 
     if cache:
-        save_session_cache(sessions, context)
+        save_session_cache(flat_sessions, context)

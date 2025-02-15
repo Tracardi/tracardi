@@ -6,6 +6,7 @@ from tracardi.domain.event_to_profile import EventToProfile
 from tracardi.domain.field_change import FieldChange
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.geo import Geo
 from tracardi.domain.session import Session
 from tracardi.common.exception.exception_service import get_traceback
@@ -99,7 +100,7 @@ async def _check_mapping_condition_if_met(if_statement, dot: DotAccessor):
 async def _custom_event_to_profile_mapping(custom_mapping_schemas,
                                            flat_profile: FlatProfile,
                                            flat_event: FlatEvent,
-                                           session: Session) -> AsyncGenerator[FieldChange, None]:
+                                           flat_session: FlatSession) -> AsyncGenerator[FieldChange, None]:
     if custom_mapping_schemas is not None and len(custom_mapping_schemas) > 0:
         print(1, flat_event['properties'])
         event_create_timestamp = flat_event.metadata_time.create.timestamp()
@@ -111,7 +112,7 @@ async def _custom_event_to_profile_mapping(custom_mapping_schemas,
                 try:
                     dot = DotAccessor(event=flat_event,
                                       profile=flat_profile,
-                                      session=session)
+                                      session=flat_session)
                     result = await _check_mapping_condition_if_met(if_statement, dot)
                     if result is False:
                         continue
@@ -326,7 +327,7 @@ async def map_event_to_profile(
         custom_mapping_schemas: List[EventToProfile],
         flat_event: FlatEvent,
         flat_profile: FlatProfile,
-        session: Session,
+        flat_session: FlatSession,
 ) -> AsyncGenerator[FieldChange, None]:
     # Default event types mappings
 
@@ -346,7 +347,7 @@ async def map_event_to_profile(
             custom_mapping_schemas,
             flat_profile,
             flat_event,
-            session):
+            flat_session):
         yield item
 
     for item in _computed_event_props_to_profile(flat_profile, flat_event):

@@ -8,7 +8,6 @@ from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from tracardi.domain.time import Time
 from tracardi.service.tracking.session_loading import load_or_create_session_1
 
