@@ -8,7 +8,6 @@ from tracardi.domain.destination_work_package import DestinationWorkPackage
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_session import FlatSession
-from tracardi.domain.session import Session
 from tracardi.common.exception.exception_service import get_traceback
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.process_engine.destination.destination_interface import DestinationInterface
@@ -23,9 +22,9 @@ logger = get_logger(__name__)
 
 async def yield_event_destination_work_package(flat_events: List[FlatEvent],
                                                flat_profile: Optional[FlatProfile] = None,
-                                               session: Optional[Session] = None,
+                                               flat_session: Optional[FlatSession] = None,
                                                ) -> AsyncGenerator[Tuple[FlatEvent, DestinationWorkPackage], None]:
-    dot = DotAccessor(flat_profile, session)
+    dot = DotAccessor(flat_profile, flat_session)
     for flat_event in flat_events:
 
         try:

@@ -8,7 +8,6 @@ from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.geo import Geo
-from tracardi.domain.session import Session
 from tracardi.common.exception.exception_service import get_traceback
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.process_engine.tql.condition import Condition

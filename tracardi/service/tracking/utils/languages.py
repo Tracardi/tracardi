@@ -1,7 +1,6 @@
 from typing import Optional, Tuple
 
 from tracardi.domain.flat_session import FlatSession
-from tracardi.domain.session import Session
 from tracardi.common.db.languages import language_codes_dict
 from tracardi.common.tools.parser import parse_accept_language
 

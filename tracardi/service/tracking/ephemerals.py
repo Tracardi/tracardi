@@ -3,7 +3,6 @@ from tracardi.common.logging.log_handler import get_logger
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.flat_session import FlatSession
-from tracardi.domain.session import Session
 
 logger = get_logger(__name__)
 

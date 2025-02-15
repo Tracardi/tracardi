@@ -4,7 +4,6 @@ from tracardi.config import tracardi
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
 from tracardi.domain.flat_session import FlatSession
-from tracardi.domain.session import Session
 from tracardi.service.destination.dispatchers import profile_destination_dispatch, event_destination_dispatch
 
 
