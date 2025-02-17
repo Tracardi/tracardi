@@ -44,7 +44,7 @@ def append(base, key, value, strategy: MergingStrategy):
             base[key] = list(base[key])
 
         if isinstance(base[key], list):
-            base[key] = yield_valid_values(base[key])
+            base[key] = list(yield_valid_values(base[key]))
 
     if type(value) in [set, tuple]:
         value = list(value)
