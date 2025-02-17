@@ -1,6 +1,7 @@
 import json
 from json import JSONDecodeError
 
+from tracardi.domain.session import Session
 from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.service.collector.load.profile import load_profile
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -52,15 +53,16 @@ class StartAction(ActionRunner):
         # Replace session
 
         if self.config.session_id:
-            session = await bd_session_adapter.load_session_from_db(self.config.session_id)
-            if not session:
+            flat_session = await bd_session_adapter.load_flat_session_from_db(self.config.session_id)
+            if not flat_session:
                 raise ValueError(f"Can not load session with id {self.config.session_id}")
             # replace session in event
             event.session = EventSession(
-                id=session.id,
-                start=session.metadata.time.insert,
-                duration=session.metadata.time.duration
+                id=flat_session.id,
+                start=flat_session['metadata.time.insert'],
+                duration=flat_session['metadata.time.duration']
             )
+            session = Session(**flat_session)
 
         # Replace profile
 

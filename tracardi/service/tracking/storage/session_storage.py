@@ -4,7 +4,6 @@ from tracardi.domain.flat_session import FlatSession
 from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.service.tracking.cache.session_cache import load_session_cache, save_session_cache
 from tracardi.context import Context, get_context
-from tracardi.domain.session import Session
 
 
 async def load_flat_session(session_id: str,
@@ -25,7 +24,7 @@ async def load_flat_session(session_id: str,
 
 async def load_session(session_id: str,
                        context: Optional[Context] = None
-                       ) -> Optional[Session]:
+                       ) -> Optional[FlatSession]:
     if context is None:
         context = get_context()
 
@@ -33,11 +32,11 @@ async def load_session(session_id: str,
     if cached_session is not None:
         return cached_session
 
-    session = await bd_session_adapter.load_session_from_db(session_id)
-    if session:
-        save_session_cache(session, context)
+    flat_session = await bd_session_adapter.load_flat_session_from_db(session_id)
+    if flat_session:
+        save_session_cache(flat_session, context)
 
-    return session
+    return flat_session
 
 
 async def save_session(flat_sessions: Union[FlatSession, List[FlatSession], Set[FlatSession]],

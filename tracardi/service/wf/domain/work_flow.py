@@ -1,6 +1,8 @@
 from time import time
 
 from tracardi.common.logging.log_handler import get_logger
+from tracardi.domain.profile import Profile
+from tracardi.domain.session import Session
 from tracardi.service.wf.domain.entity import Entity as WfEntity
 from tracardi.domain.event import Event
 from tracardi.domain.flow import Flow
@@ -75,7 +77,7 @@ class WorkFlow:
 
         return FlowInvokeResult(debug_info, log_list, flow, event, profile, session)
 
-    async def invoke(self, flow: Flow, event: Event, profile, session, ux: list, debug) -> FlowInvokeResult:
+    async def invoke(self, flow: Flow, event: Event, profile: Profile, session: Session, ux: list, debug) -> FlowInvokeResult:
 
         """
         Invokes workflow and returns DebugInfo and list of saved Logs.

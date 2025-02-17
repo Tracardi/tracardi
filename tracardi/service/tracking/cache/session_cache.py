@@ -5,7 +5,6 @@ from tracardi.config import tracardi
 from tracardi.context import Context
 from tracardi.domain import ExtraInfo
 from tracardi.domain.flat_session import FlatSession
-from tracardi.domain.session import Session
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.storage.redis.collections import Collection
 from tracardi.service.tracking.cache.cache_helper import _has_cache, _delete_cache, _set_cache, _get_cache
@@ -18,7 +17,7 @@ def get_session_key_namespace(session_id: str, context: Context) -> str:
     return f"{Collection.session}{context.context_abrv()}:{get_cache_prefix(session_id[0:2])}:"
 
 
-def load_session_cache(session_id: str, context: Context):
+def load_session_cache(session_id: str, context: Context) -> Optional[FlatSession]:
     if tracardi.keep_session_in_cache_for == 0:
         return None
 
@@ -31,7 +30,7 @@ def load_session_cache(session_id: str, context: Context):
         session_id,
         key_namespace)
 
-    session = Session(**session)
+    session = FlatSession(session)
     if session_metadata:
         session.set_meta_data(RecordMetadata(**session_metadata))
 
