@@ -163,6 +163,9 @@ class FlatEntity(DotDict):
             self._changes = None
         return self
 
+    def get_dotted_properties(self):
+        return self.flat()
+
     def __getstate__(self):
         # Here, you should retrieve the state, not set it.
         state = {

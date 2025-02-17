@@ -15,7 +15,6 @@ from tracardi.service.tracking.locking import Lock, async_mutex
 from tracardi.domain.event import flat_events_to_event
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from tracardi.service.wf.domain.tracker_result import TrackerResult
 from tracardi.domain import ExtraInfo
 from tracardi.domain.named_entity import NamedEntity
@@ -243,19 +242,19 @@ async def _run_workflows(tracker_payload: TrackerPayload, profile: Profile, flat
 
 
 async def _trigger_workflows(profile: Profile,
-                             session: Session,
+                             flat_session: FlatSession,
                              events: List[Event],
                              tracker_payload: TrackerPayload,
                              debug: bool) -> Tuple[
-    Profile, Session, List[Event], Optional[list], Optional[dict], Dict[str, List], bool]:
+    Profile, FlatSession, List[Event], Optional[list], Optional[dict], Dict[str, List], bool]:
     # Checks rules and trigger workflows for given events
 
-    tracker_result = await _run_workflows(tracker_payload, profile, session, events, debug)
+    tracker_result = await _run_workflows(tracker_payload, profile, flat_session, events, debug)
 
     # Reassign results
 
     profile = tracker_result.profile
-    session = tracker_result.session
+    flat_session = tracker_result.flat_session
     events = tracker_result.events
     ux = tracker_result.ux
     response = tracker_result.response
@@ -264,14 +263,14 @@ async def _trigger_workflows(profile: Profile,
 
     if is_wf_triggered:
         # Add new fields to field mapping. New fields can be created in workflow.
-        add_new_field_mappings(profile, session)
+        add_new_field_mappings(profile, flat_session)
 
-    return profile, session, events, ux, response, tracker_result.changed_field_timestamps, is_wf_triggered
+    return profile, flat_session, events, ux, response, tracker_result.changed_field_timestamps, is_wf_triggered
 
 
-async def _exec_workflow(profile_id: Optional[str], session: Session, events: List[Event],
+async def _exec_workflow(profile_id: Optional[str], flat_session: FlatSession, events: List[Event],
                          tracker_payload: TrackerPayload) -> Tuple[
-    Profile, Session, List[Event], Optional[list], Optional[dict], Dict[str, list], bool]:
+    Profile, FlatSession, List[Event], Optional[list], Optional[dict], Dict[str, list], bool]:
     # Loads profile form cache
     # Profile needs to be loaded from cache. It may have changed during it was dispatched by event trigger
 
@@ -281,10 +280,10 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
 
     # Triggers workflow
 
-    profile, session, events, ux, response, changed_fields, is_wf_triggered = await (
+    profile, flat_session, events, ux, response, changed_fields, is_wf_triggered = await (
         # Triggers all workflows for given events
         _trigger_workflows(profile,
-                           session,
+                           flat_session,
                            events,
                            tracker_payload,
                            debug=False)
@@ -308,33 +307,32 @@ async def _exec_workflow(profile_id: Optional[str], session: Session, events: Li
             # Synchronous save
             await save_profile_in_db_and_cache(profile)
 
-        if session and session.is_updated_in_workflow():
-            logger.debug(f"Session {session.id} needs update after workflow.")
+        if flat_session and flat_session.is_updated_in_workflow():
+            logger.debug(f"Session {flat_session.id} needs update after workflow.")
 
             # Profile is in mutex, that means no session for the profile should be modified.
             # No session loading from cache necessary; Save it in db and cache
             # Synchronous save
-            await bd_session_adapter.save_session_to_db_and_cache(session)
+            await bd_session_adapter.save_session_to_db_and_cache(flat_session)
 
-    return profile, session, events, ux, response, changed_fields, is_wf_triggered
+    return profile, flat_session, events, ux, response, changed_fields, is_wf_triggered
 
 
 async def exec_workflow(profile_id: Optional[str], flat_session: FlatSession, flat_events: List[FlatEvent],
                         tracker_payload: TrackerPayload) -> Optional[Tuple[
-    Profile, Session, List[Event], Optional[list], Optional[dict], Dict[str, list], bool]]:
+    Profile, FlatSession, List[Event], Optional[list], Optional[dict], Dict[str, list], bool]]:
 
     if not tracardi.enable_workflow:
         return None
 
     # Convert to events. Workflow needs Events
-    # TODO EOFE - End of FlatEvent, FlatSession
+    # TODO EOFE - End of FlatEvent
     events = flat_events_to_event(flat_events)
-    session = Session(**flat_session)
 
     if profile_id is None:
         # Profile less execution
         return await _exec_workflow(
-            profile_id, session, events, tracker_payload
+            profile_id, flat_session, events, tracker_payload
         )
 
     profile_key = Lock.get_key(Collection.lock_tracker, "profile", profile_id)
@@ -343,10 +341,10 @@ async def exec_workflow(profile_id: Optional[str], flat_session: FlatSession, fl
     # Load profile - it could be changed since last loaded
     async with async_mutex(profile_lock, name='workflow-worker'):
         profile, session, events, ux, response, changed_fields, is_wf_triggered = await _exec_workflow(
-            profile_id, session, events, tracker_payload
+            profile_id, flat_session, events, tracker_payload
         )
 
-    return profile, session, events, ux, response, changed_fields, is_wf_triggered
+    return profile, flat_session, events, ux, response, changed_fields, is_wf_triggered
 
 
 async def exec_workflow_in_queue(context: TransportContext,
@@ -354,6 +352,6 @@ async def exec_workflow_in_queue(context: TransportContext,
                                  flat_session: FlatSession,
                                  flat_events: List[FlatEvent],
                                  tracker_payload: TrackerPayload) -> Optional[Tuple[
-    Profile, Session, List[Event], Optional[list], Optional[dict], Dict[str, list], bool]]:
+    Profile, FlatSession, List[Event], Optional[list], Optional[dict], Dict[str, list], bool]]:
     with ServerContext(Context(**context.as_context())) as c:
         return await exec_workflow(profile_id, flat_session, flat_events, tracker_payload)

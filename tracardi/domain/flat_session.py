@@ -16,6 +16,7 @@ class FlatSession(FlatEntity):
     def __init__(self, dictionary):
         super().__init__(dictionary)
         self._is_frozen = False  # Internal flag to manage mutability
+        self._updated_in_workflow = False
 
     def freeze(self):
         self._is_frozen = True
@@ -101,18 +102,27 @@ class FlatSession(FlatEntity):
         except Exception:
             return None
 
-
     def replace(self, session: 'FlatSession'):
         if isinstance(session, FlatSession):
             self.unfreeze()
-            self['id'] = session['id']
-            self['metadata'] = session['metadata']
-            self['operation'] = session['operation']
-            self['profile'] = session['profile']
-            self['context'] = session['context']
-            self['properties'] = session['properties']
-            self['aux'] = session['aux']
-            self['device'] = session['device']
-            self['os'] = session['os']
-            self['app'] = session['app']
+            self.map(session) << {
+                'id',
+                'metadata',
+                'operation',
+                'profile',
+                'context',
+                'properties',
+                'aux',
+                'device',
+                'os',
+                'app',
+            }
             self.freeze()
+
+
+    def set_updated_in_workflow(self, state=True):
+        self._updated_in_workflow = state
+
+
+    def is_updated_in_workflow(self) -> bool:
+        return self._updated_in_workflow

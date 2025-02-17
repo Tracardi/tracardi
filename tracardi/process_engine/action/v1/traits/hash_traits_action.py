@@ -1,9 +1,6 @@
 import hashlib
 import json
 from typing import List
-from tracardi.domain.event import Event
-from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
@@ -64,8 +61,7 @@ class HashTraitsAction(ActionRunner):
             self.profile.replace(profile)
 
         if dot.session:
-            session = self.dot_to_session(dot)
-            self.session.replace(session)
+            self.session.replace(dot.session)
 
         event = self.dot_to_event(dot)
         self.event.replace(event)

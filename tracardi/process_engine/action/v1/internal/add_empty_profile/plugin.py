@@ -1,10 +1,10 @@
 from tracardi.common.time.date import now_in_utc
 from uuid import uuid4
-from tracardi.domain.entity import PrimaryEntity
 from tracardi.domain.event_session import EventSession
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.metadata import ProfileMetadata
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session, SessionMetadata, SessionTime
+from tracardi.domain.session import SessionTime
 from tracardi.domain.time import ProfileTime, ProfileVisit
 from tracardi.domain.value_object.operation import Operation
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -55,32 +55,32 @@ class AddEmptyProfileAction(ActionRunner):
 
         # Create session
 
-        session = Session(
+        flat_session = FlatSession.new(
             id=str(uuid4()),
-            profile=PrimaryEntity(id=profile.id),
-            metadata=SessionMetadata(time=SessionTime()),
-            operation=Operation(new=True, update=True)
-        )
+            profile_id=profile.id
+        ) << [
+            ('metadata.time', SessionTime().model_dump())
+        ]
 
         # todo set session in tracker payload
 
         if self.session is not None:
             self.console.warning(
-                f"Old session {self.session.id} was replaced by new session {session.id}. "
+                f"Old session {self.session.id} was replaced by new session {flat_session.id}. "
                 f"Replacing session is not a good practice if you already have a session.")
 
-        self.session = session
+        self.session = flat_session
 
         self.event.session = EventSession(
-            id=session.id,
-            start=session.metadata.time.insert,
-            duration=session.metadata.time.duration
+            id=flat_session.id,
+            start=flat_session['metadata.time.insert'],
+            duration=flat_session.get('metadata.time.duration', 0)
         )
 
-        self.execution_graph.set_sessions(session)
+        self.execution_graph.set_sessions(flat_session)
 
         if self.tracker_payload.session:
-            self.tracker_payload.session.id = session.id
+            self.tracker_payload.session.id = flat_session.id
 
         self.tracker_payload.options.update({"saveSession": True})
 

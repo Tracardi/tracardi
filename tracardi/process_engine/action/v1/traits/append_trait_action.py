@@ -6,9 +6,6 @@ from pydantic_core.core_schema import ValidationInfo
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-
-from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
@@ -92,7 +89,7 @@ class AppendTraitAction(ActionRunner):
 
         if 'id' in dot.session:
             try:
-                session = self.dot_to_session(dot)
+                session = dot.session
             except ValidationError as e:
                 self.console.error(f"Session could not be updated. Some values where set incorrectly. "
                                    f"Please see the error {str(e)}")

@@ -16,7 +16,6 @@ from tracardi.domain.event_session import EventSession
 from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from tracardi.process_engine.tql.condition import Condition
 from tracardi.service.plugin.runner import ActionRunner
 from tracardi.service.plugin.domain.console import Log, ConsoleStatus
@@ -216,7 +215,7 @@ class GraphInvoker(BaseModel):
                     ) if flat_session is not None else None
 
     async def run_node(self, node: Node, payload, ready_upstream_results: ActionsResults) -> AsyncIterable[Tuple[
-        Result, float, Optional[Profile], Optional[Session], ConsoleStatus, InputEdges]]:
+        Result, float, Optional[Profile], Optional[FlatSession], ConsoleStatus, InputEdges]]:
 
         task_start_time = time()
 
@@ -348,7 +347,7 @@ class GraphInvoker(BaseModel):
                     _current_profile_reference = None
 
                 if not isinstance(_current_session_reference,
-                                  Session) or _current_session_reference is _prev_session_reference:
+                                  FlatSession) or _current_session_reference is _prev_session_reference:
                     _current_session_reference = None
 
             except BaseException as e:

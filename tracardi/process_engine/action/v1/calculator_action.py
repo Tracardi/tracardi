@@ -1,7 +1,5 @@
 from pydantic import field_validator
 from tracardi.service.plugin.domain.config import PluginConfig
-from tracardi.domain.session import Session
-from tracardi.domain.profile import Profile
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
     FormField, FormComponent
 from tracardi.service.plugin.domain.result import Result
@@ -43,8 +41,7 @@ class CalculatorAction(ActionRunner):
             self.profile.replace(profile)
 
         if 'id' in dot.session:
-            session = self.dot_to_session(dot)
-            self.session.replace(session)
+            self.session.replace(dot.session)
 
         return Result(port="payload", value={
             "result": results[-1],

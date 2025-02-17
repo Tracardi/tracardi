@@ -1,8 +1,8 @@
 from uuid import uuid4
-from tracardi.domain.entity import PrimaryEntity
 from tracardi.domain.event_session import EventSession
-from tracardi.domain.session import Session, SessionMetadata
-from tracardi.domain.value_object.operation import Operation
+from tracardi.domain.flat_session import FlatSession
+from tracardi.domain.session import SessionMetadata
+
 from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
@@ -13,17 +13,14 @@ class AddEmptySessionAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None) -> Result:
 
-        session = Session(
-                id=str(uuid4()),
-                profile=PrimaryEntity(id=self.profile.id) if self.profile is not None else None,
-                metadata=SessionMetadata(),
-                operation=Operation(update=True)
-            )
+        session = FlatSession.new(id=str(uuid4()), profile_id=self.profile.id if self.profile is not None else None) << [
+            ('metadata', SessionMetadata().model_dump())
+        ]
         self.session = session
         self.event.session = EventSession(
                 id=session.id,
-                start=session.metadata.time.insert,
-                duration=session.metadata.time.duration
+                start=session['metadata.time.insert'],
+                duration=session['metadata.time.duration']
             )
 
         self.execution_graph.set_sessions(session)

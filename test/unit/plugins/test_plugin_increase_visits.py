@@ -4,7 +4,6 @@ from tracardi.domain.event_session import EventSession
 from tracardi.domain.event_metadata import EventMetadata
 from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.time import EventTime
-from tracardi.domain.session import Session, SessionMetadata
 
 from tracardi.process_engine.action.v1.increase_visits_action import IncreaseVisitsAction
 from tracardi.domain.profile import Profile

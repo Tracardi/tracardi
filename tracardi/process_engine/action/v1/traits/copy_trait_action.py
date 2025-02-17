@@ -96,8 +96,7 @@ class CopyTraitAction(ActionRunner):
                                      "less so there is no profile.")
 
         if 'id' in dot.session:
-            session = self.dot_to_session(dot)
-            self.session.replace(session)
+            self.session.replace(dot.session)
 
         return Result(port="payload", value=payload)
 

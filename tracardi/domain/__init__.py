@@ -1,5 +1,4 @@
 __all__ = [
-    'session',
     'event',
     'profile',
     'resource',

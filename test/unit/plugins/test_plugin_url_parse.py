@@ -1,5 +1,4 @@
 from tracardi.domain.flat_session import FlatSession
-from tracardi.domain.session import Session, SessionMetadata
 from tracardi.process_engine.action.v1.strings.url_parser.plugin import ParseURLParameters
 from tracardi.service.plugin.service.plugin_runner import run_plugin
 
@@ -37,15 +36,12 @@ def test_plugin_url_parser_fail():
 
     payload = {}
 
-    session = Session(
-        id='1',
-        metadata=SessionMetadata(),
-        context={
+    session = FlatSession.new(id='1')
+    session['context']={
             'page': {
                 'no-key': "http://test.url/path/?param=1#hash"  # Incorrect key
             }
         }
-    )
 
     try:
         run_plugin(ParseURLParameters, init, payload, session=session)

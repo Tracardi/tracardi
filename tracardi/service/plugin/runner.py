@@ -3,9 +3,9 @@ from typing import Dict, final, Optional
 from pydantic import BaseModel
 
 from tracardi.domain.event import Event
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from tracardi.common.dot_notation.dot_accessor import DotAccessor
 from tracardi.service.plugin.domain.console import Console
 from tracardi.service.plugin.domain.result import Result
@@ -32,7 +32,7 @@ class ActionRunner:
     id = None
     debug = True
     event: Event = None
-    session = None
+    session: FlatSession = None
     profile: Optional[Profile] = None
     flow: BaseModel = None  # Flow
     flow_history = None
@@ -97,10 +97,6 @@ class ActionRunner:
         return Result(port=port, value={
             "message": message
         })
-
-    @staticmethod
-    def dot_to_session(dot: DotAccessor) -> Session:
-        return Session(**dot.session.to_dict())
 
     @staticmethod
     def dot_to_profile(dot: DotAccessor) -> Profile:

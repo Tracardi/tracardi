@@ -4,8 +4,6 @@ from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Form
     Documentation, PortDoc
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
-from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.config import PluginConfig
 
 
@@ -48,8 +46,7 @@ class DeleteTraitAction(ActionRunner):
             self.profile.replace(profile)
 
         if 'id' in dot.session:
-            session = self.dot_to_session(dot)
-            self.session.replace(session)
+            self.session.replace(dot.session)
 
         self.update_profile()
 

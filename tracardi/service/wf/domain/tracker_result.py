@@ -5,7 +5,6 @@ from tracardi.domain.flat_session import FlatSession
 from tracardi.process_engine.debugger import Debugger
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 
 

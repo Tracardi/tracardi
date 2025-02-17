@@ -1,6 +1,6 @@
 from tracardi.common.time.date import now_in_utc
+from tracardi.domain.flat_session import FlatSession
 
-from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc
 from tracardi.service.plugin.runner import ActionRunner
 
@@ -8,9 +8,9 @@ from tracardi.service.plugin.runner import ActionRunner
 class UpdateSessionAction(ActionRunner):
 
     async def run(self, payload: dict, in_edge=None):
-        if isinstance(self.session, Session):
+        if isinstance(self.session, FlatSession):
             self.session.set_updated_in_workflow()
-            self.session.metadata.time.update = now_in_utc()
+            self.session['metadata.time.update'] = now_in_utc()
         return None
 
 

@@ -1,10 +1,10 @@
 from collections import defaultdict
-from typing import List, Set, Optional
+from typing import List, Set, Optional, Union
 
 from tracardi.config import tracardi
-from tracardi.domain.entity import Entity
+from tracardi.domain.entity import Entity, FlatEntity
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from tracardi.service.adapter.cache_adaper_selector import mcache_adapter
 from tracardi.common.singleton import Singleton
 from tracardi.service.storage.redis.collections import Collection
@@ -34,7 +34,7 @@ class FieldMapper(metaclass=Singleton):
             return {item.decode() for item in _mcache.smembers(redis_collections[type])}
         return set()
 
-    def add_field_mappings(self, type, entities: List[Entity]) -> bool:
+    def add_field_mappings(self, type, entities: List[Union[Entity, FlatEntity]]) -> bool:
         new_props = set()
         for entity in entities:
             self.i += 1
@@ -61,11 +61,11 @@ class FieldMapper(metaclass=Singleton):
                 _mcache.sadd(redis_collections[type], *list(field_maps))
 
 
-def add_new_field_mappings(profile: Optional[Profile], session: Optional[Session]):
+def add_new_field_mappings(profile: Optional[Profile], flat_session: Optional[FlatSession]):
     # Add mappings
     if tracardi.expose_gui_api is True:
         if profile:
             FieldMapper().add_field_mappings('profile', [profile])
 
-        if session:
-            FieldMapper().add_field_mappings('session', [session])
+        if flat_session:
+            FieldMapper().add_field_mappings('session', [flat_session])

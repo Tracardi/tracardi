@@ -1,7 +1,6 @@
 import json
 from json import JSONDecodeError
 
-from tracardi.domain.session import Session
 from tracardi.service.dependency.adapters.big_data_adapter import *
 from tracardi.service.collector.load.profile import load_profile
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -33,7 +32,7 @@ class StartAction(ActionRunner):
         properties = {}
         event = self.event
         # Session can be None
-        session = self.session
+        flat_session = self.session
         profile = self.profile
         source = self.tracker_payload.source
 
@@ -62,7 +61,6 @@ class StartAction(ActionRunner):
                 start=flat_session['metadata.time.insert'],
                 duration=flat_session['metadata.time.duration']
             )
-            session = Session(**flat_session)
 
         # Replace profile
 
@@ -89,13 +87,17 @@ class StartAction(ActionRunner):
                 event.properties = properties
             self.event.replace(event)
             self.event.source = source
-            self.event.session = session
+            self.event.session = EventSession(
+                id=flat_session.id,
+                start=flat_session['metadata.time.insert'],
+                duration=flat_session['metadata.time.duration']
+            )
             self.event.profile = profile
 
             # Remove session in all nodes because the event is session less
             graph = self.execution_graph  # type: GraphInvoker
             if isinstance(graph, GraphInvoker):
-                graph.set_sessions(session)
+                graph.set_sessions(flat_session)
 
             # Remove profiles in all nodes because the event is profile less
             graph = self.execution_graph  # type: GraphInvoker

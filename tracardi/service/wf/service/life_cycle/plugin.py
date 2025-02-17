@@ -6,7 +6,6 @@ from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.flow import Flow
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from tracardi.service.plugin.domain.console import Console
 from tracardi.service.plugin.domain.result import Result
 from tracardi.service.plugin.runner import ActionRunner
