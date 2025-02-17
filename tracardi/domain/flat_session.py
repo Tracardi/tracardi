@@ -64,7 +64,10 @@ class FlatSession(FlatEntity):
         self.set('operation.update', flag)
 
     @staticmethod
-    def from_es_storage_record(record: StorageRecord) -> 'FlatSession':
+    def from_es_storage_record(record: StorageRecord) -> Optional['FlatSession']:
+        if record is None:
+            return None
+
         fs = FlatSession(dict(record))
         fs.set_new(False)
         fs.set_updated(False)
