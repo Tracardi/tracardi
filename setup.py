@@ -77,7 +77,7 @@ setup(
         'speedict==0.3.12',
         'boto3==1.34.41',
         'dotdict_parser>=0.7.2',
-        'durable-dot-dict>=0.0.3',
+        'durable-dot-dict>=0.0.4',
         # Worker requirements
         'mysql-connector-python==8.4.0',
         'requests>=2.0.0,<3',
