@@ -13,6 +13,7 @@ from tracardi.common.logging.log_handler import get_logger
 
 from tracardi.domain.event import Event
 from tracardi.domain.event_session import EventSession
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
@@ -200,19 +201,19 @@ class GraphInvoker(BaseModel):
                 if node.object.event:
                     node.object.event.profile = profile
 
-    def set_sessions(self, session):
+    def set_sessions(self, flat_session: FlatSession):
         """
         Sets reference to session as None
         """
         for node in self.graph:
             if not isinstance(node.object, DagExecError):
-                node.object.session = session
+                node.object.session = flat_session
                 if node.object.event:
                     node.object.event.session = EventSession(
-                        id=session.id,
-                        start=session.metadata.time.insert,
-                        duration=session.metadata.time.duration
-                    ) if session is not None else None
+                        id=flat_session.id,
+                        start=flat_session.get_or_none('metadata.time.insert'),
+                        duration=flat_session.get_or_none('metadata.time.duration')
+                    ) if flat_session is not None else None
 
     async def run_node(self, node: Node, payload, ready_upstream_results: ActionsResults) -> AsyncIterable[Tuple[
         Result, float, Optional[Profile], Optional[Session], ConsoleStatus, InputEdges]]:
@@ -457,7 +458,7 @@ class GraphInvoker(BaseModel):
             task_results.add(edge.id, result_copy)
         return task_results
 
-    async def init(self, debug_info: DebugInfo, log_list: List[Log], flow, flow_history, event, session, profile,
+    async def init(self, debug_info: DebugInfo, log_list: List[Log], flow, flow_history, event, flat_session: FlatSession, profile,
                    tracker_payload: TrackerPayload,
                    ux: list):
 
@@ -478,7 +479,7 @@ class GraphInvoker(BaseModel):
                 node.object = life_cycle.plugin.set_context(
                     node,
                     event,
-                    session,
+                    flat_session,
                     profile,
                     flow,
                     flow_history,
@@ -547,10 +548,10 @@ class GraphInvoker(BaseModel):
                   payload: dict,
                   event: Event,
                   profile: Profile,
-                  session: Session,
+                  flat_session: FlatSession,
                   debug_info: DebugInfo,
                   log_list: List[Log],
-                  ) -> Tuple[DebugInfo, List[Log], Profile, Session, Event]:
+                  ) -> Optional[Tuple[DebugInfo, List[Log], Profile, FlatSession, Event]]:
 
         actions_results = ActionsResults()
         flow_start_time = debug_info.timestamp
@@ -599,7 +600,7 @@ class GraphInvoker(BaseModel):
                         profile = _profile_reference_to_update
 
                     if _session_reference_to_update:
-                        session = _session_reference_to_update
+                        flat_session = _session_reference_to_update
 
                     executed_node = input_edges.has_active_edges() | executed_node
 
@@ -758,12 +759,12 @@ class GraphInvoker(BaseModel):
         # Sum up all process WF times
         event.metadata.time.process_time = event.metadata.time.process_time + (time() - flow_start_time)
 
-        return debug_info, log_list, profile, session, event
+        return debug_info, log_list, profile, flat_session, event
 
     def serialize(self):
         return self.model_dump()
 
-    def get_node_by_id(self, node_id) -> Node:
+    def get_node_by_id(self, node_id) -> Optional[Node]:
         for node in self.graph:
             if node.id == node_id:
                 return node

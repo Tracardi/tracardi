@@ -1,8 +1,8 @@
 from typing import Optional, List
 
 from tracardi.domain.event import Event
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.service.plugin.domain.console import Log
 from tracardi.service.wf.domain.debug_info import DebugInfo
@@ -15,7 +15,7 @@ class FlowInvokeResult:
 
     def __init__(self, debug_info: DebugInfo, log_list: List[Log], flow: FlowGraph, event: Event,
                  profile: Optional[Profile] = None,
-                 session: Optional[Session] = None):
+                 session: Optional[FlatSession] = None):
         self.debug_info = debug_info
         self.log_list: List[Log] = log_list
         self.event = event

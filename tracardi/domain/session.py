@@ -192,7 +192,3 @@ class Session(Entity):
 
         return session
 
-
-class FrozenSession(Session):
-    class Config:
-        frozen = True

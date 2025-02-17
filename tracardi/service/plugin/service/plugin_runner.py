@@ -2,12 +2,14 @@ import asyncio
 from typing import Type
 from uuid import uuid4
 
+from tracardi.common.tools.getters import get_entity_id, get_entity
+from tracardi.domain.entity import Entity
 from tracardi.domain.event import Event
 from tracardi.domain.event_source import EventSource
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.named_entity import NamedEntity
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from ..domain.result import Result
 from ..runner import ActionRunner
 from ..domain.console import Console
@@ -15,9 +17,9 @@ from tracardi.service.wf.domain.graph_invoker import GraphInvoker
 
 
 class PluginTestResult:
-    def __init__(self, output, profile=None, session=None, event=None, console=None, flow=None):
+    def __init__(self, output, profile=None, session:FlatSession=None, event=None, console=None, flow=None):
         self.event: Event = event
-        self.session: Session = session
+        self.session: FlatSession = session
         self.profile: Profile = profile
         self.output: Result = output
         self.console = console
@@ -28,7 +30,7 @@ class PluginTestResult:
                f"\nconsole=`{self.console}`"
 
 
-def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=None, event=None, flow=None,
+def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session: FlatSession=None, event=None, flow=None,
                node=None, in_edge=None) -> PluginTestResult:
     async def main(plugin, init, payload):
         try:
@@ -53,7 +55,7 @@ def run_plugin(plugin: Type[ActionRunner], init, payload, profile=None, session=
                     description="This resource is created for test purposes.",
                     tags=['test']
                 ),
-                session=session
+                session=get_entity(session)
             )
             plugin.execution_graph = GraphInvoker(graph=[], start_nodes=[])
 

@@ -4,11 +4,15 @@ from tracardi.domain.entity import Entity, PrimaryEntity, FlatEntity
 
 
 def get_entity_id(entity: Union[Optional[Entity],Optional[FlatEntity]]) -> Optional[str]:
-    return entity.id if isinstance(entity, (Entity, FlatEntity)) else None
+    if isinstance(entity, (Entity, FlatEntity)):
+        return entity.id
+    if isinstance(entity, dict):
+        return entity.get("id", None)
+    return None
 
 
-def get_entity(entity: Optional[Entity]) -> Optional[Entity]:
-    return Entity(id=entity.id) if isinstance(entity, Entity) else None
+def get_entity(entity: Union[Optional[Entity],Optional[FlatEntity]]) -> Optional[Entity]:
+    return Entity(id=entity.id) if isinstance(entity, (Entity, FlatEntity)) else None
 
 
 def get_primary_entity(entity: Optional[PrimaryEntity]) -> Optional[PrimaryEntity]:

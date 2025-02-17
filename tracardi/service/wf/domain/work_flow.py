@@ -1,8 +1,8 @@
 from time import time
 
 from tracardi.common.logging.log_handler import get_logger
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.profile import Profile
-from tracardi.domain.session import Session
 from tracardi.service.wf.domain.entity import Entity as WfEntity
 from tracardi.domain.event import Event
 from tracardi.domain.flow import Flow
@@ -42,7 +42,7 @@ class WorkFlow:
             logger.error(message)
             raise DagGraphError(message)
 
-    async def _run(self, exec_dag: GraphInvoker, flow: Flow, event: Event, profile, session, ux: list) -> FlowInvokeResult:
+    async def _run(self, exec_dag: GraphInvoker, flow: Flow, event: Event, profile: Profile, flat_session: FlatSession, ux: list) -> FlowInvokeResult:
         flow_start_time = time()
         debug_info = DebugInfo(
             timestamp=flow_start_time,
@@ -58,7 +58,7 @@ class WorkFlow:
             flow,
             self.flow_history,
             event,
-            session,
+            flat_session,
             profile,
             self.tracker_payload,
             ux)
@@ -68,16 +68,16 @@ class WorkFlow:
                 payload={},
                 event=event,
                 profile=profile,
-                session=session,
+                flat_session=flat_session,
                 debug_info=debug_info,
                 log_list=log_list
             )
 
         await exec_dag.close()
 
-        return FlowInvokeResult(debug_info, log_list, flow, event, profile, session)
+        return FlowInvokeResult(debug_info, log_list, flow, event, profile, flat_session)
 
-    async def invoke(self, flow: Flow, event: Event, profile: Profile, session: Session, ux: list, debug) -> FlowInvokeResult:
+    async def invoke(self, flow: Flow, event: Event, profile: Profile, flat_session: FlatSession, ux: list, debug) -> FlowInvokeResult:
 
         """
         Invokes workflow and returns DebugInfo and list of saved Logs.
@@ -93,7 +93,7 @@ class WorkFlow:
 
         if self.flow_history.is_acyclic(flow.id):
             exec_dag = self._make_dag(flow, debug=debug)
-            result = await self._run(exec_dag, flow, event, profile, session, ux)
+            result = await self._run(exec_dag, flow, event, profile, flat_session, ux)
             return result
 
         raise RuntimeError("Workflow has circular reference.")

@@ -100,3 +100,19 @@ class FlatSession(FlatEntity):
             return ips[0]
         except Exception:
             return None
+
+
+    def replace(self, session: 'FlatSession'):
+        if isinstance(session, FlatSession):
+            self.unfreeze()
+            self['id'] = session['id']
+            self['metadata'] = session['metadata']
+            self['operation'] = session['operation']
+            self['profile'] = session['profile']
+            self['context'] = session['context']
+            self['properties'] = session['properties']
+            self['aux'] = session['aux']
+            self['device'] = session['device']
+            self['os'] = session['os']
+            self['app'] = session['app']
+            self.freeze()

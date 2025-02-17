@@ -1,9 +1,9 @@
 from tracardi.context import ServerContext, Context
 from tracardi.domain.entity import Entity
 from tracardi.domain.event_metadata import EventMetadata
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.profile import Profile
 from tracardi.domain.time import EventTime
-from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.event import Event
 from tracardi.domain.event_session import EventSession
 from tracardi.process_engine.action.v1.traits.mask_traits_action import MaskTraitsAction
@@ -27,10 +27,7 @@ def test_plugin_mask_traits():
             source=Entity(id='1'),
             properties={"prop1": 5}
         )
-        session = Session(
-            id='1',
-            metadata=SessionMetadata()
-        )
+        flat_session = FlatSession.new(id='1')
         result = run_plugin(
             MaskTraitsAction,
             {
@@ -38,7 +35,7 @@ def test_plugin_mask_traits():
             },
             payload=payload,
             event=event,
-            session=session,
+            session=flat_session,
             profile=profile,
             flow=Flow(id="1", name="flow1", lock=False, type="collection")
         )

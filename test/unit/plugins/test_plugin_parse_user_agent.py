@@ -1,4 +1,4 @@
-from tracardi.domain.session import Session, SessionMetadata
+from tracardi.domain.flat_session import FlatSession
 from tracardi.process_engine.action.v1.detect_client_agent_action import DetectClientAgentAction
 from tracardi.service.plugin.service.plugin_runner import run_plugin
 
@@ -9,10 +9,11 @@ def test_plugin_parse_user_agent():
     }
 
     payload = {}
-
-    result = run_plugin(DetectClientAgentAction, init, payload, session=Session(id="1", context={
+    session = FlatSession.new(id="1")
+    session['context']={
         "userAgent": "Mozilla/5.0 (iPad; U; CPU OS 3_2_1 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Mobile/7B405"
-    }, metadata=SessionMetadata()))
+    }
+    result = run_plugin(DetectClientAgentAction, init, payload, session=session)
 
     assert result.output.value['device']['model']['name'] == 'iPad'
     assert result.output.value['device']['model']['brand']['name'] == 'Apple'

@@ -2,6 +2,7 @@ import importlib
 from typing import Optional
 
 from tracardi.domain.event import Event
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.flow import Flow
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
@@ -31,7 +32,7 @@ async def create_instance(node: Node) -> ActionRunner:
 
 def set_context(node: Node,
                 event: Optional[Event],
-                session: Optional[Session],
+                flat_session: Optional[FlatSession],
                 profile: Optional[Profile],
                 flow: Optional[Flow],
                 flow_history,
@@ -49,7 +50,7 @@ def set_context(node: Node,
 
     node.object.debug = debug
     node.object.event = event
-    node.object.session = session
+    node.object.session = flat_session
     node.object.profile = profile
     node.object.flow = flow
     node.object.flow_history = flow_history

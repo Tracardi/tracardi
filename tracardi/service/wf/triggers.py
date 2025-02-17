@@ -120,7 +120,7 @@ async def _get_routing_rules(tracker_payload: TrackerPayload, events: List[Event
     return event_rules
 
 
-async def _get_rules_engine(tracker_payload: TrackerPayload, profile, session, events: List[Event]) -> Optional[
+async def _get_rules_engine(tracker_payload: TrackerPayload, profile: Profile, flat_session: FlatSession, events: List[Event]) -> Optional[
     RulesEngine]:
     # Get routing rules if workflow is not disabled
 
@@ -131,7 +131,7 @@ async def _get_rules_engine(tracker_payload: TrackerPayload, profile, session, e
     if event_trigger_rules is not None:
         # Skips INVALID events in invoke method
         return RulesEngine(
-            session,
+            flat_session,
             profile,
             events_rules=event_trigger_rules
         )
@@ -188,7 +188,7 @@ async def _merge(profile):
         )
 
 
-async def _run_workflows(tracker_payload: TrackerPayload, profile: Profile, session: Session, events: List[Event],
+async def _run_workflows(tracker_payload: TrackerPayload, profile: Profile, flat_session: FlatSession, events: List[Event],
                          debug: bool = False) -> TrackerResult:
     debugger = None
     wf_triggered = False
@@ -200,7 +200,7 @@ async def _run_workflows(tracker_payload: TrackerPayload, profile: Profile, sess
     # Workflow
 
     try:
-        rules_engine = await _get_rules_engine(tracker_payload, profile, session, events)
+        rules_engine = await _get_rules_engine(tracker_payload, profile, flat_session, events)
 
         #  If no event_rules for delivered event then no need to run rule invoke
         #  and no need for profile merging
@@ -219,8 +219,8 @@ async def _run_workflows(tracker_payload: TrackerPayload, profile: Profile, sess
                 if profile is not rules_engine.profile:  # Not equal
                     profile = rules_engine.profile
 
-                if session is not rules_engine.session:
-                    session = rules_engine.session
+                if flat_session is not rules_engine.flat_session:
+                    flat_session = rules_engine.flat_session
 
             await _merge(profile)
 
@@ -231,7 +231,7 @@ async def _run_workflows(tracker_payload: TrackerPayload, profile: Profile, sess
 
         return TrackerResult(
             wf_triggered=wf_triggered,
-            session=session,
+            flat_session=flat_session,
             profile=profile,
             events=events,
             tracker_payload=tracker_payload,

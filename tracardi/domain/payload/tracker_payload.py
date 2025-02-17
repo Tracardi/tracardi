@@ -22,7 +22,6 @@ from ..request import Request
 from ..event_metadata import EventPayloadMetadata
 from ..event_source import EventSource
 from ..payload.event_payload import EventPayload
-from ..session import Session
 from ..time import Time
 from ..entity import Entity, PrimaryEntity, DefaultEntity
 from tracardi.domain.flat_profile import FlatProfile
@@ -304,16 +303,6 @@ class TrackerPayload(BaseModel):
 
     def is_debugging_on(self) -> bool:
         return tracardi.track_debug and self.is_on('debugger', default=False)
-
-    def _copy_tracker_payload_session_metadata(self, session: Session) -> Session:
-        if self.session and isinstance(self.session, DefaultEntity) and self.session.metadata:
-            if self.session.metadata.insert:
-                session.metadata.time.insert = self.session.metadata.insert
-            if self.session.metadata.update:
-                session.metadata.time.update = self.session.metadata.update
-            if self.session.metadata.create:
-                session.metadata.time.create = self.session.metadata.create
-        return session
 
     def _fill_profile_metadata(self, profile):
         # Copy metadata to new profile

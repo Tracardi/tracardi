@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import patch, AsyncMock
 
+from tracardi.domain.flat_session import FlatSession
 from tracardi.service.wf.triggers import _run_workflows
 from tracardi.context import ServerContext, Context
 from tracardi.domain.entity import Entity, PrimaryEntity
@@ -11,7 +12,6 @@ from tracardi.domain.payload.event_payload import EventPayload
 from tracardi.domain.payload.tracker_payload import TrackerPayload
 from tracardi.domain.profile import Profile
 from tracardi.domain.rule import Rule
-from tracardi.domain.session import Session
 from tracardi.domain.time import Time, EventTime
 
 
@@ -19,7 +19,7 @@ from tracardi.domain.time import Time, EventTime
 async def test_workflow_trigger():
     with ServerContext(Context(production=False)):
         profile = Profile.new()
-        session = Session.new()
+        flat_session = FlatSession.new()
         source = Entity(id="@1")
         events = [Event(id="1", name="PageView", type="page-view", properties={},
                         metadata=EventMetadata(time=EventTime()),
@@ -27,7 +27,7 @@ async def test_workflow_trigger():
 
         tp = TrackerPayload(
             source=source,
-            session=Entity(id=session.id),
+            session=Entity(id=flat_session.id),
             metadata=EventPayloadMetadata(time=Time()),
             profile=PrimaryEntity(id=profile.id),
             context={},
@@ -43,5 +43,6 @@ async def test_workflow_trigger():
                        Rule(flow=NamedEntity(id="w1", name="wf1"), id='r1', name='rule1')
                    ]) as mock_load_rule:
             'tracardi.service.wf.workflow_manager_async.invoke'
-            await _run_workflows(tp, profile, session, events)
+            result = await _run_workflows(tp, profile, flat_session, events)
+            assert isinstance(result.flat_session, FlatSession)
             assert mock_load_rule.call_count == 1

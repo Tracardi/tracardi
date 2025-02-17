@@ -9,12 +9,150 @@ import tracardi.config
 from pydantic import BaseModel, field_validator, PrivateAttr
 
 from ..api_instance import ApiInstance
-from ..entity import Entity
-from ..event import Event
-from tracardi.domain.event_session import EventSession
-from ..session import Session
+from ..entity import Entity, DefaultEntity
 from ..time import Time
 from tracardi.common.tools.getters import get_entity_id
+from ...common.tools.string_manager import capitalize_event_type_id
+
+
+def dictionary(id: str = None,
+               type: str = None,
+               session_id: str = None,
+               profile_id=None,
+               properties: dict = None,
+               context=None) -> dict:
+    if context is None:
+        context = {}
+    if properties is None:
+        properties = {}
+    return {
+        "id": id,
+        "type": type,
+        "name": capitalize_event_type_id(type),
+        "metadata": {
+            "aux": {},
+            "time": {
+                "insert": None,
+                "create": None,
+                "update": None,
+                "process_time": 0
+            },
+            "ip": None,
+            "status": None,
+            "channel": None,
+            "processed_by": {
+                "rules": [],
+                "flows": [],
+                "third_party": []
+            },
+            "profile_less": False,
+            "debug": False,
+            "valid": True,
+            "error": False,
+            "warning": False,
+            "instance": {
+                "id": None
+            }
+        },
+        "utm": {
+            "source": None,
+            "medium": None,
+            "campaign": None,
+            "term": None,
+            "content": None
+        },
+        "properties": properties,
+        "traits": {},
+        "operation": {
+            "new": False,
+            "update": False
+        },
+        "source": {
+            "id": None,
+            "type": [],
+            "bridge": {
+                "id": None,
+                "name": None
+            },
+            "timestamp": None,
+            "name": None,
+            "description": None,
+            "channel": None,
+            "enabled": True,
+            "transitional": False,
+            "tags": [],
+            "groups": [],
+            "returns_profile": False,
+            "permanent_profile_id": False,
+            "requires_consent": False,
+            "manual": None,
+            "locked": False,
+            "synchronize_profiles": True,
+            "config": None
+        },
+        "session": {
+            "id": session_id,
+            "start": None,
+            "duration": 0,
+            "tz": "utc"
+        },
+        "profile": {
+            "id": profile_id
+        },
+        "context": context,
+        "request": {},
+        "config": {},
+        "tags": {
+            "values": (),
+            "count": 0
+        },
+        "aux": {},
+        "data": {},
+        "device": {
+            "name": None,
+            "brand": None,
+            "model": None,
+            "type": None,
+            "touch": False,
+            "ip": None,
+            "resolution": None,
+            "geo": {
+                "country": {
+                    "name": None,
+                    "code": None
+                },
+                "city": None,
+                "county": None,
+                "postal": None,
+                "latitude": None,
+                "longitude": None
+            },
+            "color_depth": None,
+            "orientation": None
+        },
+        "os": {
+            "name": None,
+            "version": None
+        },
+        "app": {
+            "type": None,
+            "name": None,
+            "version": None,
+            "language": None,
+            "bot": False,
+            "resolution": None
+        },
+        "hit": {
+            "name": None,
+            "url": None,
+            "referer": None,
+            "query": None,
+            "category": None
+        },
+        "journey": {
+            "state": None
+        }
+    }
 
 
 class ProcessStatus(BaseModel):
@@ -69,10 +207,6 @@ class EventPayload(BaseModel):
             raise ValueError("Event type can not be empty")
         return value
 
-    @staticmethod
-    def from_event(event: Event) -> 'EventPayload':
-        return EventPayload(type=event.type, properties=event.properties, context=event.context)
-
     def is_valid(self) -> bool:
         if self.validation is None:
             return True
@@ -90,12 +224,12 @@ class EventPayload(BaseModel):
 
     def to_event_dict(self,
                       source: Entity,
-                      session: Union[Optional[Entity], Optional[Session]],
+                      session: Optional[Union[DefaultEntity, Entity]],
                       profile: Optional[Entity],
                       profile_less: bool) -> dict:
-
+        # This is only for validation
         event_type = self.type.strip()
-        event = Event.dictionary(
+        event = dictionary(
             id=str(uuid4()) if not self.id else self.id,
             profile_id=get_entity_id(profile),
             session_id=get_entity_id(session),
@@ -114,8 +248,6 @@ class EventPayload(BaseModel):
         if self.time.create:
             event['metadata']['time']['create'] = self.time.create.replace(tzinfo=ZoneInfo("UTC"))
 
-        # To prevent performance bottleneck do not create full event session
-        # event["session"] = self._get_event_session(session)
         event['source']['id'] = source.id if not self._source_id else self._source_id
         event['config'] = self.options
         event['operation']['update'] = False
@@ -123,48 +255,4 @@ class EventPayload(BaseModel):
         event['tags']['values'] = tuple(self.tags)
         event['tags']['count'] = len(self.tags)
 
-        if isinstance(session, Session):
-            try:
-                title = self.context['page']['title']
-            except KeyError:
-                title = None
-
-            try:
-                url = self.context['page']['url']
-            except KeyError:
-                url = None
-
-            try:
-                referer = self.context['page']['referer']['host']
-            except KeyError:
-                referer = None
-
-            event["os"] = session.os
-            event["app"] = session.app
-            event["device"] = session.device
-
-            event["hit"]['title'] = title
-            event["hit"]['url'] = url
-            event["hit"]['referer'] = referer
-            event["utm"] = session.utm
-
         return event
-
-    @staticmethod
-    def _get_event_session(session: Union[Session, Entity]) -> Optional[EventSession]:
-        if session is not None:
-            if isinstance(session, Session) and isinstance(session.context, dict):
-                tz = session.get_time_zone()
-                event_session = EventSession(
-                    id=session.id,
-                    tz=tz
-                )
-
-            else:
-                event_session = EventSession(
-                    id=session.id
-                )
-
-            return event_session
-
-        return None

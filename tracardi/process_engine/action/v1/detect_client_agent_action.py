@@ -46,7 +46,7 @@ class DetectClientAgentAction(ActionRunner):
     async def run(self, payload: dict, in_edge=None) -> Result:
 
         try:
-            if not isinstance(self.session.context, dict):
+            if not isinstance(self.session.get('context', {}), dict):
                 raise KeyError("No session context defined.")
 
             dot = self._get_dot_accessor(payload)

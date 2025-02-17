@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional, Dict
 
+from tracardi.domain.flat_session import FlatSession
 from tracardi.process_engine.debugger import Debugger
 from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
@@ -14,7 +15,7 @@ class TrackerResult:
     tracker_payload: TrackerPayload
     events: List[Event]
     changed_field_timestamps: Dict[str, List]
-    session: Optional[Session] = None
+    flat_session: Optional[FlatSession] = None
     profile: Optional[Profile] = None
     response: Optional[dict] = None
     debugger: Optional[Debugger] = None

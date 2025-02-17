@@ -16,12 +16,12 @@ from tracardi.service.wf.domain.work_flow import WorkFlow
 from .debugger import Debugger
 from ..domain import ExtraInfo
 from tracardi.service.wf.domain.entity import Entity as WfEntity
+from ..domain.flat_session import FlatSession
 from ..domain.flow import Flow
 from tracardi.service.wf.domain.flow_invoke_result import FlowInvokeResult
 from ..domain.payload.tracker_payload import TrackerPayload
 from ..domain.profile import Profile
 from ..domain.rule_invoke_result import RuleInvokeResult
-from ..domain.session import Session
 from ..domain.rule import Rule
 from tracardi.common.logging.log_handler import get_logger
 from tracardi.common.tools.getters import get_entity_id
@@ -34,12 +34,12 @@ logger = get_logger(__name__)
 class RulesEngine:
 
     def __init__(self,
-                 session: Session,
+                 flat_session: FlatSession,
                  profile: Optional[Profile],
                  events_rules: List[Tuple[List[Rule], Event]]
                  ):
 
-        self.session = session
+        self.flat_session = flat_session
         self.profile = profile  # Profile can be None if profile_less event
         self.events_rules = events_rules
 
@@ -171,7 +171,7 @@ class RulesEngine:
                             workflow.invoke(flow,
                                             event,
                                             self.profile,
-                                            self.session,
+                                            self.flat_session,
                                             ux,
                                             debug=debug
                                             )
@@ -195,7 +195,7 @@ class RulesEngine:
                     # Preliminary tests showed no issues but on heavy load we do not know if
                     # the test is still valid and every thing is ok. Solution is to remove create_task.
                     flow_task = asyncio.create_task(
-                        workflow.invoke(flow, event, self.profile, self.session, ux, debug=debug)
+                        workflow.invoke(flow, event, self.profile, self.flat_session, ux, debug=debug)
                     )
 
                     # Append flows to flow_task store
@@ -212,7 +212,7 @@ class RulesEngine:
                     flow_invoke_result = await task  # type: FlowInvokeResult
 
                     self.profile = flow_invoke_result.profile
-                    self.session = flow_invoke_result.session
+                    self.flat_session = flow_invoke_result.session
                     debug_info = flow_invoke_result.debug_info
                     log_list = flow_invoke_result.log_list
                     post_invoke_event = flow_invoke_result.event

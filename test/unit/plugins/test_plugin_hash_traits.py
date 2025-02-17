@@ -1,7 +1,7 @@
 from tracardi.domain.entity import Entity
 from tracardi.domain.event_metadata import EventMetadata
+from tracardi.domain.flat_session import FlatSession
 from tracardi.domain.time import EventTime
-from tracardi.domain.session import Session, SessionMetadata
 from tracardi.domain.event import Event
 from tracardi.domain.event_session import EventSession
 from tracardi.process_engine.action.v1.traits.hash_traits_action import HashTraitsAction
@@ -16,15 +16,13 @@ def test_plugin_hash_traits():
     event = Event(
         id='1',
         type='text',
+        name='text',
         metadata=EventMetadata(time=EventTime(), profile_less=True),
         session=EventSession(id='1'),
         source=Entity(id='1'),
         properties={"prop1": 5}
     )
-    session = Session(
-        id='1',
-        metadata=SessionMetadata()
-    )
+    flat_session = FlatSession.new(id='1')
     result = run_plugin(
         HashTraitsAction,
         {
@@ -33,7 +31,7 @@ def test_plugin_hash_traits():
         },
         payload=payload,
         event=event,
-        session=session,
+        session=flat_session,
         profile=None,
         flow=Flow(id="1", name="flow1", lock=False, type="collection")
     )

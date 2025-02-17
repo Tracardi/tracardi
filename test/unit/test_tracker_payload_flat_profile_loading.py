@@ -2,9 +2,9 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from tracardi.context import ServerContext, Context
-from tracardi.domain.entity import Entity, PrimaryEntity
+from tracardi.domain.entity import PrimaryEntity
 from tracardi.domain.flat_profile import FlatProfile
-from tracardi.domain.session import Session, SessionMetadata
+from tracardi.domain.flat_session import FlatSession
 from tracardi.service.tracking.profile_loading import get_profile_and_session
 
 
@@ -14,7 +14,7 @@ async def test_get_profile_and_session():
     profile_id = "2"
 
     # Mock session and profile
-    session = Session(id="session-123", profile=Entity(id=profile_id), metadata=SessionMetadata())
+    flat_session = FlatSession.new(id="session-123", profile_id=profile_id)
     static = False
 
     # Act
@@ -22,10 +22,10 @@ async def test_get_profile_and_session():
         patch('tracardi.service.tracking.profile_loading._get_profile', AsyncMock()) as get_profile:
 
             has_profile_id_in_session.return_value = True
-            get_profile.return_value = (FlatProfile(dict(id="2")), session, None, None)
+            get_profile.return_value = (FlatProfile(dict(id="2")), flat_session, None, None)
 
             flat_profile, session_result, tracker_profile, tracker_session = await get_profile_and_session(
-                session,
+                flat_session,
                 static,
                 False,
                 PrimaryEntity(id=profile_id),
@@ -36,7 +36,7 @@ async def test_get_profile_and_session():
     assert isinstance(flat_profile, FlatProfile), "Profile should be of type FlatProfile"
     assert flat_profile.id == profile_id, "Profile ID should match the expected value"
     assert session_result.id == "session-123", "Session ID should match the expected value"
-    assert session_result.profile is not None, "Session should have an associated profile"
+    assert session_result.get_or_none('profile') is not None, "Session should have an associated profile"
 
 
 @pytest.mark.asyncio
@@ -47,12 +47,12 @@ async def test_get_profile_and_session_with_profile_less():
         # Arrange
         profile_id = "2"
 
-        session = Session(id="session-456", profile=Entity(id=profile_id), metadata=SessionMetadata())
+        flat_session = FlatSession.new(id="session-456", profile_id=profile_id)
         static = False
 
         # Act
         flat_profile, session_result, tracker_profile, tracker_session = await get_profile_and_session(
-            session,
+            flat_session,
             static,
             True,
             None,
@@ -70,7 +70,7 @@ async def test_get_profile_and_session_with_static():
     profile_id = "3"
 
     # Mock session and profile
-    session = Session(id="session-789", profile=Entity(id=profile_id), metadata=SessionMetadata())
+    flat_session = FlatSession.new(id="session-789", profile_id=profile_id)
     static = True
 
     # Act
@@ -78,10 +78,10 @@ async def test_get_profile_and_session_with_static():
             patch('tracardi.service.tracking.profile_loading._get_profile', AsyncMock()) as get_profile:
 
         has_profile_id_in_session.return_value = True
-        get_profile.return_value = (FlatProfile(dict(id=profile_id)), session, None, None)
+        get_profile.return_value = (FlatProfile(dict(id=profile_id)), flat_session, None, None)
 
         flat_profile, session_result, tracker_profile, tracker_session = await get_profile_and_session(
-            session,
+            flat_session,
             static,
             False,
             PrimaryEntity(id=profile_id),
@@ -92,4 +92,4 @@ async def test_get_profile_and_session_with_static():
     assert isinstance(flat_profile, FlatProfile), "Profile should be of type FlatProfile"
     assert flat_profile.id == profile_id, "Profile ID should match the expected value"
     assert session_result.id == "session-789", "Session ID should match the expected value"
-    assert session_result.profile is not None, "Session should not have an associated profile"
+    assert session_result.get_or_none('profile') is not None, "Session should not have an associated profile"
