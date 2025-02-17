@@ -22,7 +22,7 @@ async def test_async_cache_basic():
     assert result2 == 1
     assert call_count == 1
 
-    # Now it ttl exprires
+    # Now it ttl expires
     await asyncio.sleep(.15)
 
     result = await my_async_function(1)
