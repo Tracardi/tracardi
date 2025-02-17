@@ -101,7 +101,6 @@ async def _custom_event_to_profile_mapping(custom_mapping_schemas,
                                            flat_event: FlatEvent,
                                            flat_session: FlatSession) -> AsyncGenerator[FieldChange, None]:
     if custom_mapping_schemas is not None and len(custom_mapping_schemas) > 0:
-        print(1, flat_event['properties'])
         event_create_timestamp = flat_event.metadata_time.create.timestamp()
         for custom_mapping_schema in custom_mapping_schemas:
 
