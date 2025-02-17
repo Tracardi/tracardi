@@ -40,6 +40,8 @@ def map_to_workflow_record(workflow_table: WorkflowTable) -> FlowRecord:
         file_name=workflow_table.file_name,
         draft=workflow_table.draft,
         lock=workflow_table.lock,
+
+        production=workflow_table.production,
         running=workflow_table.running
     )
 
