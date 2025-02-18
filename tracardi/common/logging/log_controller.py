@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, AsyncGenerator
 
 from contextlib import asynccontextmanager
 
@@ -8,7 +8,7 @@ from tracardi.common.logging.log_handler import ElasticLogHandler
 
 
 @asynccontextmanager
-async def log_controller(log_handler: ElasticLogHandler) -> Optional[list]:
+async def log_controller(log_handler: ElasticLogHandler) -> AsyncGenerator[Optional[list], None]:
     if tracardi.save_logs and log_handler.has_logs():
         try:
             # Check global settings
