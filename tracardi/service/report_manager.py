@@ -30,4 +30,4 @@ class ReportManager:
 
     async def get_report(self, params: dict) -> dict:
         query = self.report.get_built_query(**params)
-        return await  bd_report_adapter.query(query, self.report.index)
+        return await  bd_report_adapter.query_report(query, self.report.index)

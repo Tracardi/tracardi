@@ -15,6 +15,7 @@ if _bd_adapter_var == 'elastic':
     from system.adapter.os.bigdata.elastic.elastic_raw_adapter import ElasticRawAdapter
     from system.adapter.os.bigdata.elastic.elastic_report_adapter import ElasticReportAdapter
     from system.adapter.os.bigdata.elastic.elastic_session_adapter import ElasticSessionAdapter
+    from system.adapter.os.bigdata.elastic.elastic_internal_adapter import ElasticInternalAdapter
 elif _bd_adapter_var == 'starrocks':
     pass
 
@@ -125,6 +126,16 @@ def _bd_session_adapter():
 
     return _bd_adapter
 
+
+@run_once
+def _bd_internal_adapter():
+    if _bd_adapter_var.lower() == 'elastic':
+        _bd_adapter = ElasticInternalAdapter()
+    else:
+        raise ValueError(f"Unknown big data internal adapter `{_bd_adapter_var}`")
+
+    return _bd_adapter
+
 bd_elastic_adapter = _bd_elastic_adapter()
 bd_install_adapter = _bd_install_adapter()
 bd_report_adapter = _bd_report_adapter()
@@ -136,4 +147,5 @@ bd_event_adapter = _bd_event_adapter()
 bd_search_adapter = _bd_search_adapter()
 bd_profile_adapter = _bd_profile_adapter()
 bd_session_adapter = _bd_session_adapter()
+bd_internal_adapter = _bd_internal_adapter()
 

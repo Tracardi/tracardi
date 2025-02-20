@@ -107,7 +107,6 @@ from tracardi.process_engine.action.v1.genai_action import GenAIAction
 # import tracardi.process_engine.action.v1.internal.add_empty_profile.plugin
 # import tracardi.process_engine.action.v1.internal.get_prev_event.plugin
 # import tracardi.process_engine.action.v1.internal.get_prev_session.plugin
-# import tracardi.process_engine.action.v1.internal.query_string.plugin
 # import tracardi.process_engine.action.v1.internal.add_empty_session.plugin
 # import tracardi.process_engine.action.v1.internal.add_response.plugin
 # import tracardi.process_engine.action.v1.metrics.key_counter.plugin
@@ -881,11 +880,6 @@ installed_plugins: Dict[str, PluginMetadata] = {
 
     "tracardi.process_engine.action.v1.internal.get_prev_session.plugin": PluginMetadata(
         test=PluginTest(init={'offset': -1},
-                        resource=None)
-    ),
-
-    "tracardi.process_engine.action.v1.internal.query_string.plugin": PluginMetadata(
-        test=PluginTest(init={'index': "None", 'query': '', 'time_range': "+1d"},
                         resource=None)
     ),
 
