@@ -1,7 +1,5 @@
 from collections import defaultdict
 
-import json
-
 from typing import Optional, List, Dict, Generator, Tuple
 from uuid import uuid4
 
@@ -9,6 +7,75 @@ from .entity import Entity, FlatEntity
 
 
 class FlatEvent(FlatEntity):
+
+    PROFILE_ID = 'profile.id'
+    SESSION_ID = 'session.id'
+    UTM_SOURCE = 'utm.source'
+    UTM_MEDIUM = 'utm.medium'
+    UTM_CAMPAIGN = 'utm.campaign'
+    UTM_TERM = 'utm.term'
+    UTM_CONTENT = 'utm.content'
+    HIT_ID = 'hit.id'
+    HIT_CATEGORY = 'hit.category'
+    HIT_QUERY = 'hit.query'
+    HIT_REFERER = 'hit.referer'
+    HIT_URL = 'hit.url'
+    HIT_NAME = 'hit.name'
+    APP_RESOLUTION = 'app.resolution'
+    APP_LANGUAGE = 'app.language'
+    APP_VERSION = 'app.version'
+    APP_NAME = 'app.name'
+    APP_BOT = 'app.bot'
+    APP_TYPE = 'app.type'
+    OS_VERSION = 'os.version'
+    OS_NAME = 'os.name'
+    DEVICE_GEO_POSTAL = 'device.geo.postal'
+    DEVICE_GEO_LOCATION = 'device.geo.location'
+    DEVICE_GEO_LONGITUDE = 'device.geo.longitude'
+    DEVICE_GEO_LATITUDE = 'device.geo.latitude'
+    DEVICE_GEO_CITY = 'device.geo.city'
+    DEVICE_GEO_COUNTY = 'device.geo.county'
+    DEVICE_GEO_COUNTRY_CODE = 'device.geo.country.code'
+    DEVICE_GEO_COUNTRY_NAME = 'device.geo.country.name'
+    DEVICE_ORIENTATION = 'device.orientation'
+    DEVICE_COLOR_DEPTH = 'device.color.depth'
+    DEVICE_RESOLUTION = 'device.resolution'
+    DEVICE_TOUCH = 'device.touch'
+    DEVICE_TYPE = 'device.type'
+    DEVICE_IP = 'device.ip'
+    DEVICE_MODEL = 'device.model'
+    DEVICE_BRAND = 'device.brand'
+    DEVICE_NAME = 'device.name'
+    SOURCE_ID = 'source.id'
+    REQUEST = 'request'
+    METADATA_DEBUG = 'metadata.debug'
+    METADATA_INSTANCE_ID = 'metadata.instance.id'
+    METADATA_MERGE = 'metadata.merge'
+    METADATA_ERROR = 'metadata.error'
+    METADATA_WARNING = 'metadata.warning'
+    METADATA_VALID = 'metadata.valid'
+    METADATA_PROFILE_LESS = 'metadata.profile.less'
+    METADATA_PROCESSED_BY_THIRD_PARTY = 'metadata.processed.by.third.party'
+    METADATA_PROCESSED_BY_FLOWS = 'metadata.processed.by.flows'
+    METADATA_PROCESSED_BY_RULES = 'metadata.processed.by.rules'
+    METADATA_IP = 'metadata.ip'
+    METADATA_CHANNEL = 'metadata.channel'
+    METADATA_STATUS = 'metadata.status'
+    METADATA_TIME_TOTAL_TIME = 'metadata.time.total.time'
+    METADATA_TIME_PROCESS_TIME = 'metadata.time.process.time'
+
+    OBJECT = 'object'
+    SUBJECT = 'subject'
+    VERSION = 'version'
+    NAME = 'name'
+    TYPE = 'type'
+    CONFIG = 'config'
+    CONTEXT = 'context'
+    PROPERTIES = 'properties'
+    TRAITS = 'traits'
+    TAGS_VALUES = 'tags.values'
+    TAGS_COUNT = 'tags.count'
+    JOURNEY_STATE = 'journey.state'
 
     @staticmethod
     def as_entity(flat_event: 'FlatEvent'):
@@ -51,6 +118,7 @@ class FlatEvent(FlatEntity):
         return FlatEvent({
             "id": str(uuid4())
         })
+
 
 class FlatEvents(list):
     def group_by_type(self):

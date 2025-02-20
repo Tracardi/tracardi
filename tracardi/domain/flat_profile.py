@@ -16,6 +16,8 @@ from tracardi.common.security.hashing.hasher import hash_id, has_hash_id
 
 class FlatProfile(FlatEntity):
 
+    IDS= 'ids'
+
     def __init__(self, dictionary):
         super().__init__(dictionary)
 
