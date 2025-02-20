@@ -58,8 +58,8 @@ class StartAction(ActionRunner):
             # replace session in event
             event.session = EventSession(
                 id=flat_session.id,
-                start=flat_session['metadata.time.insert'],
-                duration=flat_session['metadata.time.duration']
+                start=flat_session.metadata_time_insert,
+                duration=flat_session.metadata_time_duration
             )
 
         # Replace profile

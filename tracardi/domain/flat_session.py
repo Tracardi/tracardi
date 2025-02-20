@@ -3,15 +3,67 @@ from datetime import datetime
 import uuid
 
 from typing import Optional, Dict
+from system.adapter.os.bigdata.elastic.model.storage_record import StorageRecord
 
 from tracardi.common.time.date import now_in_utc
 from tracardi.domain.entity import FlatEntity
 from tracardi.domain.time import Time
-from system.adapter.os.bigdata.elastic.model.storage_record import StorageRecord
 from user_agents import parse
 
 
 class FlatSession(FlatEntity):
+
+    PRIMARY_ID = "primary.id"
+    METADATA = "metadata"
+    METADATA_STATUS = "metadata.status"
+    METADATA_TIME_TIMESTAMP = "metadata.time.timestamp"
+    METADATA_TIME_DURATION = "metadata.time.duration"
+    METADATA_TIME_WEEKDAY = "metadata.time.weekday"
+    METADATA_TIME_TZ = "metadata.time.tz"
+    METADATA_TIME_OFFSET = "metadata.time.offset"
+    METADATA_CHANNEL = "metadata.channel"
+    METADATA_HIT_REFERER = "metadata.hit.referer"
+    METADATA_DEVICE_NAME = "metadata.device.name"
+    METADATA_DEVICE_BRAND = "metadata.device.brand"
+    METADATA_DEVICE_MODEL = "metadata.device.model"
+    METADATA_DEVICE_TYPE = "metadata.device.type"
+    METADATA_DEVICE_TOUCH = "metadata.device.touch"
+    METADATA_DEVICE_IP = "metadata.device.ip"
+    METADATA_DEVICE_RESOLUTION_WIDTH = "metadata.device.resolution.width"
+    METADATA_DEVICE_RESOLUTION_HEIGHT = "metadata.device.resolution.height"
+    METADATA_DEVICE_RESOLUTION_ORIENTATION = "metadata.device.resolution.orientation"
+    METADATA_DEVICE_GPU_VENDOR_ID = "metadata.device.gpu.vendor.id"
+    METADATA_DEVICE_GPU_VENDOR_NAME = "metadata.device.gpu.vendor.name"
+    METADATA_DEVICE_GPU_RENDERER_NAME = "metadata.device.gpu.renderer.renderer"
+    METADATA_DEVICE_COLOR_DEPTH = "metadata.device.color_depth"
+    METADATA_DEVICE_ORIENTATION = "metadata.device.orientation"
+    METADATA_DEVICE_GEO_COUNTRY_NAME = "metadata.device.geo.country.name"
+    METADATA_DEVICE_GEO_COUNTRY_CODE = "metadata.device.geo.country.code"
+    METADATA_DEVICE_GEO_COUNTY = "metadata.device.geo.county"
+    METADATA_DEVICE_GEO_CITY = "metadata.device.geo.city"
+    METADATA_DEVICE_GEO_POSTAL = "metadata.device.geo.postal"
+    METADATA_DEVICE_GEO_LATITUDE = "metadata.device.geo.latitude"
+    METADATA_DEVICE_GEO_LONGITUDE = "metadata.device.geo.longitude"
+    METADATA_DEVICE_GEO_LOCATION = "metadata.device.geo.location"
+    METADATA_OS_NAME = "metadata.os.name"
+    METADATA_OS_VERSION = "metadata.os.version"
+    METADATA_APP_TYPE = "metadata.app.type"
+    METADATA_APP_NAME = "metadata.app.name"
+    METADATA_APP_VERSION = "metadata.app.version"
+    METADATA_APP_LANGUAGE = "metadata.app.language"
+    METADATA_APP_BOT = "metadata.app.bot"
+    METADATA_APP_RESOLUTION = "metadata.app.resolution"
+    METADATA_UTM_SOURCE = "metadata.utm.source"
+    METADATA_UTM_MEDIUM = "metadata.utm.medium"
+    METADATA_UTM_CAMPAIGN = "metadata.utm.campaign"
+    METADATA_UTM_TERM = "metadata.utm.term"
+    METADATA_UTM_CONTENT = "metadata.utm.content"
+    PROFILE_ID = "profile.id"
+    PROFILE_PRIMARY_ID = "profile.primary.id"
+    CONTEXT = "context"
+    PROPERTIES = "properties"
+    TRAITS = "traits"
+    AUX = "aux"
 
     def __init__(self, dictionary):
         super().__init__(dictionary)
@@ -35,8 +87,8 @@ class FlatSession(FlatEntity):
         if not default:
             default = {}
 
-        default['id'] = str(uuid.uuid4()) if not id else id
-        default['metadata'] = {
+        default[FlatSession.ID] = str(uuid.uuid4()) if not id else id
+        default[FlatSession.METADATA] = {
             "time": time_dict,
             "channel": None,
             "aux": {},
@@ -76,7 +128,7 @@ class FlatSession(FlatEntity):
 
     def get_user_agent(self) -> Optional[str]:
         try:
-            _user_agent_string = self.get('context.browser.local.browser.userAgent', None)
+            _user_agent_string = self.get_or_none('context.browser.local.browser.userAgent')
             if not _user_agent_string:
                 return None
             return parse(_user_agent_string)
@@ -111,14 +163,10 @@ class FlatSession(FlatEntity):
             self.map(session) << {
                 'id',
                 'metadata',
-                'operation',
                 'profile',
                 'context',
                 'properties',
-                'aux',
-                'device',
-                'os',
-                'app',
+                'operation',
             }
             self.freeze()
 
@@ -129,3 +177,16 @@ class FlatSession(FlatEntity):
 
     def is_updated_in_workflow(self) -> bool:
         return self._updated_in_workflow
+
+
+    # -------------------
+    #  PROPERTIES
+    # -------------------
+
+    @property
+    def primary_id(self):
+        return self.get(FlatSession.PRIMARY_ID)
+
+    @primary_id.setter
+    def primary_id(self, value):
+        self.set(FlatSession.PRIMARY_ID, value)

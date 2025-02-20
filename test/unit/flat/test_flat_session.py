@@ -15,3 +15,15 @@ def test_replace():
 
     assert Dot(fs1).profile == 1
 
+
+def test_props():
+    fs1 = FlatSession.new(id='1') << {"metadata.time.tz": "UTC"}
+    assert fs1.metadata_time_tz == 'UTC'
+    assert FlatSession.metadat_time_tz == 'metadata.time.tz'
+
+
+def test_dynamic_props():
+    fs1 = FlatSession.new(id='1') << {"metadata.time.tz": "UTC"}
+    print(fs1.id)
+    fs1.id = 2
+

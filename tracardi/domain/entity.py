@@ -149,6 +149,12 @@ class DotDictEncoder(json.JSONEncoder):
 
 class FlatEntity(DotDict):
 
+    ID = "id"
+    METADATA_TIME = "metadata.time"
+    METADATA_TIME_INSERT = "metadata.time.insert"
+    METADATA_TIME_CREATE = "metadata.time.create"
+    METADATA_TIME_UPDATE = "metadata.time.update"
+
     def __init__(self, dictionary):
         super().__init__(dictionary)
         self._changes: Optional[FieldUpdateLogger] = None
@@ -230,7 +236,7 @@ class FlatEntity(DotDict):
 
     @property
     def id(self) -> Optional[str]:
-        return self.get('id', None)
+        return self.get(FlatEntity.ID, None)
 
     @id.setter
     def id(self, value: str):
@@ -238,11 +244,11 @@ class FlatEntity(DotDict):
         if not isinstance(value, str):
             raise ValueError("ID value must be a string.")
 
-        self['id'] = value
+        self[FlatEntity.ID] = value
 
     @property
     def metadata_time(self) -> Optional[EventTime]:
-        return EventTime(**self.get('metadata.time', {}))
+        return EventTime(**self.get(FlatEntity.METADATA_TIME, {}))
 
     def get_meta_data(self) -> Optional[RecordMetadata]:
         return self._metadata if isinstance(self._metadata, RecordMetadata) else None
