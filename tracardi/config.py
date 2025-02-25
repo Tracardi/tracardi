@@ -285,7 +285,7 @@ class TracardiConfig(metaclass=Singleton):
         self.skip_errors_on_profile_mapping = get_env_as_bool('SKIP_ERRORS_ON_PROFILE_MAPPING', 'no')
 
         self.cache_adapter = env.get('CACHE_ADAPTER', 'redis')
-        self.big_data_adapter = env.get('BIG_DATA_ADAPTER', 'elastic')
+        self.big_data_adapter = env.get('BIG_DATA_ADAPTER', 'starrocks')
         self.meta_data_adapter = env.get('META_DATA_ADAPTER', 'mysql')
 
         self._config = None
