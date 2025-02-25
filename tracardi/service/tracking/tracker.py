@@ -139,12 +139,6 @@ async def os_tracker(
                         for field, (timestamp, old_value)
                         in changed_fields.items()]
 
-                    # Save changes to field log
-                    if tracardi.enable_field_update_log:
-                        # Save to history if needed (DISABLE to REDO)
-                        # await profile_change_log_worker(_changed_fields)
-                        pass
-
                     # Dispatch profile changed outbound traffic if profile changed in workflow
                     # Send it SYNCHRONOUSLY
 
