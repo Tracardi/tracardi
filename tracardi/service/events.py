@@ -3,8 +3,7 @@ import json
 import os
 from typing import Optional, Tuple, Generator
 
-
-from tracardi.context import ServerContext, get_context
+from tracardi.context import get_context, ServerContext
 from tracardi.domain.field_change import FieldChange
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.flat_profile import FlatProfile
@@ -22,16 +21,7 @@ _predefined_event_types = {}
 logger = get_logger(__name__)
 
 
-# def call_function(call_string, event: DotDict, profile: DotDict):
-#     state = call_string[5:]
-#     module, function = state.split(',')
-#     module = import_package(module)
-#     state_function = load_callable(module, function)
-#
-#     return state_function(event, profile)
-
-
-def cache_predefined_event_types():
+def _cache_predefined_event_types():
     if not _predefined_event_types:
         path = os.path.join(f"{_local_dir}/setup/events/*.json")
         for file_path in glob.glob(path):
@@ -43,40 +33,31 @@ def cache_predefined_event_types():
                 except Exception as e:
                     raise ValueError(f"Could not decode JSON for file {file_path}. Error: {repr(e)}")
 
-
 def get_predefined_event_types():
-    if not _predefined_event_types:
-        cache_predefined_event_types()
+    _cache_predefined_event_types()
 
     return _predefined_event_types.items()
 
 
 def get_event_type_names():
-    if not _predefined_event_types:
-        cache_predefined_event_types()
-
-    for _, event_def in _predefined_event_types.items():
+    for _, event_def in get_predefined_event_types():
         yield event_def['id'], event_def['name']
 
 
-async def get_event_types(limit: int = 1000):
+async def get_event_types(limit: int = 1000) -> dict:
     pre_defined = list(get_event_type_names())
     pre_defined_ids = [item[0] for item in pre_defined]
 
     context = get_context()
 
     with ServerContext(context.switch_context(production=True)):
-        production_event_types = await bd_event_adapter.load_unique_event_types(limit)
-
-        for item in production_event_types:
+        for item in await bd_event_adapter.load_unique_event_types(limit):
             if item not in pre_defined_ids:
                 pre_defined.append((item, capitalize_event_type_id(item)))
                 pre_defined_ids.append(item)
 
     with ServerContext(context.switch_context(production=False)):
-        test_event_types = await bd_event_adapter.load_unique_event_types(limit)
-
-        for item in test_event_types:
+        for item in await bd_event_adapter.load_unique_event_types(limit):
             if item not in pre_defined_ids:
                 pre_defined.append((item, capitalize_event_type_id(item)))
 
@@ -89,7 +70,7 @@ async def get_event_types(limit: int = 1000):
 
 def get_default_mappings_for(event_type, type) -> Optional[dict]:
     if not _predefined_event_types:
-        cache_predefined_event_types()
+        _cache_predefined_event_types()
 
     schema = _predefined_event_types.get(event_type, None)
 
@@ -101,7 +82,7 @@ def get_default_mappings_for(event_type, type) -> Optional[dict]:
 
 def get_default_event_type_schema(event_type) -> Optional[dict]:
     if event_type not in _predefined_event_types:
-        cache_predefined_event_types()
+        _cache_predefined_event_types()
 
     schema = _predefined_event_types.get(event_type, None)
     return schema
@@ -131,6 +112,7 @@ def _append_value(values, value):
         return list(set(_values))
 
     return values
+
 
 def copy_default_event_to_profile(copy_schema: dict,
                                   flat_profile: FlatProfile,
@@ -173,7 +155,7 @@ def copy_default_event_to_profile(copy_schema: dict,
                             yield FieldChange(
                                 field=profile_path,
                                 value=_append_value(values=flat_profile[profile_path],
-                                                           value=value_to_be_appended),
+                                                    value=value_to_be_appended),
                                 ts=event_create_timestamp
                             )
                         else:
@@ -310,4 +292,3 @@ def copy_default_event_to_profile(copy_schema: dict,
                             raise AssertionError(
                                 f"Can not add increment/decrement {flat_event[event_path]} "
                                 f"to {flat_profile[profile_path]} at profile@{profile_path}")
-
