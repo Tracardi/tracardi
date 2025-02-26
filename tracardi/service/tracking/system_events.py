@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 from uuid import uuid4
 from datetime import timedelta
 
@@ -10,7 +10,7 @@ from tracardi.domain.time import Time
 from tracardi.common.time.date import now_in_utc
 
 
-def add_system_events(is_profile_new: bool, flat_session: FlatSession, tracker_payload: TrackerPayload) -> Tuple[
+def add_system_events(flat_session: Optional[FlatSession], tracker_payload: TrackerPayload) -> Tuple[
     TrackerPayload, FlatSession]:
     # Visit ended never creates system events.
     if tracker_payload.has_event_type('visit-ended'):
@@ -23,25 +23,6 @@ def add_system_events(is_profile_new: bool, flat_session: FlatSession, tracker_p
     async_processing = True
 
     _now_utc = now_in_utc()
-
-    if is_profile_new and not tracker_payload.has_event_type('profile-created'):
-        _time = _now_utc - timedelta(seconds=3)
-        # Add session created
-        tracker_payload.events.append(
-            EventPayload(
-                id=str(uuid4()),
-                type='profile-created',
-                time=Time(
-                    create=_time,
-                    insert=_time
-                ),
-                properties={},
-                options={
-                    "source_id": tracardi.internal_source,
-                    "async": async_processing
-                }
-            )
-        )
 
     if flat_session:
 

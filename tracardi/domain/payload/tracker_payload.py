@@ -414,10 +414,9 @@ class TrackerPayload(BaseModel):
     def for_session_creation(self):
 
         session_id = get_entity_id(self.session)
-        profile_id = get_entity_id(self.profile)
         insert, update, create = self.get_times()
 
-        return session_id, profile_id, insert, update, create
+        return session_id, insert, update, create
 
 
     def get_profile_ids(self) -> Set[str]:

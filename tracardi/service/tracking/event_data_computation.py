@@ -95,16 +95,14 @@ def _auto_index_default_event_type(flat_event: FlatEvent) -> FlatEvent:
 
 async def event_properties_to_profile(custom_event_to_profile_mapping_schemas: List[EventToProfile],
                                       flat_event: FlatEvent,
-                                      flat_profile: FlatProfile,
-                                      flat_session: FlatSession) -> AsyncGenerator[FieldChange, None, None]:
+                                      flat_profile: FlatProfile) -> AsyncGenerator[FieldChange, None, None]:
     # Maps event to traits (Event Mapping) and to profile (Profile Mapping)
 
     # Map event data to profile
     async for item in map_event_to_profile(
         custom_event_to_profile_mapping_schemas,
         flat_event,
-        flat_profile,
-        flat_session
+        flat_profile
     ):
         # Add what event changed it
         item.event_type = flat_event.type
@@ -156,7 +154,7 @@ async def make_event_from_event_payload(
 async def compute_events(events: List[EventPayload],
                          metadata,
                          source: EventSource,
-                         flat_session: FlatSession,
+                         flat_session: Optional[FlatSession],
                          flat_profile: Optional[FlatProfile],
                          profile_less: bool,
                          tracker_payload: TrackerPayload
@@ -192,8 +190,7 @@ async def compute_events(events: List[EventPayload],
                 async for field_change in event_properties_to_profile(
                     custom_event_to_profile_mapping_schemas,
                     flat_event,
-                    flat_profile,
-                    flat_session
+                    flat_profile
                 ):
                     flat_profile.set(field_change.field,
                                      field_change.value,

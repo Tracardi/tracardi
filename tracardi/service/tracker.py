@@ -11,11 +11,8 @@ from tracardi.config import tracardi
 from tracardi.domain.event_source import EventSource
 from tracardi.common.logging.log_handler import get_logger
 
-if License.has_license():
-    from com_tracardi.workers.collector import run_com_tracker_worker, run_com_tracker
-    from com_tracardi.service.profiler_calculator import calculate_statistics
-else:
-    from tracardi.service.tracking.tracker import os_tracker
+from com_tracardi.workers.collector import run_com_tracker_worker, run_com_tracker
+from com_tracardi.service.profiler_calculator import calculate_statistics
 
 logger = get_logger(__name__)
 _measures = []
@@ -102,14 +99,6 @@ class Tracker:
                 tracker_payload.set_ephemeral()
 
             context.profiler.measure('tracker')
-
-            if not License.has_license():
-                return await os_tracker(
-                    source,
-                    tracker_payload,
-                    self.tracker_config,
-                    tracking_start
-                )
 
             # Only commercial
 

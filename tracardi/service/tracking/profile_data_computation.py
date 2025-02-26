@@ -1,4 +1,4 @@
-from typing import List, Generator, AsyncGenerator
+from typing import List, Generator, AsyncGenerator, Optional
 
 from tracardi.domain import ExtraInfo
 from tracardi.domain.event_compute import EventCompute
@@ -98,8 +98,7 @@ async def _check_mapping_condition_if_met(if_statement, dot: DotAccessor):
 
 async def _custom_event_to_profile_mapping(custom_mapping_schemas,
                                            flat_profile: FlatProfile,
-                                           flat_event: FlatEvent,
-                                           flat_session: FlatSession) -> AsyncGenerator[FieldChange, None]:
+                                           flat_event: FlatEvent) -> AsyncGenerator[FieldChange, None]:
     if custom_mapping_schemas is not None and len(custom_mapping_schemas) > 0:
         event_create_timestamp = flat_event.metadata_time.create.timestamp()
         for custom_mapping_schema in custom_mapping_schemas:
@@ -109,8 +108,7 @@ async def _custom_event_to_profile_mapping(custom_mapping_schemas,
                 if_statement = custom_mapping_schema.config['condition']
                 try:
                     dot = DotAccessor(event=flat_event,
-                                      profile=flat_profile,
-                                      session=flat_session)
+                                      profile=flat_profile)
                     result = await _check_mapping_condition_if_met(if_statement, dot)
                     if result is False:
                         continue
@@ -324,8 +322,7 @@ def _computed_event_props_to_profile(flat_profile: FlatProfile, flat_event: Flat
 async def map_event_to_profile(
         custom_mapping_schemas: List[EventToProfile],
         flat_event: FlatEvent,
-        flat_profile: FlatProfile,
-        flat_session: FlatSession,
+        flat_profile: FlatProfile
 ) -> AsyncGenerator[FieldChange, None]:
     # Default event types mappings
 
@@ -344,8 +341,7 @@ async def map_event_to_profile(
     async for item in _custom_event_to_profile_mapping(
             custom_mapping_schemas,
             flat_profile,
-            flat_event,
-            flat_session):
+            flat_event):
         yield item
 
     for item in _computed_event_props_to_profile(flat_profile, flat_event):

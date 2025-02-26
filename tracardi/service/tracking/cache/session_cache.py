@@ -38,32 +38,27 @@ def load_session_cache(session_id: str, context: Context) -> Optional[FlatSessio
 
 
 def _save_single_session(flat_session: FlatSession, context):
-    index = flat_session.get_meta_data()
+    session_dict = flat_session.to_dict()
 
-    if index is None:
-        logger.warning("Empty session metadata. Index is not set. Cached session removed.",
-                       extra=ExtraInfo.exact(origin="cache", package=__name__))
-        _delete_cache(flat_session.id, get_session_key_namespace(flat_session.id, context))
-    else:
-        session_dict = flat_session.to_dict()
-        try:
-            del session_dict['operation']
-        except Exception:
-            pass
-        _set_cache(
-            flat_session.id,
-            (
-                {
-                    "production": context.production,
-                    "tenant": context.tenant
-                },
-                session_dict,
-                None,
-                index.model_dump(mode="json")
-            ),
-            get_session_key_namespace(flat_session.id, context),
-            ttl=tracardi.keep_session_in_cache_for
-        )
+    try:
+        del session_dict['operation']
+    except Exception:
+        pass
+
+    _set_cache(
+        flat_session.id,
+        (
+            {
+                "production": context.production,
+                "tenant": context.tenant
+            },
+            session_dict,
+            None,
+            None
+        ),
+        get_session_key_namespace(flat_session.id, context),
+        ttl=tracardi.keep_session_in_cache_for
+    )
 
 
 def save_session_cache(flat_session: Union[Optional[FlatSession], List[FlatSession]], context: Context):
