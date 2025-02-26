@@ -4,10 +4,10 @@ from typing import Optional, List, Dict, Generator, Tuple
 from uuid import uuid4
 
 from .entity import Entity, FlatEntity
+from ..common.time.date import now_in_utc
 
 
 class FlatEvent(FlatEntity):
-
     PROFILE_ID = 'profile.id'
     SESSION_ID = 'session.id'
     UTM_SOURCE = 'utm.source'
@@ -115,8 +115,10 @@ class FlatEvent(FlatEntity):
 
     @staticmethod
     def new() -> 'FlatEvent':
+        now = now_in_utc()
         return FlatEvent({
-            "id": str(uuid4())
+            "id": str(uuid4()),
+            "metadata": {"time": {"create": now, "insert": now}}
         })
 
 

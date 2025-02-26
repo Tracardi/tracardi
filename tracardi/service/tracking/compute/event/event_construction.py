@@ -134,7 +134,6 @@ def event_payload_to_event(
             id=id,
             name=event_name,
             metadata=meta_dict,
-            session=None,
             profile=profile_entity_dict,  # profile can be None when profile_less event.
             type=event_type,
             properties=event_payload.properties,
