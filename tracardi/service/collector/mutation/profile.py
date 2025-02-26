@@ -19,7 +19,7 @@ async def save_flat_profile(profiles: Union[FlatProfile, List[FlatProfile], Set[
     if context is None:
         context = get_context()
 
-    print(await save_profiles_in_db(profiles, refresh_after_save=refresh))
+    await save_profiles_in_db(profiles, refresh_after_save=refresh)
 
     if cache:
         save_flat_profile_cache(profiles, context)
