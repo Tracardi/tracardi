@@ -12,7 +12,7 @@ available_configuration_list = {
             "repo_owner": "",
             "repo_name": ""
         },
-        description="Repository on GitHub to store Tracardi workflows.",
+        description="Repository on GitHub to store system workflows.",
         enabled=True,
         tags=['github'],
         # cluster_wide_value = True
@@ -21,7 +21,7 @@ available_configuration_list = {
         id=SAVE_LOGS_ENV_CONFIGURATION,
         name=f"{SAVE_LOGS_ENV_CONFIGURATION} Env Variable",
         config="yes",  # default value
-        description="When set to yes all logs will be saved in tracardi log (Experimental).",
+        description="When set to yes all logs will be saved in system log (Experimental).",
         enabled=True,
         tags=['env', 'setting'],
         # cluster_wide_value = True
