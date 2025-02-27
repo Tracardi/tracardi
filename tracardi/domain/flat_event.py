@@ -65,7 +65,7 @@ class FlatEvent(FlatEntity):
     METADATA_TIME_PROCESS_TIME = 'metadata.time.process.time'
 
     OBJECT = 'object'
-    SUBJECT = 'subject'
+    OBJECT_ID = 'object.id'
     VERSION = 'version'
     NAME = 'name'
     TYPE = 'type'

@@ -113,7 +113,7 @@ def event_payload_to_event(
             session=_get_event_session(flat_session).model_dump(mode="json"),
             profile=profile_entity_dict,  # profile can be None when profile_less event.
             type=event_type,
-
+            entity = event_payload.entity,
             os=flat_session.get('os', {}),
             app=flat_session.get('app', {}),
             device=flat_session.get('device', {}),
@@ -133,6 +133,7 @@ def event_payload_to_event(
         event_dict = EventDict(
             id=id,
             name=event_name,
+            entity=event_payload.entity,
             metadata=meta_dict,
             profile=profile_entity_dict,  # profile can be None when profile_less event.
             type=event_type,

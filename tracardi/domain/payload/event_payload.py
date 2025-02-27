@@ -165,6 +165,7 @@ class EventPayload(BaseModel):
     id: Optional[str] = None
     time: Optional[Time] = Time()
     type: str
+    entity: str = 'profile'
     properties: Optional[dict] = {}
     options: Optional[dict] = {}
     context: Optional[dict] = {}
