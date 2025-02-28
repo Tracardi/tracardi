@@ -58,7 +58,7 @@ SQLAlchemy==2.0.36
 speedict==0.3.12
 boto3==1.34.41
 dotdict_parser>=0.7.2
-durable-dot-dict>=0.0.10
+durable-dot-dict>=0.0.11
 
 # Plugins
 langchain==0.3.14
