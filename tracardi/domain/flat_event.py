@@ -8,7 +8,7 @@ from ..common.time.date import now_in_utc
 
 
 class FlatEvent(FlatEntity):
-    PROFILE_ID = 'profile.id'
+
     SESSION_ID = 'session.id'
     UTM_SOURCE = 'utm.source'
     UTM_MEDIUM = 'utm.medium'
@@ -66,6 +66,10 @@ class FlatEvent(FlatEntity):
 
     OBJECT = 'object'
     OBJECT_ID = 'object.id'
+
+    ENTITY_ID = 'entity.id'
+    ENTITY_NAME = 'entity.name'
+
     VERSION = 'version'
     NAME = 'name'
     TYPE = 'type'

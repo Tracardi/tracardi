@@ -91,7 +91,7 @@ def event_payload_to_event(
         tracker_payload_metadata: EventPayloadMetadata,
         source: EventSource,
         flat_session: Union[Optional[Entity], Optional[FlatSession]],
-        profile_id: Optional[str],
+        entity_id: Optional[str],
         profile_less: bool) -> Tuple[EventDict, bool]:
     id = str(uuid4()) if not event_payload.id else event_payload.id
     event_type = event_payload.type.strip()
@@ -100,7 +100,7 @@ def event_payload_to_event(
     meta = _get_metadata(event_payload, tracker_payload_metadata, source, profile_less)
     meta_dict = meta.model_dump(mode="json")
     source_dict = {"id": source.id} if not event_payload.has_source_id() else dict(id=event_payload.get_source_id())
-    profile_entity_dict = {"id": profile_id} if profile_id else None
+    entity = {"id": entity_id, "name": event_payload.entity}
 
     if isinstance(flat_session, FlatSession):
 
@@ -111,9 +111,8 @@ def event_payload_to_event(
             name=event_name,
             metadata=meta_dict,
             session=_get_event_session(flat_session).model_dump(mode="json"),
-            profile=profile_entity_dict,  # profile can be None when profile_less event.
             type=event_type,
-            entity = event_payload.entity,
+            entity = entity,
             os=flat_session.get('os', {}),
             app=flat_session.get('app', {}),
             device=flat_session.get('device', {}),
@@ -133,9 +132,8 @@ def event_payload_to_event(
         event_dict = EventDict(
             id=id,
             name=event_name,
-            entity=event_payload.entity,
+            entity=entity,
             metadata=meta_dict,
-            profile=profile_entity_dict,  # profile can be None when profile_less event.
             type=event_type,
             properties=event_payload.properties,
             source=source_dict,  # Entity
