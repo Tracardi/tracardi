@@ -14,17 +14,9 @@
         "cvv": ""
       }
     },
-    "copy": {
-      "data.ec.order.id":                  "properties.id",
-      "data.payment.method":               "properties.method",
-      "data.payment.credit_card.number":   "properties.credit_card.number",
-      "data.payment.credit_card.expires":  "properties.credit_card.expires",
-      "data.payment.credit_card.holder":   "properties.credit_card.holder"
-    },
     "tags": [
       "event:behavioral"
-    ],
-    "state": "purchase"
+    ]
   },
   {
     "name": "Payment Sent",
@@ -45,17 +37,10 @@
         "due_date": "2023-01-01 00:00:00"
       }
     },
-    "copy": {
-      "data.ec.order.id":              "properties.order_id",
-      "data.ec.order.cost.value":      "properties.payment.value",
-      "data.ec.order.cost.currency":   "properties.payment.currency",
-      "data.ec.order.cost.due_date":   "properties.payment.due_date"
-    },
     "tags": [
       "event:operational",
       "entity:payment"
-    ],
-    "state": "purchase"
+    ]
   },
   {
     "name": "Payment Received",
@@ -76,16 +61,9 @@
         "due_date": "2023-01-01 00:00:00"
       }
     },
-    "copy": {
-      "data.ec.order.id":                "properties.order_id",
-      "data.ec.order.income.value":      "properties.payment.value",
-      "data.ec.order.income.currency":   "properties.payment.currency",
-      "data.ec.order.income.due_date":   "properties.payment.due_date"
-    },
     "tags": [
       "event:operational",
       "entity:payment"
-    ],
-    "state": "purchase"
+    ]
   }
 ]

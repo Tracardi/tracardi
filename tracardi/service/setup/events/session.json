@@ -14,7 +14,6 @@
           "insert": "metadata.time.insert",
           "create": "metadata.time.create",
           "update": "metadata.time.update",
-          "timestamp": "metadata.time.timestamp",
           "duration": "metadata.time.duration",
           "weekday": "metadata.time.weekday",
           "tz": "metadata.time.tz",
@@ -87,63 +86,9 @@
       "traits": "traits",
       "aux": "aux"
     },
-    "copy": {
-      "id": "entity.id",
-      "source.id": "properties.source.id",
-      "metadata.status": "properties.metadata.status",
-      "metadata.time.insert": "properties.metadata.time.insert",
-      "metadata.time.create": "properties.metadata.time.create",
-      "metadata.time.update": "properties.metadata.time.update",
-      "metadata.time.timestamp": "properties.metadata.time.timestamp",
-      "metadata.time.duration": "properties.metadata.time.duration",
-      "metadata.time.weekday": "properties.metadata.time.weekday",
-      "metadata.time.tz": "properties.metadata.time.tz",
-      "metadata.time.offset": "properties.metadata.time.offset",
-      "metadata.channel": "properties.metadata.channel",
-      "metadata.hit.referer": "properties.metadata.hit.referer",
-      "metadata.device.name": "properties.device.name",
-      "metadata.device.brand": "properties.device.brand",
-      "metadata.device.model": "properties.device.model",
-      "metadata.device.type": "properties.device.type",
-      "metadata.device.touch": "properties.device.touch",
-      "metadata.device.ip": "properties.device.ip",
-      "metadata.device.resolution.width": "properties.device.resolution.width",
-      "metadata.device.resolution.height": "properties.device.resolution.height",
-      "metadata.device.resolution.orientation": "properties.device.resolution.orientation",
-      "metadata.device.gpu.vendor.id": "properties.device.gpu.vendor.id",
-      "metadata.device.gpu.vendor.name": "properties.device.gpu.vendor.name",
-      "metadata.device.gpu.renderer.renderer": "properties.device.gpu.renderer.renderer",
-      "metadata.device.color.depth": "properties.device.color.depth",
-      "metadata.device.orientation": "properties.device.orientation",
-      "metadata.device.geo.country.name": "properties.device.geo.country.name",
-      "metadata.device.geo.country.code": "properties.device.geo.country.code",
-      "metadata.device.geo.county": "properties.device.geo.county",
-      "metadata.device.geo.city": "properties.device.geo.city",
-      "metadata.device.geo.postal": "properties.device.geo.postal",
-      "metadata.device.geo.latitude": "properties.device.geo.latitude",
-      "metadata.device.geo.longitude": "properties.device.geo.longitude",
-      "metadata.device.geo.location": "properties.device.geo.location",
-      "metadata.os.name": "properties.os.name",
-      "metadata.os.version": "properties.os.version",
-      "metadata.app.type": "properties.app.type",
-      "metadata.app.name": "properties.app.name",
-      "metadata.app.version": "properties.app.version",
-      "metadata.app.language": "properties.app.language",
-      "metadata.app.bot": "properties.app.bot",
-      "metadata.app.resolution": "properties.app.resolution",
-      "metadata.utm.source": "properties.utm.source",
-      "metadata.utm.medium": "properties.utm.medium",
-      "metadata.utm.campaign": "properties.utm.campaign",
-      "metadata.utm.term": "properties.utm.term",
-      "metadata.utm.content": "properties.utm.content",
-      "context": "properties.context",
-      "properties": "properties.properties",
-      "traits": "properties.traits",
-      "aux": "properties.aux"
-    },
-    "profile": {
+    "entity": {
       "id": [
-        "id",
+        "entity.id",
         "equal"
       ],
       "source.id": [
@@ -151,187 +96,183 @@
         "equal"
       ],
       "metadata.status": [
-        "metadata.status",
+        "properties.metadata.status",
         "equal"
       ],
       "metadata.time.insert": [
-        "metadata.time.insert",
+        "properties.metadata.time.insert",
         "equal"
       ],
       "metadata.time.create": [
-        "metadata.time.create",
+        "properties.metadata.time.create",
         "equal"
       ],
       "metadata.time.update": [
-        "metadata.time.update",
-        "equal"
-      ],
-      "metadata.time.timestamp": [
-        "metadata.time.timestamp",
+        "properties.metadata.time.update",
         "equal"
       ],
       "metadata.time.duration": [
-        "metadata.time.duration",
+        "properties.metadata.time.duration",
         "equal"
       ],
       "metadata.time.weekday": [
-        "metadata.time.weekday",
+        "properties.metadata.time.weekday",
         "equal"
       ],
       "metadata.time.tz": [
-        "metadata.time.tz",
+        "properties.metadata.time.tz",
         "equal"
       ],
       "metadata.time.offset": [
-        "metadata.time.offset",
+        "properties.metadata.time.offset",
         "equal"
       ],
       "metadata.channel": [
-        "metadata.channel",
+        "properties.metadata.channel",
         "equal"
       ],
       "metadata.hit.referer": [
-        "metadata.hit.referer",
+        "properties.metadata.hit.referer",
         "equal"
       ],
       "metadata.device.name": [
-        "metadata.device.name",
+        "properties.metadata.device.name",
         "equal"
       ],
       "metadata.device.brand": [
-        "metadata.device.brand",
+        "properties.metadata.device.brand",
         "equal"
       ],
       "metadata.device.model": [
-        "metadata.device.model",
+        "properties.metadata.device.model",
         "equal"
       ],
       "metadata.device.type": [
-        "metadata.device.type",
+        "properties.metadata.device.type",
         "equal"
       ],
       "metadata.device.touch": [
-        "metadata.device.touch",
+        "properties.metadata.device.touch",
         "equal"
       ],
       "metadata.device.ip": [
-        "metadata.device.ip",
+        "properties.metadata.device.ip",
         "equal"
       ],
       "metadata.device.resolution.width": [
-        "metadata.device.resolution.width",
+        "properties.metadata.device.resolution.width",
         "equal"
       ],
       "metadata.device.resolution.height": [
-        "metadata.device.resolution.height",
+        "properties.metadata.device.resolution.height",
         "equal"
       ],
       "metadata.device.resolution.orientation": [
-        "metadata.device.resolution.orientation",
+        "properties.metadata.device.resolution.orientation",
         "equal"
       ],
       "metadata.device.gpu.vendor.id": [
-        "metadata.device.gpu.vendor.id",
+        "properties.metadata.device.gpu.vendor.id",
         "equal"
       ],
       "metadata.device.gpu.vendor.name": [
-        "metadata.device.gpu.vendor.name",
+        "properties.metadata.device.gpu.vendor.name",
         "equal"
       ],
       "metadata.device.gpu.renderer.renderer": [
-        "metadata.device.gpu.renderer.renderer",
+        "properties.metadata.device.gpu.renderer.renderer",
         "equal"
       ],
       "metadata.device.color.depth": [
-        "metadata.device.color.depth",
+        "properties.metadata.device.color.depth",
         "equal"
       ],
       "metadata.device.orientation": [
-        "metadata.device.orientation",
+        "properties.metadata.device.orientation",
         "equal"
       ],
       "metadata.device.geo.country.name": [
-        "metadata.device.geo.country.name",
+        "properties.metadata.device.geo.country.name",
         "equal"
       ],
       "metadata.device.geo.country.code": [
-        "metadata.device.geo.country.code",
+        "properties.metadata.device.geo.country.code",
         "equal"
       ],
       "metadata.device.geo.county": [
-        "metadata.device.geo.county",
+        "properties.metadata.device.geo.county",
         "equal"
       ],
       "metadata.device.geo.city": [
-        "metadata.device.geo.city",
+        "properties.metadata.device.geo.city",
         "equal"
       ],
       "metadata.device.geo.postal": [
-        "metadata.device.geo.postal",
+        "properties.metadata.device.geo.postal",
         "equal"
       ],
       "metadata.device.geo.latitude": [
-        "metadata.device.geo.latitude",
+        "properties.metadata.device.geo.latitude",
         "equal"
       ],
       "metadata.device.geo.longitude": [
-        "metadata.device.geo.longitude",
+        "properties.metadata.device.geo.longitude",
         "equal"
       ],
       "metadata.device.geo.location": [
-        "metadata.device.geo.location",
+        "properties.metadata.device.geo.location",
         "equal"
       ],
       "metadata.os.name": [
-        "metadata.os.name",
+        "properties.metadata.os.name",
         "equal"
       ],
       "metadata.os.version": [
-        "metadata.os.version",
+        "properties.metadata.os.version",
         "equal"
       ],
       "metadata.app.type": [
-        "metadata.app.type",
+        "properties.metadata.app.type",
         "equal"
       ],
       "metadata.app.name": [
-        "metadata.app.name",
+        "properties.metadata.app.name",
         "equal"
       ],
       "metadata.app.version": [
-        "metadata.app.version",
+        "properties.metadata.app.version",
         "equal"
       ],
       "metadata.app.language": [
-        "metadata.app.language",
+        "properties.metadata.app.language",
         "equal"
       ],
       "metadata.app.bot": [
-        "metadata.app.bot",
+        "properties.metadata.app.bot",
         "equal"
       ],
       "metadata.app.resolution": [
-        "metadata.app.resolution",
+        "properties.metadata.app.resolution",
         "equal"
       ],
       "metadata.utm.source": [
-        "metadata.utm.source",
+        "properties.metadata.utm.source",
         "equal"
       ],
       "metadata.utm.medium": [
-        "metadata.utm.medium",
+        "properties.metadata.utm.medium",
         "equal"
       ],
       "metadata.utm.campaign": [
-        "metadata.utm.campaign",
+        "properties.metadata.utm.campaign",
         "equal"
       ],
       "metadata.utm.term": [
-        "metadata.utm.term",
+        "properties.metadata.utm.term",
         "equal"
       ],
       "metadata.utm.content": [
-        "metadata.utm.content",
+        "properties.metadata.utm.content",
         "equal"
       ],
       "context": [
@@ -339,15 +280,15 @@
         "equal"
       ],
       "properties": [
-        "properties",
+        "properties.properties",
         "equal"
       ],
       "traits": [
-        "traits",
+        "properties.traits",
         "equal"
       ],
       "aux": [
-        "aux",
+        "properties.aux",
         "equal"
       ]
     },

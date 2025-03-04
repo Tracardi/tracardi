@@ -23,19 +23,7 @@
         "page": "url"
       }
     },
-    "copy": {
-      "data.ec.product.id":       "properties.id",
-      "data.ec.product.name":     "properties.name",
-      "data.ec.product.sku":      "properties.sku",
-      "data.ec.product.category": "properties.category",
-      "data.ec.product.brand":    "properties.brand",
-      "data.ec.product.variant":  "properties.variant",
-      "data.ec.product.price":    "properties.price",
-      "data.ec.product.quantity": "properties.quantity",
-      "data.ec.product.position": "properties.position"
-    },
-    "tags": ["activity:browsing", "event:behavioral"],
-    "state": "awareness"
+    "tags": ["activity:browsing", "event:behavioral"]
   },
   {
     "name": "Product Details Page View",
@@ -59,17 +47,7 @@
         "page": "url"
       }
     },
-    "copy": {
-      "data.ec.product.id":        "properties.id",
-      "data.ec.product.name":      "properties.name",
-      "data.ec.product.sku":       "properties.sku",
-      "data.ec.product.category":  "properties.category",
-      "data.ec.product.brand":     "properties.brand",
-      "data.ec.product.variant":   "properties.variant",
-      "data.ec.product.price":     "properties.price"
-    },
-    "tags": ["activity:browsing", "event:behavioral"],
-    "state": "awareness"
+    "tags": ["activity:browsing", "event:behavioral"]
   },
   {
     "name": "Product Added To Basket",
@@ -95,18 +73,7 @@
         "page": "url"
       }
     },
-    "copy": {
-      "data.ec.product.id":       "properties.id",
-      "data.ec.product.name":     "properties.name",
-      "data.ec.product.sku":      "properties.sku",
-      "data.ec.product.category": "properties.category",
-      "data.ec.product.brand":    "properties.brand",
-      "data.ec.product.variant":  "properties.variant",
-      "data.ec.product.price":    "properties.price",
-      "data.ec.product.quantity": "properties.quantity"
-    },
-    "tags": ["event:behavioral"],
-    "state": "consideration"
+    "tags": ["event:behavioral"]
   },
   {
     "name": "Product Removed From Basket",
@@ -132,18 +99,7 @@
         "page": "url"
       }
     },
-    "copy": {
-      "data.ec.product.id":        "properties.id",
-      "data.ec.product.name":      "properties.name",
-      "data.ec.product.sku":       "properties.sku",
-      "data.ec.product.category":  "properties.category",
-      "data.ec.product.brand":     "properties.brand",
-      "data.ec.product.variant":   "properties.variant",
-      "data.ec.product.price":     "properties.price",
-      "data.ec.product.quantity":  "properties.quantity"
-    },
-    "tags": ["event:behavioral"],
-    "state": "consideration"
+    "tags": ["event:behavioral"]
   },
 
 
@@ -158,14 +114,9 @@
       "id": "string",
       "media": "string"
     },
-    "copy": {
-      "data.ec.product.id":      "properties.id",
-      "data.marketing.channel":  "properties.media"
-    },
     "tags": [
       "event:behavioral"
-    ],
-    "state": "advocacy"
+    ]
   },
   {
     "name": "Product Reviewed",
@@ -177,15 +128,9 @@
       "review": "string",
       "rate": 0
     },
-    "copy": {
-      "data.ec.product.id":     "properties.id",
-      "data.ec.product.review": "properties.review",
-      "data.ec.product.rate":   "properties.rate"
-    },
     "tags": [
       "event:behavioral"
-    ],
-    "state": "retention"
+    ]
   },
   {
     "name": "Product Returned",
@@ -195,12 +140,8 @@
     "properties": {
       "id": "string"
     },
-    "copy": {
-      "data.ec.product.id": "properties.id"
-    },
     "tags": [
       "event:behavioral"
-    ],
-    "state": "retention"
+    ]
   }
 ]

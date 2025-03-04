@@ -92,11 +92,11 @@ def get_default_mappings_for(event_type, type) -> Optional[dict]:
     return schema.get(type, None)
 
 
-def get_default_event_type_schema(event_type) -> Optional[dict]:
+def get_default_event_type_schema(event_type, entity_name) -> Optional[dict]:
     if event_type not in _predefined_event_types:
         _cache_predefined_event_types()
 
-    schema = _predefined_event_types.get(event_type, None)
+    schema = _predefined_event_types.get((event_type, entity_name), None)
     return schema
 
 
