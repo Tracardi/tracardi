@@ -767,7 +767,7 @@
         "equal"
       ],
       "data.identifier.coupons": [
-        "properties.coupon",
+        "data.identifier.coupons",
         "append"
       ],
       "data.identifier.badge": [
@@ -1025,19 +1025,19 @@
         "append"
       ],
       "data.preferences.sizes": [
-        "data.preferences.size",
+        "data.preferences.sizes",
         "append"
       ],
       "data.preferences.brands": [
-        "data.preferences.brand",
+        "data.preferences.brands",
         "append"
       ],
       "data.preferences.channels": [
-        "data.preferences.channel",
+        "data.preferences.channels",
         "append"
       ],
       "data.preferences.payments": [
-        "data.preferences.payment",
+        "data.preferences.payments",
         "append"
       ]
     },
@@ -1181,15 +1181,15 @@
     },
     "profile": {
       "data.devices.last.geo.latitude": [
-        "properties.location.1",
+        "data.devices.last.geo.latitude",
         "equal"
       ],
       "data.devices.last.geo.longitude": [
-        "properties.location.0",
+        "data.devices.last.geo.longitude",
         "equal"
       ],
       "data.devices.last.geo.location": [
-        "properties.location",
+        "data.devices.last.geo.location",
         "equal"
       ]
     },
