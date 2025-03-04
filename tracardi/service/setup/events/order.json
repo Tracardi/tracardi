@@ -1,0 +1,204 @@
+[
+  {
+    "id": "order-waiting-for-dispatch",
+    "entity_name": "order",
+    "name": "Order Waiting For Dispatch",
+    "description": "Order is waiting to be dispatched from the warehouse",
+    "const": {
+      "status": "waiting-for-dispatch"
+    },
+    "properties": {
+      "id": "string",
+      "status": "string"
+    },
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.status"
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "purchase"
+  },
+   {
+    "id": "order-dispatched",
+     "entity_name": "order",
+    "name": "Order Dispatched",
+    "description": "Order dispatched from warehouse",
+    "const": {
+      "status": "dispatched"
+    },
+    "properties": {
+      "id": "string",
+      "status": "string"
+    },
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.status"
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "purchase"
+  },
+   {
+    "id": "order-dispatch-in-transit",
+     "entity_name": "order",
+    "name": "Order Dispatch In Transit",
+    "description": "Order was shipped from the warehouse and is in transit",
+    "const": {
+      "status": "order-in-transit"
+    },
+    "properties": {
+      "id": "string",
+      "status": "string"
+    },
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.status"
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "purchase"
+  },
+  {
+    "id": "order-awaiting-pickup",
+    "entity_name": "order",
+    "name": "Order Awaiting Pickup",
+    "description": "Package with order waits to be picked up",
+    "const": {
+      "status": "order-awaiting-pickup"
+    },
+    "properties": {
+      "id": "string",
+      "status": "string"
+    },
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.status"
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "purchase"
+  },
+  {
+    "id": "order-delivered",
+    "entity_name": "order",
+    "name": "Order Delivered",
+    "description": "The order has been delivered. This event signifies that the order was either delivered to the doorstep or collected from the pickup center.",
+    "const": {
+      "status": "order-delivered"
+    },
+    "properties": {
+      "id": "string",
+      "status": "order-delivered-at-door-step|order-picked-up|order-delivered"
+    },
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.status"
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "purchase"
+  },
+  {
+    "name": "Order Started",
+    "description": "Customer completed the order",
+    "id": "order-started",
+    "entity_name": "order",
+    "const": {
+      "status": "started"
+    },
+    "properties": {
+      "id": "string",
+      "income": {
+        "value": 0.0,
+        "currency": "string",
+        "due_date": "2023-01-01 00:00:00"
+      },
+      "cost": {
+        "value": 0.0,
+        "currency": "string",
+        "due_date": "2023-01-01 00:00:00"
+      },
+      "affiliation": "string",
+      "products": [
+        {
+          "id": "string",
+          "name": "string",
+          "sku": "string",
+          "category": "string",
+          "brand": "string",
+          "variant": {
+            "name": "string",
+            "color": "string",
+            "size": "string"
+          },
+          "price": 10.10,
+          "quantity": 1,
+          "url": {
+            "image": "url",
+            "page": "url"
+          }
+        }
+      ]
+    },
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.status",
+      "data.ec.order.income.value":  "properties.income.value",
+      "data.ec.order.income.currency":  "properties.income.currency",
+      "data.ec.order.income.due_date":  "properties.income.due_date",
+      "data.ec.order.cost.value":    "properties.cost.value",
+      "data.ec.order.cost.currency":    "properties.cost.currency",
+      "data.ec.order.cost.due_date":    "properties.cost.due_date"
+
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "purchase"
+  },
+  {
+    "id": "order-completed",
+    "name": "Order Completed",
+    "entity_name": "order",
+    "description": "Customer completed the order",
+    "const": {
+      "status": "completed"
+    },
+    "properties": {
+      "id": "string",
+      "status": "string"
+    },
+    "copy": {
+      "data.ec.order.id":     "properties.id",
+      "data.ec.order.status": "properties.status"
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "purchase"
+  },
+  {
+    "id": "order-status-change",
+    "name": "Order Status Change",
+    "entity_name": "order",
+    "description": "Order changed status",
+    "properties": {
+      "id": "string",
+      "status": "string"
+    },
+    "copy": {
+      "data.ec.order.id":      "properties.id",
+      "data.ec.order.status":  "properties.string"
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "purchase"
+  }
+]

@@ -35,6 +35,8 @@ class EventToProfileMap(BaseModel):
 
 
 class EventToProfile(NamedEntityInContext):
+    entity: Optional[str] = 'customer'
+    source_id: Optional[str] = None
     event_type: NamedEntity
     description: Optional[str] = "No description provided"
     enabled: Optional[bool] = False

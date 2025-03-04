@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Started",
+    "description": "Customer initiated the checkout process.",
+    "explain": "This event should be used when a customer initiates the checkout process. Example usage: User clicks on \"Checkout\" button in their shopping cart. User selects \"Checkout\" option after adding items to their cart. User manually navigates to the checkout page",
+    "id": "checkout-started",
+    "entity_name": "checkout",
+    "const": {
+      "id": "[local.storage:set,__tr_checkout_id]",
+      "status": "started"
+    },
+    "properties": {
+      "id": "string",
+      "order_id": "string",
+      "currency": "string",
+      "value": 0.0,
+      "coupon": "string"
+    },
+    "copy": {
+      "data.ec.order.id":          "properties.order_id",
+      "data.ec.checkout.id":       "properties.id",
+      "data.ec.checkout.status":   "properties.status",
+      "data.ec.checkout.currency": "properties.currency",
+      "data.ec.checkout.value":    "properties.value"
+    },
+    "profile": {
+      "data.metrics.ltcosv": [
+        "data.ec.checkout.value",
+        "+"
+      ],
+      "data.metrics.ltcosc": [
+        1,
+        "increment"
+      ]
+    },
+    "tags": [
+      "event:behavioural"
+    ],
+    "state": "purchase"
+  },
+  {
+    "name": "Completed",
+    "description": "Customer completed the check-out process.",
+    "explain": "This event should be used when a customer has completed the check-out process. An example usage would be when a user adds items to their cart, enters their payment and shipping information, and clicks \"Submit Order.\"",
+    "id": "checkout-completed",
+    "entity_name": "checkout",
+    "const": {
+      "id": "[local.storage:read,__tr_checkout_id]",
+      "status": "completed"
+    },
+    "properties": {
+      "id": "string",
+      "value": 0.0
+    },
+    "copy": {
+      "data.ec.checkout.id":     "properties.id",
+      "data.ec.checkout.status": "properties.status"
+    },
+    "profile": {
+      "data.metrics.ltcocv": [
+        "properties.value",
+        "+"
+      ],
+      "data.metrics.ltcocc": [
+        1,
+        "increment"
+      ]
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "purchase"
+  }
+]

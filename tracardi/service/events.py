@@ -29,7 +29,19 @@ def _cache_predefined_event_types():
                 try:
                     content = json.load(file)
                     for item in content:
-                        _predefined_event_types[item['id']] = item
+
+                        try:
+                            entity_name = item['entity_name']
+                        except KeyError:
+                            raise ValueError(f"Wrong configuration of `{file_path}`. Could not find `entity_name` key in {item}.")
+
+                        try:
+                            event_type = item['id']
+                        except KeyError:
+                            raise ValueError(f"Wrong configuration of `{file_path}`. Could not find `id` key in {item}.")
+
+                        # (event_type, entity_name) = mapping
+                        _predefined_event_types[(event_type, entity_name)] = item
                 except Exception as e:
                     raise ValueError(f"Could not decode JSON for file {file_path}. Error: {repr(e)}")
 

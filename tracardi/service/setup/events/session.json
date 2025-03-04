@@ -1,0 +1,350 @@
+[
+  {
+    "id": "session-opened",
+    "name": "Session Opened",
+    "description": "New session opened",
+    "entity_name": "session",
+    "properties": {
+      "source": {
+        "id": "source.id"
+      },
+      "metadata": {
+        "status": "metadata.status",
+        "time": {
+          "insert": "metadata.time.insert",
+          "create": "metadata.time.create",
+          "update": "metadata.time.update",
+          "timestamp": "metadata.time.timestamp",
+          "duration": "metadata.time.duration",
+          "weekday": "metadata.time.weekday",
+          "tz": "metadata.time.tz",
+          "offset": "metadata.time.offset"
+        },
+        "channel": "metadata.channel",
+        "hit": {
+          "referer": "metadata.hit.referer"
+        }
+      },
+      "device": {
+        "name": "device.name",
+        "brand": "device.brand",
+        "model": "device.model",
+        "type": "device.type",
+        "touch": "device.touch",
+        "ip": "device.ip",
+        "resolution": {
+          "width": "device.resolution.width",
+          "height": "device.resolution.height",
+          "orientation": "device.resolution.orientation"
+        },
+        "gpu": {
+          "vendor": {
+            "id": "device.gpu.vendor.id",
+            "name": "device.gpu.vendor.name"
+          },
+          "renderer": {
+            "renderer": "device.gpu.renderer.renderer"
+          }
+        },
+        "color": {
+          "depth": "device.color.depth"
+        },
+        "orientation": "device.orientation",
+        "geo": {
+          "country": {
+            "name": "device.geo.country.name",
+            "code": "device.geo.country.code"
+          },
+          "county": "device.geo.county",
+          "city": "device.geo.city",
+          "postal": "device.geo.postal",
+          "latitude": "device.geo.latitude",
+          "longitude": "device.geo.longitude",
+          "location": "device.geo.location"
+        }
+      },
+      "os": {
+        "name": "os.name",
+        "version": "os.version"
+      },
+      "app": {
+        "type": "app.type",
+        "name": "app.name",
+        "version": "app.version",
+        "language": "app.language",
+        "bot": "app.bot",
+        "resolution": "app.resolution"
+      },
+      "utm": {
+        "source": "utm.source",
+        "medium": "utm.medium",
+        "campaign": "utm.campaign",
+        "term": "utm.term",
+        "content": "utm.content"
+      },
+      "context": "context",
+      "properties": "properties",
+      "traits": "traits",
+      "aux": "aux"
+    },
+    "copy": {
+      "source.id": "source.id",
+      "metadata.status": "metadata.status",
+      "metadata.time.duration": "metadata.time.duration",
+      "metadata.time.weekday": "metadata.time.weekday",
+      "metadata.time.tz": "metadata.time.tz",
+      "metadata.time.offset": "metadata.time.offset",
+      "metadata.channel": "metadata.channel",
+      "metadata.hit.referer": "metadata.hit.referer",
+      "device.name": "device.name",
+      "device.brand": "device.brand",
+      "device.model": "device.model",
+      "device.type": "device.type",
+      "device.touch": "device.touch",
+      "device.ip": "device.ip",
+      "device.resolution.width": "device.resolution.width",
+      "device.resolution.height": "device.resolution.height",
+      "device.resolution.orientation": "device.resolution.orientation",
+      "device.gpu.vendor.id": "device.gpu.vendor.id",
+      "device.gpu.vendor.name": "device.gpu.vendor.name",
+      "device.gpu.renderer.renderer": "device.gpu.renderer.renderer",
+      "device.color.depth": "device.color.depth",
+      "device.orientation": "device.orientation",
+      "device.geo.country.name": "device.geo.country.name",
+      "device.geo.country.code": "device.geo.country.code",
+      "device.geo.county": "device.geo.county",
+      "device.geo.city": "device.geo.city",
+      "device.geo.postal": "device.geo.postal",
+      "device.geo.latitude": "device.geo.latitude",
+      "device.geo.longitude": "device.geo.longitude",
+      "device.geo.location": "device.geo.location",
+      "os.name": "os.name",
+      "os.version": "os.version",
+      "app.type": "app.type",
+      "app.name": "app.name",
+      "app.version": "app.version",
+      "app.language": "app.language",
+      "app.bot": "app.bot",
+      "app.resolution": "app.resolution",
+      "utm.source": "utm.source",
+      "utm.medium": "utm.medium",
+      "utm.campaign": "utm.campaign",
+      "utm.term": "utm.term",
+      "utm.content": "utm.content",
+      "context": "context",
+      "properties": "properties",
+      "traits": "traits",
+      "aux": "aux"
+    },
+    "profile": {
+      "source.id": [
+        "source.id",
+        "equal"
+      ],
+      "metadata.status": [
+        "metadata.status",
+        "equal"
+      ],
+      "metadata.time.insert": [
+        "metadata.time.insert",
+        "equal"
+      ],
+      "metadata.time.create": [
+        "metadata.time.create",
+        "equal"
+      ],
+      "metadata.time.update": [
+        "metadata.time.update",
+        "equal"
+      ],
+      "metadata.time.timestamp": [
+        "metadata.time.timestamp",
+        "equal"
+      ],
+      "metadata.time.duration": [
+        "metadata.time.duration",
+        "equal"
+      ],
+      "metadata.time.weekday": [
+        "metadata.time.weekday",
+        "equal"
+      ],
+      "metadata.time.tz": [
+        "metadata.time.tz",
+        "equal"
+      ],
+      "metadata.time.offset": [
+        "metadata.time.offset",
+        "equal"
+      ],
+      "metadata.channel": [
+        "metadata.channel",
+        "equal"
+      ],
+      "metadata.hit.referer": [
+        "metadata.hit.referer",
+        "equal"
+      ],
+      "device.name": [
+        "device.name",
+        "equal"
+      ],
+      "device.brand": [
+        "device.brand",
+        "equal"
+      ],
+      "device.model": [
+        "device.model",
+        "equal"
+      ],
+      "device.type": [
+        "device.type",
+        "equal"
+      ],
+      "device.touch": [
+        "device.touch",
+        "equal"
+      ],
+      "device.ip": [
+        "device.ip",
+        "equal"
+      ],
+      "device.resolution.width": [
+        "device.resolution.width",
+        "equal"
+      ],
+      "device.resolution.height": [
+        "device.resolution.height",
+        "equal"
+      ],
+      "device.resolution.orientation": [
+        "device.resolution.orientation",
+        "equal"
+      ],
+      "device.gpu.vendor.id": [
+        "device.gpu.vendor.id",
+        "equal"
+      ],
+      "device.gpu.vendor.name": [
+        "device.gpu.vendor.name",
+        "equal"
+      ],
+      "device.gpu.renderer.renderer": [
+        "device.gpu.renderer.renderer",
+        "equal"
+      ],
+      "device.color.depth": [
+        "device.color.depth",
+        "equal"
+      ],
+      "device.orientation": [
+        "device.orientation",
+        "equal"
+      ],
+      "device.geo.country.name": [
+        "device.geo.country.name",
+        "equal"
+      ],
+      "device.geo.country.code": [
+        "device.geo.country.code",
+        "equal"
+      ],
+      "device.geo.county": [
+        "device.geo.county",
+        "equal"
+      ],
+      "device.geo.city": [
+        "device.geo.city",
+        "equal"
+      ],
+      "device.geo.postal": [
+        "device.geo.postal",
+        "equal"
+      ],
+      "device.geo.latitude": [
+        "device.geo.latitude",
+        "equal"
+      ],
+      "device.geo.longitude": [
+        "device.geo.longitude",
+        "equal"
+      ],
+      "device.geo.location": [
+        "device.geo.location",
+        "equal"
+      ],
+      "os.name": [
+        "os.name",
+        "equal"
+      ],
+      "os.version": [
+        "os.version",
+        "equal"
+      ],
+      "app.type": [
+        "app.type",
+        "equal"
+      ],
+      "app.name": [
+        "app.name",
+        "equal"
+      ],
+      "app.version": [
+        "app.version",
+        "equal"
+      ],
+      "app.language": [
+        "app.language",
+        "equal"
+      ],
+      "app.bot": [
+        "app.bot",
+        "equal"
+      ],
+      "app.resolution": [
+        "app.resolution",
+        "equal"
+      ],
+      "utm.source": [
+        "utm.source",
+        "equal"
+      ],
+      "utm.medium": [
+        "utm.medium",
+        "equal"
+      ],
+      "utm.campaign": [
+        "utm.campaign",
+        "equal"
+      ],
+      "utm.term": [
+        "utm.term",
+        "equal"
+      ],
+      "utm.content": [
+        "utm.content",
+        "equal"
+      ],
+      "context": [
+        "context",
+        "equal"
+      ],
+      "properties": [
+        "properties",
+        "equal"
+      ],
+      "traits": [
+        "traits",
+        "equal"
+      ],
+      "aux": [
+        "aux",
+        "equal"
+      ]
+    },
+    "tags": [
+      "activity:locating",
+      "event:system"
+    ]
+  }
+]

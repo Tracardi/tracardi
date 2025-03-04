@@ -23,6 +23,15 @@ async def load_all_event_to_profile_mapping(search: Optional[str] = None,
     return _records(records)
 
 
+async def load_enabled_event_to_profile_mapping() -> List[EventToProfile]:
+    records = await etpms.load_enabled()
+
+    if not records.exists():
+        return []
+
+    return list(records.map_to_objects(map_to_event_to_profile))
+
+
 async def load_event_to_profile_mapping_by_id(mapping_id: str) -> Optional[EventToProfile]:
     record = await etpms.load_by_id(mapping_id)
 

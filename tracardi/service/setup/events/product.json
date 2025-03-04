@@ -1,0 +1,206 @@
+[
+  {
+    "name": "Product Clicked",
+    "description": "Customer clicked on a product.",
+    "id": "product-clicked",
+    "entity_name": "product",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "sku": "string",
+      "category": "string",
+      "brand": "string",
+      "variant": {
+        "name": "string",
+        "color": "string",
+        "size": "string"
+      },
+      "price": 10.15,
+      "quantity": 2,
+      "position": 1,
+      "url": {
+        "image": "url",
+        "page": "url"
+      }
+    },
+    "copy": {
+      "data.ec.product.id":       "properties.id",
+      "data.ec.product.name":     "properties.name",
+      "data.ec.product.sku":      "properties.sku",
+      "data.ec.product.category": "properties.category",
+      "data.ec.product.brand":    "properties.brand",
+      "data.ec.product.variant":  "properties.variant",
+      "data.ec.product.price":    "properties.price",
+      "data.ec.product.quantity": "properties.quantity",
+      "data.ec.product.position": "properties.position"
+    },
+    "tags": ["activity:browsing", "event:behavioral"],
+    "state": "awareness"
+  },
+  {
+    "name": "Product Details Page View",
+    "description": "Customer viewed a product details page.",
+    "id": "product-details-page-view",
+    "entity_name": "product",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "sku": "string",
+      "category": "string",
+      "brand": "string",
+      "variant": {
+        "name": "string",
+        "color": "string",
+        "size": "string"
+      },
+      "price": 0,
+      "url": {
+        "image": "url",
+        "page": "url"
+      }
+    },
+    "copy": {
+      "data.ec.product.id":        "properties.id",
+      "data.ec.product.name":      "properties.name",
+      "data.ec.product.sku":       "properties.sku",
+      "data.ec.product.category":  "properties.category",
+      "data.ec.product.brand":     "properties.brand",
+      "data.ec.product.variant":   "properties.variant",
+      "data.ec.product.price":     "properties.price"
+    },
+    "tags": ["activity:browsing", "event:behavioral"],
+    "state": "awareness"
+  },
+  {
+    "name": "Product Added To Basket",
+    "entity_name": "product",
+    "description": "Customer added a product to their shopping cart",
+    "explain": "This event should be used when a customer adds a product to their shopping cart.",
+    "id": "product-added-to-basket",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "sku": "string",
+      "category": "string",
+      "brand": "string",
+      "variant": {
+        "name": "string",
+        "color": "string",
+        "size": "string"
+      },
+      "price": 10.10,
+      "quantity": 1,
+      "url": {
+        "image": "url",
+        "page": "url"
+      }
+    },
+    "copy": {
+      "data.ec.product.id":       "properties.id",
+      "data.ec.product.name":     "properties.name",
+      "data.ec.product.sku":      "properties.sku",
+      "data.ec.product.category": "properties.category",
+      "data.ec.product.brand":    "properties.brand",
+      "data.ec.product.variant":  "properties.variant",
+      "data.ec.product.price":    "properties.price",
+      "data.ec.product.quantity": "properties.quantity"
+    },
+    "tags": ["event:behavioral"],
+    "state": "consideration"
+  },
+  {
+    "name": "Product Removed From Basket",
+    "description": "Customer removed a product from their shopping cart",
+    "explain": "This event should be used when a customer removes a product from their shopping cart. Example Usage: A customer has added a pair of shoes to their shopping cart but decides to remove it before completing the purchase.",
+    "id": "product-removed-from-basket",
+    "entity_name": "product",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "sku": "string",
+      "category": "string",
+      "brand": "string",
+      "variant": {
+        "name": "string",
+        "color": "string",
+        "size": "string"
+      },
+      "price": 10.10,
+      "quantity": 1,
+      "url": {
+        "image": "url",
+        "page": "url"
+      }
+    },
+    "copy": {
+      "data.ec.product.id":        "properties.id",
+      "data.ec.product.name":      "properties.name",
+      "data.ec.product.sku":       "properties.sku",
+      "data.ec.product.category":  "properties.category",
+      "data.ec.product.brand":     "properties.brand",
+      "data.ec.product.variant":   "properties.variant",
+      "data.ec.product.price":     "properties.price",
+      "data.ec.product.quantity":  "properties.quantity"
+    },
+    "tags": ["event:behavioral"],
+    "state": "consideration"
+  },
+
+
+
+
+  {
+    "name": "Product Shared",
+    "description": "Customer shared a product.",
+    "id": "product-shared",
+    "entity_name": "product",
+    "properties": {
+      "id": "string",
+      "media": "string"
+    },
+    "copy": {
+      "data.ec.product.id":      "properties.id",
+      "data.marketing.channel":  "properties.media"
+    },
+    "tags": [
+      "event:behavioral"
+    ],
+    "state": "advocacy"
+  },
+  {
+    "name": "Product Reviewed",
+    "description": "Customer reviewed a product.",
+    "id": "product-reviewed",
+    "entity_name": "product",
+    "properties": {
+      "id": "string",
+      "review": "string",
+      "rate": 0
+    },
+    "copy": {
+      "data.ec.product.id":     "properties.id",
+      "data.ec.product.review": "properties.review",
+      "data.ec.product.rate":   "properties.rate"
+    },
+    "tags": [
+      "event:behavioral"
+    ],
+    "state": "retention"
+  },
+  {
+    "name": "Product Returned",
+    "description": "Customer returned a product.",
+    "id": "product-returned",
+    "entity_name": "product",
+    "properties": {
+      "id": "string"
+    },
+    "copy": {
+      "data.ec.product.id": "properties.id"
+    },
+    "tags": [
+      "event:behavioral"
+    ],
+    "state": "retention"
+  }
+]

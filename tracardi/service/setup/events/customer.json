@@ -1,0 +1,1201 @@
+[
+  {
+    "name": "Updated",
+    "description": "Customer updates profile data.",
+    "id": "updated",
+    "entity_name": "customer",
+    "properties": {
+      "pii": {
+        "firstname": "string",
+        "lastname": "string",
+        "display_name": "string",
+        "birthday": "2010-01-01 00:00:00",
+        "language": {
+          "native": "string",
+          "spoken": [
+            "string"
+          ]
+        },
+        "gender": "string",
+        "education": {
+          "level": "string"
+        },
+        "civil": {
+          "status": "string"
+        },
+        "attributes": {
+          "height": 0.0,
+          "weight": 0.0,
+          "shoe_number": 0.0
+        }
+      },
+      "identifier": {
+        "id": "string",
+        "token": "string",
+        "passport": "string",
+        "credit_card": "string",
+        "coupons": [
+          "string"
+        ],
+        "badge": "string"
+      },
+      "contact": {
+        "email": {
+          "main": "string",
+          "private": "string",
+          "business": "string"
+        },
+        "phone": {
+          "main": "string",
+          "business": "string",
+          "mobile": "string",
+          "whatsapp": "string"
+        },
+        "app": {
+          "whatsapp": "string",
+          "discord": "string",
+          "slack": "string",
+          "twitter": "string",
+          "telegram": "string",
+          "wechat": "string",
+          "viber": "string",
+          "signal": "string"
+        },
+        "address": {
+          "town": "string",
+          "county": "string",
+          "country": "string",
+          "postcode": "string",
+          "street": "string",
+          "other": "string"
+        }
+      },
+      "media": {
+        "image": "string",
+        "webpage": "string",
+        "social": {
+          "twitter": "string",
+          "facebook": "string",
+          "youtube": "string",
+          "instagram": "string",
+          "tiktok": "string",
+          "linkedin": "string",
+          "reddit": "string"
+        }
+      },
+      "job": {
+        "position": "string",
+        "salary": 10.0,
+        "type": "string",
+        "company": {
+          "name": "string",
+          "size": 100,
+          "segment": "string",
+          "country": "string"
+        },
+        "department": "string"
+      },
+      "preferences": {
+        "purchases": [
+          "string"
+        ],
+        "colors": [
+          "string"
+        ],
+        "sizes": [
+          "string"
+        ],
+        "devices": [
+          "string"
+        ],
+        "channels": [
+          "string"
+        ],
+        "payments": [
+          "string"
+        ],
+        "brands": [
+          "string"
+        ],
+        "fragrances": [
+          "string"
+        ],
+        "services": [
+          "string"
+        ],
+        "other": [
+          "string"
+        ]
+      },
+      "loyalty": {
+        "codes": [
+          "string"
+        ],
+        "card": {
+          "id": "string",
+          "name": "string",
+          "issuer": "string",
+          "expires": "2022-01-01 00:00:00",
+          "points": 0
+        }
+      }
+    },
+    "copy": {
+      "data.pii.firstname": "properties.pii.firstname",
+      "data.pii.lastname": "properties.pii.lastname",
+      "data.pii.display_name": "properties.pii.display_name",
+      "data.pii.birthday": "properties.pii.birthday",
+      "data.pii.language.native": "properties.pii.language.native",
+      "data.pii.language.spoken": "properties.pii.language.spoken",
+      "data.pii.gender": "properties.pii.gender",
+      "data.pii.education.level": "properties.pii.education.level",
+      "data.pii.civil.status": "properties.pii.civil.status",
+      "data.pii.attributes.height": "properties.pii.attributes.height",
+      "data.pii.attributes.weight": "properties.pii.attributes.weight",
+      "data.pii.attributes.shoe_number": "properties.pii.attributes.shoe_number",
+      "data.identifier.id": "properties.identifier.id",
+      "data.identifier.token": "properties.identifier.token",
+      "data.identifier.passport": "properties.identifier.passport",
+      "data.identifier.credit_card": "properties.identifier.credit_card",
+      "data.identifier.coupons": "properties.identifier.coupons",
+      "data.identifier.badge": "properties.identifier.badge",
+      "data.contact.email.main": "properties.contact.email.main",
+      "data.contact.email.private": "properties.contact.email.private",
+      "data.contact.email.business": "properties.contact.email.business",
+      "data.contact.phone.main": "properties.contact.phone.main",
+      "data.contact.phone.business": "properties.contact.phone.business",
+      "data.contact.phone.mobile": "properties.contact.phone.mobile",
+      "data.contact.phone.whatsapp": "properties.contact.phone.whatsapp",
+      "data.contact.app.whatsapp": "properties.contact.app.whatsapp",
+      "data.contact.app.discord": "properties.contact.app.discord",
+      "data.contact.app.slack": "properties.contact.app.slack",
+      "data.contact.app.twitter": "properties.contact.app.twitter",
+      "data.contact.app.telegram": "properties.contact.app.telegram",
+      "data.contact.app.wechat": "properties.contact.app.wechat",
+      "data.contact.app.viber": "properties.contact.app.viber",
+      "data.contact.app.signal": "properties.contact.app.signal",
+      "data.contact.address.town": "properties.contact.address.town",
+      "data.contact.address.county": "properties.contact.address.county",
+      "data.contact.address.country": "properties.contact.address.country",
+      "data.contact.address.postcode": "properties.contact.address.postcode",
+      "data.contact.address.street": "properties.contact.address.street",
+      "data.contact.address.other": "properties.contact.address.other",
+      "data.media.image": "properties.media.image",
+      "data.media.webpage": "properties.media.webpage",
+      "data.media.social.twitter": "properties.media.social.twitter",
+      "data.media.social.facebook": "properties.media.social.facebook",
+      "data.media.social.youtube": "properties.media.social.youtube",
+      "data.media.social.instagram": "properties.media.social.instagram",
+      "data.media.social.tiktok": "properties.media.social.tiktok",
+      "data.media.social.linkedin": "properties.media.social.linkedin",
+      "data.media.social.reddit": "properties.media.social.reddit",
+      "data.job.position": "properties.job.position",
+      "data.job.salary": "properties.job.salary",
+      "data.job.type": "properties.job.type",
+      "data.job.company.name": "properties.job.company.name",
+      "data.job.company.size": "properties.job.company.size",
+      "data.job.company.country": "properties.job.company.country",
+      "data.job.company.segment": "properties.job.company.segment",
+      "data.job.department": "properties.job.department",
+      "data.preferences.purchases": "properties.preferences.purchases",
+      "data.preferences.colors": "properties.preferences.colors",
+      "data.preferences.sizes": "properties.preferences.sizes",
+      "data.preferences.devices": "properties.preferences.devices",
+      "data.preferences.channels": "properties.preferences.channels",
+      "data.preferences.payments": "properties.preferences.payments",
+      "data.preferences.brands": "properties.preferences.brands",
+      "data.preferences.fragrances": "properties.preferences.fragrances",
+      "data.preferences.services": "properties.preferences.services",
+      "data.preferences.other": "properties.preferences.other",
+      "data.loyalty.codes": "properties.loyalty.codes",
+      "data.loyalty.card.id": "properties.loyalty.card.id",
+      "data.loyalty.card.name": "properties.loyalty.card.name",
+      "data.loyalty.card.issuer": "properties.loyalty.card.issuer",
+      "data.loyalty.card.expires": "properties.loyalty.card.expires",
+      "data.loyalty.card.points": "properties.loyalty.card.points"
+    },
+    "profile": {
+      "data.pii.firstname": [
+        "data.pii.firstname",
+        "equal"
+      ],
+      "data.pii.lastname": [
+        "data.pii.lastname",
+        "equal"
+      ],
+      "data.pii.display_name": [
+        "data.pii.display_name",
+        "equal"
+      ],
+      "data.pii.birthday": [
+        "data.pii.birthday",
+        "equal"
+      ],
+      "data.pii.language.native": [
+        "data.pii.language.native",
+        "equal"
+      ],
+      "data.pii.language.spoken": [
+        "data.pii.language.spoken",
+        "append"
+      ],
+      "data.pii.gender": [
+        "data.pii.gender",
+        "equal"
+      ],
+      "data.pii.education.level": [
+        "data.pii.education.level",
+        "equal"
+      ],
+      "data.pii.civil.status": [
+        "data.pii.civil.status",
+        "equal"
+      ],
+      "data.pii.attributes.height": [
+        "data.pii.attributes.height",
+        "equal"
+      ],
+      "data.pii.attributes.weight": [
+        "data.pii.attributes.weight",
+        "equal"
+      ],
+      "data.pii.attributes.shoe_number": [
+        "data.pii.attributes.shoe_number",
+        "equal"
+      ],
+      "data.identifier.id": [
+        "data.identifier.id",
+        "equal"
+      ],
+      "data.identifier.token": [
+        "data.identifier.token",
+        "equal"
+      ],
+      "data.identifier.passport": [
+        "data.identifier.passport",
+        "equal"
+      ],
+      "data.identifier.credit_card": [
+        "data.identifier.credit_card",
+        "equal"
+      ],
+      "data.identifier.coupons": [
+        "data.identifier.coupons",
+        "equal"
+      ],
+      "data.identifier.badge": [
+        "data.identifier.badge",
+        "equal"
+      ],
+      "data.contact.app.whatsapp": [
+        "data.contact.app.whatsapp",
+        "equal"
+      ],
+      "data.contact.email.main": [
+        "data.contact.email.main",
+        "equal"
+      ],
+      "data.contact.email.private": [
+        "data.contact.email.private",
+        "equal"
+      ],
+      "data.contact.email.business": [
+        "data.contact.email.business",
+        "equal"
+      ],
+      "data.contact.phone.main": [
+        "data.contact.phone.main",
+        "equal"
+      ],
+      "data.contact.phone.business": [
+        "data.contact.phone.business",
+        "equal"
+      ],
+      "data.contact.phone.mobile": [
+        "data.contact.phone.mobile",
+        "equal"
+      ],
+      "data.contact.phone.whatsapp": [
+        "data.contact.phone.whatsapp",
+        "equal"
+      ],
+      "data.contact.app.discord": [
+        "data.contact.app.discord",
+        "equal"
+      ],
+      "data.contact.app.slack": [
+        "data.contact.app.slack",
+        "equal"
+      ],
+      "data.contact.app.twitter": [
+        "data.contact.app.twitter",
+        "equal"
+      ],
+      "data.contact.app.telegram": [
+        "data.contact.app.telegram",
+        "equal"
+      ],
+      "data.contact.app.wechat": [
+        "data.contact.app.wechat",
+        "equal"
+      ],
+      "data.contact.app.viber": [
+        "data.contact.app.viber",
+        "equal"
+      ],
+      "data.contact.app.signal": [
+        "data.contact.app.signal",
+        "equal"
+      ],
+      "data.contact.address.town": [
+        "data.contact.address.town",
+        "equal"
+      ],
+      "data.contact.address.county": [
+        "data.contact.address.county",
+        "equal"
+      ],
+      "data.contact.address.country": [
+        "data.contact.address.country",
+        "equal"
+      ],
+      "data.contact.address.postcode": [
+        "data.contact.address.postcode",
+        "equal"
+      ],
+      "data.contact.address.street": [
+        "data.contact.address.street",
+        "equal"
+      ],
+      "data.contact.address.other": [
+        "data.contact.address.other",
+        "equal"
+      ],
+      "data.media.image": [
+        "data.media.image",
+        "equal"
+      ],
+      "data.media.webpage": [
+        "data.media.webpage",
+        "equal"
+      ],
+      "data.media.social.twitter": [
+        "data.media.social.twitter",
+        "equal"
+      ],
+      "data.media.social.facebook": [
+        "data.media.social.facebook",
+        "equal"
+      ],
+      "data.media.social.youtube": [
+        "data.media.social.youtube",
+        "equal"
+      ],
+      "data.media.social.instagram": [
+        "data.media.social.instagram",
+        "equal"
+      ],
+      "data.media.social.tiktok": [
+        "data.media.social.tiktok",
+        "equal"
+      ],
+      "data.media.social.linkedin": [
+        "data.media.social.linkedin",
+        "equal"
+      ],
+      "data.media.social.reddit": [
+        "data.media.social.reddit",
+        "equal"
+      ],
+      "data.job.position": [
+        "data.job.position",
+        "equal"
+      ],
+      "data.job.salary": [
+        "data.job.salary",
+        "equal"
+      ],
+      "data.job.type": [
+        "data.job.type",
+        "equal"
+      ],
+      "data.job.company.name": [
+        "data.job.company.name",
+        "equal"
+      ],
+      "data.job.company.size": [
+        "data.job.company.size",
+        "equal"
+      ],
+      "data.job.company.country": [
+        "data.job.company.country",
+        "equal"
+      ],
+      "data.job.company.segment": [
+        "data.job.company.segment",
+        "equal"
+      ],
+      "data.job.department": [
+        "data.job.department",
+        "equal"
+      ],
+      "data.preferences.purchases": [
+        "data.preferences.purchases",
+        "equal"
+      ],
+      "data.preferences.colors": [
+        "data.preferences.colors",
+        "equal"
+      ],
+      "data.preferences.sizes": [
+        "data.preferences.sizes",
+        "equal"
+      ],
+      "data.preferences.devices": [
+        "data.preferences.devices",
+        "equal"
+      ],
+      "data.preferences.channels": [
+        "data.preferences.channels",
+        "equal"
+      ],
+      "data.preferences.payments": [
+        "data.preferences.payments",
+        "equal"
+      ],
+      "data.preferences.brands": [
+        "data.preferences.brands",
+        "equal"
+      ],
+      "data.preferences.fragrances": [
+        "data.preferences.fragrances",
+        "equal"
+      ],
+      "data.preferences.services": [
+        "data.preferences.services",
+        "equal"
+      ],
+      "data.preferences.other": [
+        "data.preferences.other",
+        "equal"
+      ],
+      "data.loyalty.codes": [
+        "data.loyalty.codes",
+        "equal"
+      ],
+      "data.loyalty.card.id": [
+        "data.loyalty.card.id",
+        "equal"
+      ],
+      "data.loyalty.card.name": [
+        "data.loyalty.card.name",
+        "equal"
+      ],
+      "data.loyalty.card.issuer": [
+        "data.loyalty.card.issuer",
+        "equal"
+      ],
+      "data.loyalty.card.expires": [
+        "data.loyalty.card.expires",
+        "equal"
+      ],
+      "data.loyalty.card.points": [
+        "data.loyalty.card.points",
+        "equal"
+      ]
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "awareness"
+  },
+  {
+    "name": "Traits Updated",
+    "description": "Customer updates profile traits. All traits will be replaced by event properties.",
+    "id": "traits-updated",
+    "entity_name": "customer",
+    "properties": {},
+    "copy": {
+      "traits": "properties"
+    },
+    "profile": {
+      "traits": [
+        "traits",
+        "equal"
+      ]
+    },
+    "tags": [
+      "event:operational"
+    ]
+  },
+  {
+    "name": "Signed-In",
+    "description": "User signs in.",
+    "explain": "When a user signs in for a service, this event should be used to track it. This could also be an identification point for profile merging.",
+    "id": "signed-in",
+    "entity_name": "customer",
+    "properties": {
+      "email": {
+        "main": "string",
+        "private": "string",
+        "business": "string"
+      },
+      "phone": {
+        "main": "string",
+        "mobile": "string",
+        "whatsapp": "string",
+        "business": "string"
+      },
+      "pk": "string",
+      "login": "string"
+    },
+    "copy": {
+      "data.identifier.pk": "properties.pk",
+      "data.identifier.token": "properties.login",
+      "data.contact.email.main": "properties.email.main",
+      "data.contact.email.private": "properties.email.private",
+      "data.contact.email.business": "properties.email.business",
+      "data.contact.phone.main": "properties.phone.main",
+      "data.contact.phone.mobile": "properties.phone.mobile",
+      "data.contact.phone.business": "properties.phone.business",
+      "data.contact.phone.whatsapp": "properties.phone.whatsapp"
+    },
+    "profile": {
+      "data.identifier.pk": [
+        "data.identifier.pk",
+        "equal"
+      ],
+      "data.identifier.token": [
+        "data.identifier.token",
+        "equal"
+      ],
+      "data.contact.email.main": [
+        "data.contact.email.main",
+        "equal"
+      ],
+      "data.contact.email.private": [
+        "data.contact.email.private",
+        "equal"
+      ],
+      "data.contact.email.business": [
+        "data.contact.email.business",
+        "equal"
+      ],
+      "data.contact.phone.main": [
+        "data.contact.phone.main",
+        "equal"
+      ],
+      "data.contact.phone.business": [
+        "data.contact.phone.business",
+        "equal"
+      ],
+      "data.contact.phone.mobile": [
+        "data.contact.phone.mobile",
+        "equal"
+      ],
+      "data.contact.phone.whatsapp": [
+        "data.contact.phone.whatsapp",
+        "equal"
+      ]
+    },
+    "tags": [
+      "event:behavioral"
+    ],
+    "state": "consideration"
+  },
+  {
+    "name": "Signed-Up",
+    "description": "User signs up.",
+    "explain": "When a user signs up for a service, this event should be used to track it. This could also be an identification point for profile merging.",
+    "id": "signed-up",
+    "entity_name": "customer",
+    "properties": {
+      "email": {
+        "main": "string",
+        "private": "string",
+        "business": "string"
+      },
+      "login": "string",
+      "firstname": "string",
+      "lastname": "string",
+      "custom": "object"
+    },
+    "copy": {
+      "data.contact.email.main": "properties.email.main",
+      "data.contact.email.private": "properties.email.private",
+      "data.contact.email.business": "properties.email.business",
+      "data.pii.firstname": "properties.firstname",
+      "data.pii.lastname": "properties.lastname",
+      "data.identifier.token": "properties.login"
+    },
+    "profile": {
+      "data.contact.email.main": [
+        "data.contact.email.main",
+        "equal"
+      ],
+      "data.contact.email.private": [
+        "data.contact.email.private",
+        "equal"
+      ],
+      "data.contact.email.business": [
+        "data.contact.email.business",
+        "equal"
+      ],
+      "data.identifier.token": [
+        "data.identifier.token",
+        "equal"
+      ],
+      "data.pii.firstname": [
+        "data.pii.firstname",
+        "equal"
+      ],
+      "data.pii.lastname": [
+        "data.pii.lastname",
+        "equal"
+      ]
+    },
+    "tags": [
+      "event:behavioral"
+    ],
+    "state": "consideration"
+  },
+  {
+    "name": "Identified",
+    "description": "User sends PII data that can be used for identification.",
+    "explain": "The \"Identified\" event should be employed when a customer provides personally identifiable information (PII). For instance, this event is relevant when a user subscribes to a newsletter or a service, or leaves a comment with their email address, or signs-in.",
+    "id": "identified",
+    "entity_name": "customer",
+    "properties": {
+      "phone": {
+        "main": "string",
+        "mobile": "string",
+        "whatsapp": "string",
+        "business": "string"
+      },
+      "email": {
+        "main": "string",
+        "private": "string",
+        "business": "string"
+      },
+      "id": "string",
+      "firstname": "string",
+      "lastname": "string",
+      "pk": "string",
+      "token": "string",
+      "passport": "string",
+      "login": "string",
+      "credit_card": "string",
+      "coupon": "string",
+      "badge": "string",
+      "twitter": "string",
+      "whatsapp": "string",
+      "discord": "string",
+      "slack": "string",
+      "telegram": "string",
+      "wechat": "string",
+      "viber": "string",
+      "signal": "string"
+    },
+    "copy": {
+      "data.pii.firstname": "properties.firstname",
+      "data.pii.lastname": "properties.lastname",
+      "data.contact.email.main": "properties.email.main",
+      "data.contact.email.private": "properties.email.private",
+      "data.contact.email.business": "properties.email.business",
+      "data.contact.phone.main": "properties.phone.main",
+      "data.contact.phone.mobile": "properties.phone.mobile",
+      "data.contact.phone.business": "properties.phone.business",
+      "data.contact.phone.whatsapp": "properties.phone.whatsapp",
+      "data.identifier.pk": "properties.pk",
+      "data.identifier.id": "properties.id",
+      "data.identifier.token": "properties.login",
+      "data.identifier.passport": "properties.passport",
+      "data.identifier.credit_card": "properties.credit_card",
+      "data.identifier.badge": "properties.badge",
+      "data.contact.app.twitter": "properties.twitter",
+      "data.contact.app.whatsapp": "properties.whatsapp",
+      "data.contact.app.discord": "properties.discord",
+      "data.contact.app.slack": "properties.slack",
+      "data.contact.app.telegram": "properties.telegram",
+      "data.contact.app.wechat": "properties.wechat",
+      "data.contact.app.viber": "properties.viber",
+      "data.contact.app.signal": "properties.signal"
+    },
+    "profile": {
+      "data.pii.firstname": [
+        "data.pii.firstname",
+        "equal"
+      ],
+      "data.pii.lastname": [
+        "data.pii.lastname",
+        "equal"
+      ],
+      "data.contact.phone.main": [
+        "data.contact.phone.main",
+        "equal"
+      ],
+      "data.contact.phone.business": [
+        "data.contact.phone.business",
+        "equal"
+      ],
+      "data.contact.phone.mobile": [
+        "data.contact.phone.mobile",
+        "equal"
+      ],
+      "data.contact.phone.whatsapp": [
+        "data.contact.phone.whatsapp",
+        "equal"
+      ],
+      "data.identifier.pk": [
+        "data.identifier.pk",
+        "equal"
+      ],
+      "data.identifier.id": [
+        "data.identifier.id",
+        "equal"
+      ],
+      "data.identifier.token": [
+        "data.identifier.token",
+        "equal"
+      ],
+      "data.identifier.passport": [
+        "data.identifier.passport",
+        "equal"
+      ],
+      "data.identifier.credit_card": [
+        "data.identifier.credit_card",
+        "equal"
+      ],
+      "data.identifier.coupons": [
+        "properties.coupon",
+        "append"
+      ],
+      "data.identifier.badge": [
+        "data.identifier.badge",
+        "equal"
+      ],
+      "data.contact.email.main": [
+        "data.contact.email.main",
+        "equal"
+      ],
+      "data.contact.email.private": [
+        "data.contact.email.private",
+        "equal"
+      ],
+      "data.contact.email.business": [
+        "data.contact.email.business",
+        "equal"
+      ],
+      "data.contact.app.twitter": [
+        "data.contact.app.twitter",
+        "equal"
+      ],
+      "data.contact.app.whatsapp": [
+        "data.contact.app.whatsapp",
+        "equal"
+      ],
+      "data.contact.app.discord": [
+        "data.contact.app.discord",
+        "equal"
+      ],
+      "data.contact.app.slack": [
+        "data.contact.app.slack",
+        "equal"
+      ],
+      "data.contact.app.telegram": [
+        "data.contact.app.telegram",
+        "equal"
+      ],
+      "data.contact.app.wechat": [
+        "data.contact.app.wechat",
+        "equal"
+      ],
+      "data.contact.app.viber": [
+        "data.contact.app.viber",
+        "equal"
+      ],
+      "data.contact.app.signal": [
+        "data.contact.app.signal",
+        "equal"
+      ]
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "consideration"
+  },
+  {
+    "name": "Interest Increased",
+    "description": "Increased interest for current profile.",
+    "id": "interest-increased",
+    "entity_name": "customer",
+    "properties": {
+      "interest": "string",
+      "value": 1.0
+    },
+    "tags": [
+      "event:behavioral"
+    ],
+    "compute": {
+      "run": "always",
+      "func": [
+        [
+          null,
+          "call:tracardi.service.setup.events.interests.logic,increase_interest"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "Interest Decreased",
+    "description": "Decreased interest for current profile.",
+    "id": "interest-decreased",
+    "entity_name": "customer",
+    "properties": {
+      "interest": "string",
+      "value": 1.0
+    },
+    "tags": [
+      "event:behavioral"
+    ],
+    "compute": {
+      "run": "always",
+      "func": [
+        [
+          null,
+          "call:tracardi.service.setup.events.interests.logic,decrease_interest"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "Interest Cleared",
+    "description": "Reset interest for current profile to defined value.",
+    "id": "interest-cleared",
+    "entity_name": "customer",
+    "properties": {
+      "interest": "string",
+      "value": 0.0
+    },
+    "tags": [
+      "event:behavioral"
+    ],
+    "compute": {
+      "run": "always",
+      "func": [
+        [
+          null,
+          "call:tracardi.service.setup.events.interests.logic,reset_interest"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "Loyalty Card Added",
+    "id": "loyalty-card-added",
+    "entity_name": "customer",
+    "description": "Customer adds or receives loyalty card.",
+    "properties": {
+      "id": "string",
+      "name": "string",
+      "issuer": "string",
+      "expires": "2023-01-01 00:00:00"
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "retention"
+  },
+  {
+    "name": "Loyalty Card Removed",
+    "id": "loyalty-card-removed",
+    "entity_name": "customer",
+    "description": "Customer removes or loyalty card is deleted.",
+    "properties": {
+      "id": "string"
+    },
+    "tags": [
+      "event:operational"
+    ],
+    "state": "retention"
+  },
+  {
+    "name": "Message Sent",
+    "description": "Message was sent to the customer.",
+    "id": "message-sent",
+    "entity_name": "customer",
+    "properties": {
+      "id": "string",
+      "conversation": "string",
+      "type": "online-message|newsletter|...",
+      "message": "string",
+      "sender": "string",
+      "recipient": "string",
+      "identity": {
+        "phone": {
+          "main": "string",
+          "mobile": "string",
+          "whatsapp": "string",
+          "business": "string"
+        },
+        "email": {
+          "main": "string",
+          "private": "string",
+          "business": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "Message Received",
+    "description": "Customer received message.",
+    "id": "message-received",
+    "entity_name": "customer",
+    "properties": {
+      "id": "string",
+      "conversation": "string",
+      "type": "string",
+      "message": "string",
+      "sender": "string",
+      "recipient": "string",
+      "identity": {
+        "phone": {
+          "main": "string",
+          "mobile": "string",
+          "whatsapp": "string",
+          "business": "string"
+        },
+        "email": {
+          "main": "string",
+          "private": "string",
+          "business": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "Message Opened",
+    "description": "Customer opened message.",
+    "id": "message-opened",
+    "entity_name": "customer",
+    "properties": {
+      "id": "string",
+      "conversation": "string",
+      "type": "string",
+      "message": "string",
+      "sender": "string",
+      "recipient": "string",
+      "identity": {
+        "phone": {
+          "main": "string",
+          "mobile": "string",
+          "whatsapp": "string",
+          "business": "string"
+        },
+        "email": {
+          "main": "string",
+          "private": "string",
+          "business": "string"
+        }
+      }
+    }
+  },
+  {
+    "name": "Preference Added",
+    "description": "Add preference to current customer.",
+    "id": "preference-added",
+    "entity_name": "customer",
+    "properties": {
+      "color": "white",
+      "size": "M",
+      "brand": "apple",
+      "channel": "mobile",
+      "payment": "card"
+    },
+    "copy": {
+      "data.preferences.colors": "properties.color",
+      "data.preferences.sizes": "properties.size",
+      "data.preferences.brands": "properties.brand",
+      "data.preferences.channels": "properties.channel",
+      "data.preferences.payments": "properties.payment"
+    },
+    "profile": {
+      "data.preferences.colors": [
+        "data.preferences.colors",
+        "append"
+      ],
+      "data.preferences.sizes": [
+        "data.preferences.size",
+        "append"
+      ],
+      "data.preferences.brands": [
+        "data.preferences.brand",
+        "append"
+      ],
+      "data.preferences.channels": [
+        "data.preferences.channel",
+        "append"
+      ],
+      "data.preferences.payments": [
+        "data.preferences.payment",
+        "append"
+      ]
+    },
+    "tags": [
+      "event:behavioral"
+    ]
+  },
+  {
+    "name": "Content Viewed",
+    "description": "Signals that customer viewed some content.",
+    "id": "content-viewed",
+    "entity_name": "customer",
+    "properties": {
+      "id": "string",
+      "type": "string",
+      "tag": "string",
+      "content": "string",
+      "duration": 0,
+      "mouseOverDuration": 0,
+      "selectedText": [],
+      "duplicateCount": 1,
+      "clickCount": 0
+    },
+    "tags": [
+      "event:signal"
+    ]
+  },
+  {
+    "name": "Product Search Viewed",
+    "description": "Customer viewed a product list or product category.",
+    "id": "product-search-viewed",
+    "entity_name": "customer",
+    "properties": {
+      "type": "product",
+      "query": "string",
+      "filters": [
+        {
+          "key": "string",
+          "value": "string"
+        }
+      ],
+      "sorting": [
+        {
+          "key": "string",
+          "order": "string"
+        }
+      ],
+      "products": [
+        {
+          "id": "string",
+          "sku": "string",
+          "name": "string",
+          "category": "string",
+          "url": {
+            "image": "url",
+            "page": "url"
+          },
+          "price": "float"
+        }
+      ]
+    },
+    "copy": {
+      "hit.query": "properties.query"
+    },
+    "tags": [
+      "activity:browsing",
+      "activity:browsing:search",
+      "event:behavioral"
+    ],
+    "state": "awareness"
+  },
+  {
+    "name": "Content Searched",
+    "description": "Customer searched for products, services, etc.",
+    "id": "content-searched",
+    "entity_name": "customer",
+    "properties": {
+      "category": "string",
+      "query": "string"
+    },
+    "copy": {
+      "hit.category": "properties.category",
+      "hit.query": "properties.query"
+    },
+    "tags": [
+      "activity:browsing:search",
+      "event:behavioral"
+    ]
+  },
+  {
+    "name": "Page Viewed",
+    "description": "Customer views a page.",
+    "id": "page-viewed",
+    "entity_name": "customer",
+    "properties": {
+      "id": "string",
+      "category": "string"
+    },
+    "copy": {
+      "hit.id": "properties.id",
+      "hit.category": "properties.category"
+    },
+    "tags": [
+      "activity:browsing",
+      "event:behavioral"
+    ],
+    "state": "awareness"
+  },
+  {
+    "name": "Page Printed",
+    "description": "Customer prints a page.",
+    "id": "page-printed",
+    "entity_name": "customer",
+    "properties": {
+      "category": "string"
+    },
+    "copy": {
+      "hit.category": "properties.category"
+    },
+    "tags": [
+      "activity:printing",
+      "event:behavioral"
+    ],
+    "state": "awareness"
+  },
+  {
+    "name": "Located",
+    "description": "Registers customer location.",
+    "id": "located",
+    "entity_name": "customer",
+    "properties": {
+      "location": [
+        0.0,
+        0.0
+      ]
+    },
+    "copy": {
+      "data.devices.last.geo.location": "properties.location",
+      "data.devices.last.geo.longitude": "properties.location[0]",
+      "data.devices.last.geo.latitude": "properties.latitude[1]"
+    },
+    "profile": {
+      "data.devices.last.geo.latitude": [
+        "properties.location.1",
+        "equal"
+      ],
+      "data.devices.last.geo.longitude": [
+        "properties.location.0",
+        "equal"
+      ],
+      "data.devices.last.geo.location": [
+        "properties.location",
+        "equal"
+      ]
+    },
+    "tags": [
+      "activity:locating",
+      "event:system"
+    ]
+  }
+]

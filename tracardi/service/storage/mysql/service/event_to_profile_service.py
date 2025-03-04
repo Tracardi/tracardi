@@ -41,3 +41,14 @@ class EventToProfileMappingService(TableService):
             EventToProfileMappingTable,
             where=where
         )
+
+    async def load_enabled(self) -> SelectResult:
+        where = where_tenant_and_mode_context(
+                EventToProfileMappingTable,
+                EventToProfileMappingTable.enabled == True
+            )
+
+        return await self._select_in_deployment_mode(
+            EventToProfileMappingTable,
+            where=where
+        )
