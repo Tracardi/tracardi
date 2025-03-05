@@ -440,7 +440,7 @@
     "id": "traits-updated",
     "entity_name": "customer",
     "properties": {},
-    "mapping": {
+    "entity": {
       "traits": [
         "properties",
         "equal"
@@ -471,7 +471,7 @@
       "pk": "string",
       "login": "string"
     },
-    "mapping": {
+    "entity": {
       "data.identifier.pk": [
         "properties.pk",
         "equal"
@@ -531,7 +531,7 @@
       "lastname": "string",
       "custom": "object"
     },
-    "mapping": {
+    "entity": {
       "data.contact.email.main": [
         "properties.email.main",
         "equal"
@@ -599,7 +599,7 @@
       "viber": "string",
       "signal": "string"
     },
-    "mapping": {
+    "entity": {
       "data.pii.firstname": [
         "properties.firstname",
         "equal"
@@ -859,7 +859,7 @@
       "channel": "mobile",
       "payment": "card"
     },
-    "mapping": {
+    "entity": {
       "data.preferences.colors": [
         "properties.color",
         "append"
@@ -939,9 +939,6 @@
         }
       ]
     },
-    "mapping": {
-      "hit.query": "properties.query"
-    },
     "tags": [
       "activity:browsing",
       "activity:browsing:search",
@@ -958,10 +955,6 @@
       "category": "string",
       "query": "string"
     },
-    "mapping": {
-      "hit.category": "properties.category",
-      "hit.query": "properties.query"
-    },
     "tags": [
       "activity:browsing:search",
       "event:behavioral"
@@ -976,10 +969,6 @@
       "id": "string",
       "category": "string"
     },
-    "mapping": {
-      "hit.id": "properties.id",
-      "hit.category": "properties.category"
-    },
     "tags": [
       "activity:browsing",
       "event:behavioral"
@@ -993,9 +982,6 @@
     "entity_name": "customer",
     "properties": {
       "category": "string"
-    },
-    "mapping": {
-      "hit.category": "properties.category"
     },
     "tags": [
       "activity:printing",
@@ -1014,7 +1000,7 @@
         0.0
       ]
     },
-    "mapping": {
+    "entity": {
       "data.devices.last.geo.location": [
         "properties.location",
         "equal"
@@ -1031,6 +1017,24 @@
     "tags": [
       "activity:locating",
       "event:system"
+    ]
+  },
+  {
+    "name": "Consent Updated",
+    "description": "Registers updates consent.",
+    "id": "consent-granted",
+    "entity_name": "customer",
+    "properties": {
+      "consents": []
+    },
+    "entity": {
+      "consents": [
+        "properties.consents",
+        "equal"
+      ]
+    },
+    "tags": [
+      "event:behavioral"
     ]
   }
 ]
