@@ -60,7 +60,7 @@ class HttpConfiguration(BaseModel):
                 "json": body
             }
         else:
-            return {"data": json.dumps(body)}
+            return {"data": json.dumps(body, default=str)}  # Fixed in 1.0.6
 
 
 class HttpConnector(DestinationInterface):
