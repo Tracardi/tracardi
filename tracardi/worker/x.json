@@ -1,0 +1,57 @@
+{
+  'id': '44c0b8dd-9db5-408c-947c-01bb249cf656',
+  'type': 'session-opened',
+  'name': 'Session Opened',
+  'metadata': {
+    'time': {
+      'insert': datetime.datetime(2025,
+      3,
+      4,
+      8,
+      25,
+      8,
+      167085),
+      'create': datetime.datetime(2025,
+      3,
+      4,
+      8,
+      25,
+      8,
+      167085)
+    },
+    'status': 'collected'
+  },
+  'source': {
+    'id': 'locust-test'
+  },
+  'entity': {
+    'id': 's10',
+    'name': 'session'
+  },
+  'properties': {
+    'aux': {},
+    'context': {
+      'ip': '127.0.0.1',
+      'language': [
+        'English'
+      ],
+      'language_codes': [
+        'en'
+      ]
+    },
+    'metadata': {
+      'aux': {},
+      'channel': '',
+      'status': 'active',
+      'time': {
+        'create': '2025-03-04T08:25:08.162247Z',
+        'duration': 0,
+        'insert': '2025-03-04T08:25:08.162247Z',
+        'timestamp': 1741076708.162312,
+        'update': None,
+        'weekday': 1
+      }
+    },
+    'traits': {}
+  }
+}
