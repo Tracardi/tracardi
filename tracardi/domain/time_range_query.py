@@ -184,10 +184,7 @@ class DatetimeRangePayload(BaseModel):
         max_date = self.maxDate.get_date()
 
         if min_date > max_date or min_date == max_date:
-            raise ValueError(
-                "Incorrect time range. From date `{}` is earlier then to date `{}` or dates are equal.".format(
-                    min_date, max_date
-                ))
+            min_date = datetime.fromtimestamp(0)
 
         return min_date, max_date
 
