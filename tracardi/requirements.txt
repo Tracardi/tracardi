@@ -39,9 +39,6 @@ google-api-python-client == 2.33.0
 google_auth_oauthlib == 0.4.6
 python_weather==0.4.2
 influxdb-client
-grpcio==1.48.2
-grpcio-tools==1.48.2
-protobuf==3.20.2
 certifi==2022.9.24
 celery==5.2.6
 random-password-generator==2.2.0
@@ -59,6 +56,9 @@ SQLAlchemy==2.0.23
 speedict==0.3.12
 boto3==1.34.41
 jwt==1.3.1
+grpcio==1.49.1              # previous 1.48.2
+grpcio-tools==1.49.1        # previous 1.48.2
+protobuf==4.21.3            # previous 3.20.2
 
 # Worker requirements
 mysql-connector-python==8.0.29
