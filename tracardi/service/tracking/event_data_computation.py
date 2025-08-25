@@ -17,6 +17,7 @@ from tracardi.domain.session import Session
 from tracardi.domain.flat_event import EventDict, FlatEvent
 from tracardi.service.events import get_default_mappings_for
 from tracardi.service.tracking.utils.function_call import default_event_call_function
+from tracardi.service.utils.getters import get_entity_id
 
 logger = get_logger(__name__)
 
@@ -187,7 +188,7 @@ async def make_event_from_event_payload(
         metadata,
         source,
         session,
-        profile_entity.id,
+        get_entity_id(profile_entity),
         profile_less)
 
     if not even_valid:

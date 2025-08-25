@@ -94,19 +94,20 @@ async def os_tracker(
             tracker_payload.debug)
 
         # Dispatch outbound profile SYNCHRONOUSLY
-        timestamp_log: List[dict] = [
-            {
-                "field": field,
-                "timestamp": timestamp,
-                "old_value": old_value,
-            }
-            for field, (timestamp, old_value)
-            in flat_profile.get_change_logger().changes()]
+        if flat_profile:
+            timestamp_log: List[dict] = [
+                {
+                    "field": field,
+                    "timestamp": timestamp,
+                    "old_value": old_value,
+                }
+                for field, (timestamp, old_value)
+                in flat_profile.get_change_logger().changes()]
 
-        await sync_profile_destination(
-            flat_profile,
-            timestamp_log
-        )
+            await sync_profile_destination(
+                flat_profile,
+                timestamp_log
+            )
 
         # ----------------------------------------------
         # FROM THIS POINT EVENTS AND SESSION SHOULD NOT
