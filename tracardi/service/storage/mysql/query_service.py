@@ -4,7 +4,7 @@ from tracardi.service.storage.mysql.utils.select_result import SelectResult
 
 from typing import Type, Any, Callable, Optional, Tuple
 
-from sqlalchemy import Column, Select, update, delete, ChunkedIteratorResult, and_
+from sqlalchemy import Column, Select, update, delete, ChunkedIteratorResult, and_, func
 from sqlalchemy.future import select
 
 
@@ -14,8 +14,8 @@ def context_filter(table: Type[Base], tenant: str, production: bool, *clauses):
 
     return _wrapper
 
-class MySqlQueryResult:
 
+class MySqlQueryResult:
     """
     Standardizes the output form MysqlQuery
     """
@@ -35,7 +35,6 @@ class MySqlQueryResult:
         else:
             return self.data[0] if self.data else None
 
-
     def one(self):
         if isinstance(self.data, ChunkedIteratorResult):
             return self.data.scalars().one()
@@ -48,10 +47,24 @@ class MySqlQueryResult:
         else:
             return not bool(self.data)
 
+
 class MysqlQuery:
 
     def __init__(self, session):
         self.session = session
+
+    @staticmethod
+    def _count_clause(table: Type[Base],
+                      where: Optional[Callable] = None
+                      ) -> Select[Any]:
+
+        # Count
+        _select = select(func.count())
+
+        if where is not None:
+            _select = _select.where(where())
+
+        return _select.select_from(table)
 
     @staticmethod
     def _select_clause(table: Type[Base],
@@ -116,8 +129,19 @@ class MysqlQuery:
 
         return MySqlQueryResult(await self.session.execute(query))
 
+    async def count(self,
+                    table: Type[Base],
+                    where: Optional[Callable] = None):
+
+        query = self._count_clause(table,
+                                   where)
+
+        print(1, query)
+        return await self.session.execute(query)
+
     def insert(self, data):
         return self.session.add(data)
+
 
 class MysqlQueryInDeploymentMode(MysqlQuery):
 

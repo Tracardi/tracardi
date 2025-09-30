@@ -31,6 +31,19 @@ class TableService(metaclass=Singleton):
         self.client = client
         self.engine = engine
 
+    async def _count(self,
+                     table: Type[Base],
+                     where: Callable = None):
+
+        local_session = self.client.get_session(self.engine)
+        async with local_session() as session:
+            # Start a new transaction
+            async with session.begin():
+                # Use SQLAlchemy core to perform an asynchronous query
+
+                resource = MysqlQueryInDeploymentMode(session)
+                return await resource.count(table, where)
+
     async def _select_in_deployment_mode(self,
                                          table: Type[Base],
                                          columns=None,
@@ -90,6 +103,18 @@ class TableService(metaclass=Singleton):
                 resource = MysqlQueryInDeploymentMode(session)
                 deleted, record = await resource.delete_by_id(table, primary_id)
                 return deleted, record.map_to_object(mapper)
+
+    async def _count_all_in_deployment_mode(self,
+                                            table,
+                                            search: Optional[str] = None
+                                            ):
+        and_clauses = []
+        if search:
+            and_clauses.append(table.name.like(f'%{search}%'))
+
+        where = where_tenant_and_mode_context(table, *and_clauses)
+
+        return await self._count(table, where=where)
 
     async def _load_all_in_deployment_mode(self, table,
                                            search: Optional[str] = None,

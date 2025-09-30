@@ -13,6 +13,9 @@ class IdentificationPointService(TableService):
     async def load_all(self, search: str = None, limit: int = None, offset: int = None) -> SelectResult:
         return await self._load_all_in_deployment_mode(IdentificationPointTable, search, limit, offset)
 
+    async def count_all(self, search: str = None):
+        return await self._count_all_in_deployment_mode(IdentificationPointTable, search)
+
     async def load_by_id(self, identification_point_id: str) -> SelectResult:
         return await self._load_by_id_in_deployment_mode(IdentificationPointTable, primary_id=identification_point_id)
 
