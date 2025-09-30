@@ -38,6 +38,10 @@ async def load_all_event_sources(query, limit) -> Tuple[List[EventSource], int]:
     return _records(records)
 
 
+async def count_sources(query) -> int:
+    return await ess.count_sources(query)
+
+
 def load_event_source_types(type: str) -> Tuple[List[Dict], int]:
     types = ess.event_source_types()
 

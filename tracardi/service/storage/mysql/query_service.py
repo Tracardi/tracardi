@@ -136,7 +136,6 @@ class MysqlQuery:
         query = self._count_clause(table,
                                    where)
 
-        print(1, query)
         return await self.session.execute(query)
 
     def insert(self, data):

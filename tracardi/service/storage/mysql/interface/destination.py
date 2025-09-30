@@ -29,6 +29,10 @@ async def load_all_destinations(query, start, limit) -> Tuple[List[Destination],
     return _records(records)
 
 
+async def count_destinations(query: str) -> Optional[int]:
+    return await ds.count_all(query)
+
+
 async def load_destinations_for_event_type(event_type: str, source_id: str) -> Tuple[List[Destination], int]:
     records = await ds.load_event_destinations(event_type, source_id)
     return _records(records)

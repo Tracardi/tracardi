@@ -45,6 +45,9 @@ class EventSourceService(TableService):
             )
         )
 
+    async def count_sources(self, search: str = None) -> int:
+        return await self._count_all_in_deployment_mode(EventSourceTable, search)
+
     async def insert(self, event_source: EventSource):
         return await self._insert_if_none(EventSourceTable, map_to_event_source_table(event_source))
 

@@ -2,6 +2,7 @@ from typing import Optional, Type, Callable, Tuple, TypeVar
 
 from sqlalchemy.dialects.mysql import insert
 
+from tracardi.context import get_context
 from tracardi.exceptions.log_handler import get_logger
 from tracardi.service.license import License, LICENSE
 from tracardi.service.singleton import Singleton
@@ -107,14 +108,17 @@ class TableService(metaclass=Singleton):
     async def _count_all_in_deployment_mode(self,
                                             table,
                                             search: Optional[str] = None
-                                            ):
+                                            ) -> int:
         and_clauses = []
         if search:
             and_clauses.append(table.name.like(f'%{search}%'))
 
-        where = where_tenant_and_mode_context(table, *and_clauses)
+        context = get_context()
 
-        return await self._count(table, where=where)
+        where = where_with_context(table, server_context=context.production, *and_clauses)
+        result = await self._count(table, where=where)
+
+        return result.one_or_none()[0]
 
     async def _load_all_in_deployment_mode(self, table,
                                            search: Optional[str] = None,

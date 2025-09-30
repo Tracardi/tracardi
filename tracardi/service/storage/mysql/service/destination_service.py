@@ -21,6 +21,9 @@ class DestinationService(TableService):
         return await self._delete_by_id_in_deployment_mode(DestinationTable, map_to_destination,
                                                            primary_id=destination_id)
 
+    async def count_all(self, search: str = None):
+        return await self._count_all_in_deployment_mode(DestinationTable, search)
+
     async def insert(self, destination: Destination):
         return await self._replace(DestinationTable, map_to_destination_table(destination))
 

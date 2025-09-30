@@ -44,3 +44,6 @@ class ResourceService(TableService):
             ResourceTable,
             where=where
         )
+
+    async def count_all(self, search: str = None):
+        return await self._count_all_in_deployment_mode(ResourceTable, search)

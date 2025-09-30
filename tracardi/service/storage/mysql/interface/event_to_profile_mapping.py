@@ -22,6 +22,10 @@ async def load_all_event_to_profile_mapping(search: Optional[str] = None,
     return _records(records)
 
 
+async def count_event_to_profile_mapping(search: Optional[str] = None) -> int:
+    return await etpms.count_all(search)
+
+
 async def load_event_to_profile_mapping_by_id(mapping_id: str) -> SelectResult:
     return await etpms.load_by_id(mapping_id)
 
@@ -34,7 +38,8 @@ async def insert_event_to_profile_mapping(mapping: EventToProfile):
     return await etpms.insert(mapping)
 
 
-async def load_event_to_profile_mapping_by_type(event_type: str, enabled_only: bool = False) -> Tuple[List[EventToProfile], int]:
+async def load_event_to_profile_mapping_by_type(event_type: str, enabled_only: bool = False) -> Tuple[
+    List[EventToProfile], int]:
     records = await etpms.load_by_type(
         event_type, enabled_only
     )

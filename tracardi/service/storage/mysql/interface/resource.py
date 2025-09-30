@@ -38,6 +38,10 @@ async def load_all_resources(search: str = None, limit: int = None, offset: int 
     return _records(records, map_to_resource)
 
 
+async def count_resources(search: str = None):
+    return await rs.count_all(search)
+
+
 async def load_all_resource_entities(search: str = None, limit: int = None, offset: int = None) -> Tuple[
     List[Resource], int]:
     records = await rs.load_all(search, limit, offset)
