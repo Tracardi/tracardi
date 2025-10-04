@@ -48,13 +48,18 @@ class CopyTraitAction(ActionRunner):
 
             # Value is automatically converted to value if in dot format
             old_value = dot[destination] if destination in dot else None
-            dot[destination] = value
-            if self.profile and destination.startswith('profile@'):
-                flow.record_change(
-                    field=destination[8:],
-                    value=value,
-                    old_value=old_value
-                )
+            try:
+                dot[destination] = value
+                if self.profile and destination.startswith('profile@'):
+                    flow.record_change(
+                        field=destination[8:],
+                        value=value,
+                        old_value=old_value
+                    )
+            except KeyError:
+                self.console.warning(f"Property {value} does not exist.")
+                continue
+
 
         self.flow = flow
 
