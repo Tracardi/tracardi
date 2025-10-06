@@ -55,7 +55,7 @@ async def install_system(credentials: Credentials):
                                   f"tenant {context.tenant}: Details {str(e)}.")
 
         if not tenant:
-            raise PermissionError(f"Installation forbidden. Tenant [{context.tenant}] not allowed.")
+            raise PermissionError(f"Installation forbidden. Tenant ID:{context.tenant} missing.")
 
         if tenant.install_token and tenant.install_token != credentials.token:
             raise PermissionError("Installation forbidden. Invalid installation token.")
