@@ -37,7 +37,7 @@ class DeleteSegmentAction(ActionRunner):
         self.config = validate(init)
 
     async def run(self, payload: dict, in_edge=None) -> Result:
-        if isinstance(self.profile, Profile):            
+        if isinstance(self.profile, Profile):
             dot = self._get_dot_accessor(payload)
             profile = Profile(**dot.profile)
             
