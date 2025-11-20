@@ -120,8 +120,9 @@ async def load_events_by_profile_and_field(profile_id: str, field: str, table: b
     return [{"name": id, "value": count} for id, count in result.aggregations[bucket_name][0].items()]
 
 
-async def aggregate_event_types_from_db() -> List[Dict[str, str]]:
-    return await event_db.aggregate_event_type()
+async def aggregate_event_types_from_db(profile_id: Optional[str] = None, start_range: Optional[str] = None, buckets_size:Optional[int]=None) -> List[
+    Dict[str, str]]:
+    return await event_db.aggregate_event_type(profile_id, start_range, buckets_size)
 
 
 async def aggregate_events_by_source_and_type(source_id, time_span):

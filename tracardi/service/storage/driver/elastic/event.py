@@ -133,7 +133,7 @@ async def aggregate_event_by_field_within_time(profile_id,
     result = await storage_manager(index="event").query(query)
     if metric == 'terms':
         buckets = result.aggregations('events_bucket').buckets()
-        output = { item['key']: item['doc_count'] for item in buckets}
+        output = {item['key']: item['doc_count'] for item in buckets}
     else:
         buckets = result.aggregations('events_bucket')
         output = {
@@ -216,23 +216,49 @@ async def _aggregate_event(bucket_name, by, filter_query=None, buckets_size=100)
     return await storage_manager(index="event").aggregate(query)
 
 
-async def aggregate_event_type() -> List[Dict[str, str]]:
+async def aggregate_event_type(profile_id: Optional[str] = None, start_range: Optional[str] = None, buckets_size:Optional[int]=None) -> List[Dict[str, str]]:
+
+    if start_range is None:
+        start_range = "now-1M"
+
+    if buckets_size is None:
+        buckets_size = 10
+
     bucket_name = "by_type"
 
-    query = {
-        "bool": {
-            "must": {
-                "range": {
-                    "metadata.time.insert": {
-                        "gte": "now-1M",
-                        "lte": "now"
-                    }
-                }
+    filter_query = {
+        "range": {
+            "metadata.time.insert": {
+                "gte": start_range,
+                "lte": "now"
             }
         }
     }
 
-    result = await _aggregate_event(bucket_name, "type", query, buckets_size=12)
+    if profile_id is not None:
+        filter_query = [
+            {
+                "range": {
+                    "metadata.time.insert": {
+                        "gte": start_range,
+                        "lte": "now"
+                    }
+                }
+            },
+            {
+                "term": {
+                    "profile.id": profile_id
+                }
+            }
+        ]
+
+    query = {
+        "bool": {
+            "must": filter_query
+        }
+    }
+
+    result = await _aggregate_event(bucket_name, "type", query, buckets_size=buckets_size)
 
     if bucket_name not in result.aggregations:
         return []
@@ -417,16 +443,16 @@ async def aggregate_events_by_source(buckets_size):
 async def load_events_heatmap(profile_id: str = None):
     if profile_id is not None:
         filter_query = {
-                           "bool": {
-                               "must": [
-                                   {
-                                       "term": {
-                                           "profile.id": profile_id
-                                       }
-                                   }
-                               ]
-                           }
-                       },
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            "profile.id": profile_id
+                        }
+                    }
+                ]
+            }
+        },
     else:
         filter_query = {"match_all": {}}
 
