@@ -106,20 +106,20 @@ async def _custom_event_to_profile_mapping(custom_mapping_schemas,
             if 'condition' in custom_mapping_schema.config:
                 if_statement = custom_mapping_schema.config['condition']
                 try:
-                    dot = DotAccessor(event=flat_event,
-                                      profile=flat_profile,
-                                      session=session)
-                    result = await _check_mapping_condition_if_met(if_statement, dot)
-                    if result is False:
-                        continue
+                    if isinstance(if_statement, str) and if_statement.strip() != "":
+                        dot = DotAccessor(event=flat_event,
+                                          profile=flat_profile,
+                                          session=session)
+                        result = await _check_mapping_condition_if_met(if_statement, dot)
+                        if result is False:
+                            continue
                 except Exception as e:
-                    logger.error(
-                        f"Routing error. "
+                    logger.warning(
                         f"An error occurred when coping data from event to profile. "
                         f"There is error in the conditional trigger settings for event "
                         f"`{flat_event['type']}`."
                         f"Could not parse or access data for if statement: `{if_statement}`. "
-                        f"Data was not copied but the event was routed to the next step. ",
+                        f"Event was routed to the next step. No condition checked.",
                         extra=ExtraInfo.exact(
                             flow_id=None,
                             node_id=None,
@@ -130,7 +130,6 @@ async def _custom_event_to_profile_mapping(custom_mapping_schemas,
                             traceback=get_traceback(e)
                         )
                     )
-                    continue
 
             # Custom Copy
 
