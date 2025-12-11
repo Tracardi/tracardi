@@ -38,6 +38,11 @@ async def get_destination_data(destinations: List[Destination], dot: DotAccessor
         # Load resource from cache
         try:
             resource = await load_resource_via_cache(destination.resource.id)
+            if resource is None:
+                logger.warning(f"Destination `{destination.name}` not triggered. Missing resource.",
+                               exc_info=ExtraInfo.exact('resource-loading', package=__name__))
+                continue
+
             if resource.enabled is False:
                 raise ConnectionError(f"Can't connect to disabled resource: {resource.name}.")
 
