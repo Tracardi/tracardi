@@ -731,6 +731,26 @@ async def get_events_by_session_and_profile(profile_id: str, session_id: str, li
     }
     return await storage_manager("event").query(query)
 
+async def get_events_by_profile_and_event_type(profile_id: str, event_type: str, limit: int = 10) -> StorageRecords:
+    query = {
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"profile.id": profile_id}},
+                    {"term": {"type": event_type}}
+                ]
+            }
+        },
+        "sort": [
+            {
+                "metadata.time.insert": {"order": "desc"}
+            }
+        ],
+        "size": limit
+    }
+
+    return await storage_manager("event").query(query)
+
 
 def scan(query: dict = None, batch: int = 1000):
     return storage_manager('event').scan(query, batch)

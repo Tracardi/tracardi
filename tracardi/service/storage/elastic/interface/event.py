@@ -4,6 +4,7 @@ from tracardi.domain.event import Event
 from tracardi.domain.flat_event import FlatEvent
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.storage.driver.elastic import event as event_db
+from tracardi.service.storage.driver.elastic.event import get_events_by_profile_and_event_type
 
 
 async def refresh_event_db():
@@ -78,6 +79,18 @@ async def load_events_by_session_and_profile(profile_id: str, session_id: str, l
     } for doc in result]
 
     return {"result": result, "more_to_load": more_to_load}
+
+
+async def load_events_by_profile_and_event_type(profile_id: str, event_type: str, limit: int):
+    result = await get_events_by_profile_and_event_type(
+        profile_id,
+        event_type,
+        limit)
+
+    if result.total == 0:
+        return None
+
+    return result.to_domain_objects(Event)
 
 
 async def load_events_by_profile_id(profile_id: str, limit: int) -> dict:
