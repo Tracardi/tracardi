@@ -47,6 +47,10 @@ class Index:
         """
         Current date suffix
         """
+
+        if self.partitioning:
+            self.partitioning = self.partitioning.lower()
+
         date = datetime.now()
         if self.partitioning == 'month':
             return f"{date.year}-{date.month}"
