@@ -50,6 +50,8 @@ class Index:
         date = datetime.now()
         if self.partitioning == 'month':
             return f"{date.year}-{date.month}"
+        elif self.partitioning == 'fixed-year':
+            return f"2025-year"
         elif self.partitioning == 'year':
             return f"{date.year}-year"
         elif self.partitioning == 'day':
