@@ -736,7 +736,7 @@ async def get_events_by_profile_and_event_type(profile_id: str, event_type: str,
         "query": {
             "bool": {
                 "must": [
-                    {"term": {"profile.id": profile_id}},
+                    {"term": {"profile.ids": profile_id}},
                     {"term": {"type": event_type}}
                 ]
             }
