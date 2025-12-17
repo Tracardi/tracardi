@@ -4,7 +4,7 @@ from time import time
 
 class Timer:
 
-    def __init__(self, max_timeout: int = 60):
+    def __init__(self, max_timeout: int = 15):
         self.time_db = defaultdict(float)
         self.max_timeout = max_timeout
 
