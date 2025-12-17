@@ -87,7 +87,7 @@ async def load_events_by_profile_and_event_type(profile_id: str, event_type: str
         event_type,
         limit)
 
-    if result.total == 0:
+    if result is None or result.total == 0:
         return None
 
     return result.to_domain_objects(Event)

@@ -216,8 +216,8 @@ async def _aggregate_event(bucket_name, by, filter_query=None, buckets_size=100)
     return await storage_manager(index="event").aggregate(query)
 
 
-async def aggregate_event_type(profile_id: Optional[str] = None, start_range: Optional[str] = None, buckets_size:Optional[int]=None) -> List[Dict[str, str]]:
-
+async def aggregate_event_type(profile_id: Optional[str] = None, start_range: Optional[str] = None,
+                               buckets_size: Optional[int] = None) -> List[Dict[str, str]]:
     if start_range is None:
         start_range = "now-1M"
 
@@ -731,20 +731,47 @@ async def get_events_by_session_and_profile(profile_id: str, session_id: str, li
     }
     return await storage_manager("event").query(query)
 
-async def get_events_by_profile_and_event_type(profile_id: str, event_type: str, limit: int = 10) -> StorageRecords:
+
+async def get_events_by_profile_and_event_type(profile_id: str, event_type: str, limit: int = 10) -> Optional[StorageRecords]:
+    query = {
+        "query": {
+            "bool": {
+                "should": [
+                    {
+                        "term": {
+                            "ids": profile_id
+                        }
+                    },
+                    {
+                        "term": {
+                            "id": profile_id
+                        }
+                    }
+                ],
+                "minimum_should_match": 1
+            }
+        },
+        "size": 1
+    }
+
+    profile_records = await storage_manager("profile").query(query)
+    if profile_records.total <= 0:
+        return None
+
+    profile = profile_records.first()
+    profile_id = profile.get('id', None)
+    profile_ids = profile.get('ids', [])
+    if profile_id:
+        profile_ids.append(profile_id)
+    else:
+        # No profile id
+        return None
+
     query = {
         "query": {
             "bool": {
                 "must": [
-                    {
-                        "bool": {
-                            "should": [
-                                {"term": {"profile.id": profile_id}},
-                                {"term": {"profile.ids": profile_id}}
-                            ],
-                            "minimum_should_match": 1
-                        }
-                    },
+                    {"term": {"profile.id": profile_id}},
                     {"term": {"type": event_type}}
                 ]
             }
