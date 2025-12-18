@@ -86,7 +86,6 @@ async def aggregate_event_by_field_within_time(profile_id,
                                                time_span,
                                                metric='term',
                                                event_type: NamedEntity = NamedEntity(id='', name='')):
-
     mapping = {
         "terms": "counts"
     }
@@ -581,7 +580,6 @@ async def get_events_by_session(session_id: str, limit: int = 100) -> StorageRec
 
 
 async def get_events_by_profile(profile_id: str, limit: int = 100) -> StorageRecords:
-
     query = {
         "query": {
             "term": {
@@ -732,7 +730,24 @@ async def get_events_by_session_and_profile(profile_id: str, session_id: str, li
     return await storage_manager("event").query(query)
 
 
-async def get_events_by_profile_and_event_type(profile_id: str, event_type: str, limit: int = 10) -> Optional[StorageRecords]:
+async def get_last_event() -> Optional[StorageRecords]:
+    query = {
+        "query": {
+            "match_all": {}
+        },
+        "sort": [
+            {
+                "metadata.time.insert": {"order": "desc"}
+            }
+        ],
+        "size": 1
+    }
+
+    return await storage_manager("event").query(query)
+
+
+async def get_events_by_profile_and_event_type(profile_id: str, event_type: str, limit: int = 10) -> Optional[
+    StorageRecords]:
     query = {
         "query": {
             "bool": {
