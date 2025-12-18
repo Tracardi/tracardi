@@ -34,7 +34,8 @@ class Context:
                  tenant: str = None,
                  host: Optional[str] = None,
                  version: Optional[str] = None,
-                 metadata: Optional[dict] = None
+                 metadata: Optional[dict] = None,
+                 id: Optional[str] = None
                  ):
 
         self.version = version if version else system_version.version

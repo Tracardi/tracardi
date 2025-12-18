@@ -229,6 +229,7 @@ class TracardiConfig(metaclass=Singleton):
         self.track_debug = get_env_as_bool('TRACK_DEBUG', 'no')
         self.save_logs = get_env_as_bool('SAVE_LOGS', 'no')
         self.destinations_on_separate_queue = get_env_as_bool('DESTINATIONS_ON_SEPARATE_QUEUE', 'no')
+        self.destinations_without_queue = get_env_as_bool('DESTINATIONS_WITHOUT_QUEUE', 'no')
         self.enable_event_destinations = get_env_as_bool('ENABLE_EVENT_DESTINATIONS', 'yes')
         self.enable_profile_destinations = get_env_as_bool('ENABLE_PROFILE_DESTINATIONS', 'yes')
         self.enable_workflow = get_env_as_bool('ENABLE_WORKFLOW', 'yes')

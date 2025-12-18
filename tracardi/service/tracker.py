@@ -120,6 +120,8 @@ class Tracker:
                 # Process without queue
                 return await run_com_tracker(source, tracker_payload, self.tracker_config)
 
+            logger.warning("Running EXPERIMENTAL tracker on queue.")
+
             # Queue
             await run_com_tracker_worker(
                 self.tracker_config,
