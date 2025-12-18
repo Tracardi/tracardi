@@ -190,7 +190,7 @@ class ProfileMerger:
         # Merge traits and piis
 
         _traits = [profile.traits for profile in all_profiles]
-        _data = [profile.model_dump(mode="json") for profile in all_profiles]
+        _data = [profile.data.model_dump(mode="json") for profile in all_profiles]
         traits, data, conflicts_aux = self._merge_traits_and_data(_traits, _data, merging_strategy)
 
         # Merge stats, consents, segments, etc.
