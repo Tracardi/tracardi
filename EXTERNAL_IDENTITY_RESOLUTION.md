@@ -1093,9 +1093,94 @@ with profile_merge_lock(profile_id):
 4. **Data Validation**: Validate all input data before processing
 5. **GDPR Compliance**: Ensure merge operations comply with data protection regulations
 
+## Advanced Topics
+
+### Edge Cases & Production Hardening
+
+For production deployments, review the comprehensive edge cases document:
+
+**[IDENTITY_RESOLUTION_EDGE_CASES.md](./IDENTITY_RESOLUTION_EDGE_CASES.md)**
+
+Critical scenarios covered:
+1. **Circular Merge Chains** - Detect A→B→C→A loops
+2. **Concurrent Merge Operations** - Distributed locking strategies
+3. **Profile Resurrection** - Zombie profile prevention
+4. **Partial Merge Failures** - Transaction rollback
+5. **IDs Field Overflow** - Performance optimization
+6. **Session Orphaning** - Session migration
+7. **Event Race Conditions** - Grace period handling
+8. **Double Merge Prevention** - Idempotency keys
+9. **Cross-Tenant Security** - Tenant isolation
+10. **Merge Key Collisions** - Multi-factor matching
+11. **Validation Cache Staleness** - Cache invalidation
+12. **Profile Data Corruption** - Data integrity checks
+13. **Eventual Consistency** - Distributed system delays
+14. **Memory & Performance** - Scale considerations
+15. **APM Hash Integrity** - PII hashing validation
+
+### Production Deployment Checklist
+
+Before deploying to production:
+
+- [ ] Review all edge cases in IDENTITY_RESOLUTION_EDGE_CASES.md
+- [ ] Implement circular merge detection
+- [ ] Add distributed locking for concurrent operations
+- [ ] Set up monitoring and alerting
+- [ ] Test rollback procedures
+- [ ] Implement idempotency for all operations
+- [ ] Add tenant validation for security
+- [ ] Configure grace periods for race conditions
+- [ ] Set up profile IDs overflow monitoring
+- [ ] Document incident response procedures
+- [ ] Load test merge operations
+- [ ] Test with production-like data volumes
+- [ ] Verify backup and recovery procedures
+- [ ] Train operations team on troubleshooting
+
+### When to Use External vs Internal Resolution
+
+**Use External Resolution When:**
+- You need custom merge logic
+- CRM or external system drives merging
+- Batch processing requirements
+- Complex validation rules
+- Multi-system coordination
+- Audit trail requirements
+- Manual review processes
+
+**Use Internal Resolution When:**
+- Real-time merging is sufficient
+- Standard merge rules work
+- Simple email/phone matching
+- No external dependencies
+- Lower latency requirements
+- Automatic workflows preferred
+
+### Migration Path
+
+If migrating from internal to external resolution:
+
+1. **Phase 1: Parallel Run**
+   - Run both internal and external
+   - Compare results
+   - Fix discrepancies
+
+2. **Phase 2: Gradual Cutover**
+   - Start with low-traffic sources
+   - Enable `externalIdentityResolution` flag
+   - Monitor for issues
+   - Roll back if needed
+
+3. **Phase 3: Full External**
+   - All sources use external resolution
+   - Internal merge disabled
+   - Monitor performance
+   - Optimize as needed
+
 ## Support
 
 For questions:
 - GitHub Issues: https://github.com/Tracardi/tracardi
 - Documentation: https://docs.tracardi.com
 - Community: https://tracardi.com/community
+- Edge Cases: See IDENTITY_RESOLUTION_EDGE_CASES.md
