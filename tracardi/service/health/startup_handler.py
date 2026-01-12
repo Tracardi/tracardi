@@ -152,12 +152,29 @@ async def warm_up_redis():
 
 
 def create_default_startup_handler() -> StartupHandler:
-    """Create a startup handler with default initialization functions"""
-    handler = StartupHandler()
+    """
+    Create a startup handler with default initialization functions.
     
-    # Register default warmups
-    handler.register_init(warm_up_elasticsearch)
-    handler.register_init(warm_up_mysql)
-    handler.register_init(warm_up_redis)
+    Warmup functions are registered based on environment configuration:
+    - STARTUP_WARMUP_ELASTICSEARCH (default: yes)
+    - STARTUP_WARMUP_MYSQL (default: yes)
+    - STARTUP_WARMUP_REDIS (default: yes)
+    """
+    from tracardi.service.health.config import startup_config
+    
+    handler = StartupHandler(
+        max_retries=startup_config.wait_max_retries,
+        retry_delay=startup_config.wait_retry_delay
+    )
+    
+    # Register warmups based on configuration
+    if startup_config.warm_up_elasticsearch:
+        handler.register_init(warm_up_elasticsearch)
+    
+    if startup_config.warm_up_mysql:
+        handler.register_init(warm_up_mysql)
+    
+    if startup_config.warm_up_redis:
+        handler.register_init(warm_up_redis)
     
     return handler

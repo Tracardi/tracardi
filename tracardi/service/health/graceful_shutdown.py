@@ -215,22 +215,41 @@ async def flush_loki_logs():
         logger.error(f"Error flushing Loki logs: {e}")
 
 
-def create_default_shutdown_handler(shutdown_timeout: float = 30.0) -> GracefulShutdownHandler:
+def create_default_shutdown_handler(shutdown_timeout: float = None) -> GracefulShutdownHandler:
     """
     Create a shutdown handler with default cleanup functions.
     
+    Cleanup functions are registered based on environment configuration:
+    - SHUTDOWN_CLOSE_ELASTICSEARCH (default: yes)
+    - SHUTDOWN_CLOSE_MYSQL (default: yes)
+    - SHUTDOWN_CLOSE_REDIS (default: yes)
+    - SHUTDOWN_FLUSH_LOKI (default: yes)
+    
     Args:
-        shutdown_timeout: Maximum time to wait for shutdown
+        shutdown_timeout: Maximum time to wait for shutdown (None = use env config)
         
     Returns:
         Configured GracefulShutdownHandler
     """
+    from tracardi.service.health.config import graceful_shutdown_config
+    
+    # Use env config if not set
+    if shutdown_timeout is None:
+        shutdown_timeout = graceful_shutdown_config.shutdown_timeout
+    
     handler = GracefulShutdownHandler(shutdown_timeout=shutdown_timeout)
     
-    # Register default cleanups
-    handler.register_cleanup(close_elasticsearch)
-    handler.register_cleanup(close_mysql)
-    handler.register_cleanup(close_redis)
-    handler.register_cleanup(flush_loki_logs)
+    # Register cleanups based on configuration
+    if graceful_shutdown_config.close_elasticsearch:
+        handler.register_cleanup(close_elasticsearch)
+    
+    if graceful_shutdown_config.close_mysql:
+        handler.register_cleanup(close_mysql)
+    
+    if graceful_shutdown_config.close_redis:
+        handler.register_cleanup(close_redis)
+    
+    if graceful_shutdown_config.flush_loki:
+        handler.register_cleanup(flush_loki_logs)
     
     return handler

@@ -52,10 +52,10 @@ class HealthCheckService:
         )
     
     @classmethod
-    async def readiness(cls, check_elasticsearch: bool = True,
-                       check_mysql: bool = True,
-                       check_redis: bool = True,
-                       timeout: float = 5.0) -> HealthCheckResponse:
+    async def readiness(cls, check_elasticsearch: bool = None,
+                       check_mysql: bool = None,
+                       check_redis: bool = None,
+                       timeout: float = None) -> HealthCheckResponse:
         """
         Readiness probe - checks if the application can serve traffic.
         
@@ -63,14 +63,27 @@ class HealthCheckService:
         from service if this fails, but won't restart it.
         
         Args:
-            check_elasticsearch: Check Elasticsearch health
-            check_mysql: Check MySQL health
-            check_redis: Check Redis health
-            timeout: Timeout for each check in seconds
+            check_elasticsearch: Check Elasticsearch health (None = use env config)
+            check_mysql: Check MySQL health (None = use env config)
+            check_redis: Check Redis health (None = use env config)
+            timeout: Timeout for each check in seconds (None = use env config)
             
         Returns:
             HealthCheckResponse: Detailed health status of all components
         """
+        # Import config
+        from tracardi.service.health.config import health_check_config
+        
+        # Use env config if not explicitly set
+        if check_elasticsearch is None:
+            check_elasticsearch = health_check_config.check_elasticsearch
+        if check_mysql is None:
+            check_mysql = health_check_config.check_mysql
+        if check_redis is None:
+            check_redis = health_check_config.check_redis
+        if timeout is None:
+            timeout = health_check_config.check_timeout
+        
         components = {}
         tasks = []
         
