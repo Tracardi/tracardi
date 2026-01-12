@@ -50,6 +50,68 @@ def _profile_to_summary(profile: Profile) -> ProfileSummary:
 
 
 @router.post(
+    "/validate-profile",
+    response_model=dict,
+    summary="Validate profile ID before tracking"
+)
+async def validate_profile(profile_id: str):
+    """
+    Validate if a profile ID exists and is usable.
+    
+    Use this endpoint before sending events to ensure you're using the correct profile ID.
+    If the profile was merged, this will return the current active profile ID.
+    
+    **Important**: Always validate profile IDs after external merge operations.
+    
+    Example request:
+    ```
+    GET /identity-resolution/validate-profile?profile_id=profile-456
+    ```
+    
+    Example response (profile is valid):
+    ```json
+    {
+        "is_valid": true,
+        "profile_id": "profile-456",
+        "message": "Profile is valid and active"
+    }
+    ```
+    
+    Example response (profile was merged):
+    ```json
+    {
+        "is_valid": false,
+        "profile_id": "profile-123",
+        "error": "Profile profile-456 was merged into profile-123",
+        "message": "Use profile-123 in tracker payloads"
+    }
+    ```
+    """
+    try:
+        is_valid, actual_id, error = await IdentityResolutionService.validate_profile_id(profile_id)
+        
+        if is_valid:
+            return {
+                "is_valid": True,
+                "profile_id": actual_id,
+                "message": "Profile is valid and active"
+            }
+        else:
+            return {
+                "is_valid": False,
+                "profile_id": actual_id,
+                "error": error,
+                "message": f"Use {actual_id} in tracker payloads" if actual_id else "Profile not found"
+            }
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Validation failed: {str(e)}"
+        )
+
+
+@router.post(
     "/merge-by-ids",
     response_model=IdentityResolutionResponse,
     summary="Merge profiles by profile IDs"
@@ -61,8 +123,12 @@ async def merge_profiles_by_ids(request: IdentityResolutionByIdsRequest):
     This endpoint merges specified profiles into a primary profile.
     All events and sessions from additional profiles will be moved to the primary profile.
     
-    **Note**: After using this API, set `externalIdentityResolution: true` in tracker 
-    payload options to prevent internal automatic merging.
+    **CRITICAL**: After using this API:
+    1. Use the returned `merged_profile_id` in all subsequent tracker payloads
+    2. Set `externalIdentityResolution: true` in tracker payload options
+    3. Validate profile IDs with `/validate-profile` endpoint before tracking
+    
+    **DO NOT** use old profile IDs after merge - they will not be found!
     
     Example request:
     ```json
@@ -73,6 +139,17 @@ async def merge_profiles_by_ids(request: IdentityResolutionByIdsRequest):
     ```
     """
     try:
+        # Validate primary profile exists
+        is_valid, actual_id, error = await IdentityResolutionService.validate_profile_id(
+            request.primary_profile_id
+        )
+        
+        if not is_valid:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Primary profile validation failed: {error}. " +
+                       (f"Use {actual_id} instead" if actual_id else "Profile not found")
+            )
         merged_profile = await IdentityResolutionService.resolve_by_profile_ids(
             primary_profile_id=request.primary_profile_id,
             additional_profile_ids=request.additional_profile_ids

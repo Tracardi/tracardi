@@ -45,6 +45,56 @@ POST /track
 
 **Important**: The `options.externalIdentityResolution: true` setting prevents Tracardi from performing internal identity resolution.
 
+## ⚠️ CRITICAL: Profile ID Validation
+
+**IMPORTANT**: After external merge operations, merged profile IDs become invalid. You MUST use the returned `merged_profile_id` in tracker payloads.
+
+### Why Validation Matters
+
+```python
+# ❌ WRONG - Using old profile ID after merge
+merge_response = merge_profiles(primary="profile-123", additional=["profile-456"])
+# profile-456 is now merged and deleted
+
+track_event(profile_id="profile-456")  # ❌ ERROR: Profile not found!
+# Result: Creates duplicate profile or sends event to wrong profile
+```
+
+```python
+# ✅ CORRECT - Using merged profile ID
+merge_response = merge_profiles(primary="profile-123", additional=["profile-456"])
+merged_id = merge_response["merged_profile_id"]  # "profile-123"
+
+track_event(profile_id=merged_id)  # ✅ OK: Uses correct merged profile
+```
+
+### Profile Validation Endpoint
+
+Always validate profile IDs before tracking, especially after merge operations:
+
+```bash
+GET /identity-resolution/validate-profile?profile_id=profile-456
+```
+
+**Response (profile is valid):**
+```json
+{
+  "is_valid": true,
+  "profile_id": "profile-456",
+  "message": "Profile is valid and active"
+}
+```
+
+**Response (profile was merged):**
+```json
+{
+  "is_valid": false,
+  "profile_id": "profile-123",
+  "error": "Profile profile-456 was merged into profile-123",
+  "message": "Use profile-123 in tracker payloads"
+}
+```
+
 ## API Endpoints
 
 ### 1. Merge by Profile IDs
@@ -162,7 +212,7 @@ Content-Type: application/json
 
 ## Use Cases
 
-### Use Case 1: Real-Time User Registration/Login
+### Use Case 1: Real-Time User Registration/Login (with Validation)
 
 When a user registers or logs in, perform immediate identity resolution to merge anonymous browsing data with authenticated profile.
 
@@ -172,8 +222,20 @@ import requests
 def handle_user_login(email, anonymous_profile_id):
     """
     Merge anonymous profile with authenticated profile on login.
+    INCLUDES PROFILE VALIDATION to prevent bugs.
     """
-    # 1. Find duplicates by email
+    # 1. VALIDATE anonymous profile ID first
+    validation = requests.get(
+        f"http://tracardi-api/identity-resolution/validate-profile",
+        params={"profile_id": anonymous_profile_id}
+    ).json()
+    
+    if not validation["is_valid"]:
+        # Profile was merged or doesn't exist - use the actual ID
+        anonymous_profile_id = validation["profile_id"]
+        print(f"Warning: Profile ID updated to {anonymous_profile_id}")
+    
+    # 2. Find duplicates by email
     duplicates_response = requests.post(
         "http://tracardi-api/identity-resolution/find-duplicates",
         json={
@@ -185,7 +247,7 @@ def handle_user_login(email, anonymous_profile_id):
     
     duplicates = duplicates_response.json()
     
-    # 2. If user has existing profile, merge with anonymous
+    # 3. If user has existing profile, merge with anonymous
     if duplicates["count"] > 0:
         authenticated_profile_id = duplicates["profiles"][0]["id"]
         
@@ -197,12 +259,24 @@ def handle_user_login(email, anonymous_profile_id):
             }
         )
         
+        if not merge_response.json()["success"]:
+            raise Exception(f"Merge failed: {merge_response.json()['message']}")
+        
         merged_profile_id = merge_response.json()["merged_profile_id"]
     else:
         # New user, use anonymous profile as base
         merged_profile_id = anonymous_profile_id
     
-    # 3. Send login event with merged profile
+    # 4. VALIDATE merged profile before tracking
+    final_validation = requests.get(
+        f"http://tracardi-api/identity-resolution/validate-profile",
+        params={"profile_id": merged_profile_id}
+    ).json()
+    
+    if not final_validation["is_valid"]:
+        raise Exception(f"Merged profile validation failed: {final_validation['error']}")
+    
+    # 5. Send login event with VALIDATED merged profile
     track_response = requests.post(
         "http://tracardi-api/track",
         json={
@@ -213,7 +287,7 @@ def handle_user_login(email, anonymous_profile_id):
                 "properties": {"email": email}
             }],
             "options": {
-                "externalIdentityResolution": True
+                "externalIdentityResolution": True  # Skip internal merge
             }
         }
     )
@@ -710,16 +784,106 @@ Request/response models are defined in `tracardi/domain/identity_resolution_payl
 
 ## Best Practices
 
-1. **Always Use the Flag**: After external merging, always use `externalIdentityResolution: true` flag
-2. **Duplicate Check**: Check with `find-duplicates` endpoint before merging
-3. **Error Handling**: Implement error handling and retry logic in API calls
-4. **Monitoring**: Log and monitor external merge operations
-5. **Transaction Safety**: Ensure transaction safety for critical merge operations
-6. **Validation**: Validate profile data quality before merging
-7. **Audit Trail**: Maintain audit logs for all merge operations
-8. **Rate Limiting**: Implement rate limiting for batch operations
-9. **Testing**: Test merge logic thoroughly in staging environment
-10. **Rollback Plan**: Have a rollback strategy for incorrect merges
+### 1. **CRITICAL: Always Validate Profile IDs After Merge**
+```python
+# After any merge operation
+merge_response = merge_profiles(...)
+merged_id = merge_response["merged_profile_id"]
+
+# VALIDATE before using
+validation = validate_profile(merged_id)
+if not validation["is_valid"]:
+    raise Exception(f"Invalid profile ID: {validation['error']}")
+
+# NOW safe to use
+track_event(profile_id=merged_id)
+```
+
+**Why**: Merged profile IDs become invalid. Using old IDs causes:
+- Profile not found errors
+- Duplicate profile creation
+- Events going to wrong profiles
+- Data inconsistency
+
+### 2. **Always Use the Flag After External Merge**
+```python
+# After external merging, always use this flag
+track_event(
+    profile_id=merged_id,
+    options={"externalIdentityResolution": True}
+)
+```
+
+### 3. **Store Merged Profile ID Mappings**
+```python
+# Keep track of old → new profile ID mappings
+profile_merge_log = {
+    "old_ids": ["profile-456", "profile-789"],
+    "new_id": "profile-123",
+    "merged_at": datetime.now(),
+    "reason": "email match"
+}
+```
+
+### 4. **Validate Before Every Track Call**
+```python
+def safe_track_event(profile_id, events):
+    # Always validate first
+    validation = validate_profile(profile_id)
+    if not validation["is_valid"]:
+        profile_id = validation["profile_id"]  # Use corrected ID
+    
+    return track_event(profile_id, events)
+```
+
+### 5. **Duplicate Check Before Merge**
+Check with `find-duplicates` endpoint before merging to preview results.
+
+### 6. **Error Handling & Retry Logic**
+```python
+def merge_with_retry(primary_id, additional_ids, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            return merge_profiles(primary_id, additional_ids)
+        except Exception as e:
+            if attempt == max_retries - 1:
+                raise
+            time.sleep(2 ** attempt)  # Exponential backoff
+```
+
+### 7. **Monitoring & Alerting**
+- Log all merge operations
+- Monitor validation failure rates
+- Alert on duplicate profile creation spikes
+- Track merge success/failure metrics
+
+### 8. **Transaction Safety**
+Ensure transaction safety for critical merge operations - use database transactions where possible.
+
+### 9. **Data Quality Validation**
+Validate profile data quality before merging to prevent garbage data propagation.
+
+### 10. **Audit Trail**
+```python
+audit_log = {
+    "operation": "profile_merge",
+    "user_id": "admin-123",
+    "primary_profile": "profile-123",
+    "merged_profiles": ["profile-456", "profile-789"],
+    "timestamp": datetime.now(),
+    "reason": "CRM sync",
+    "validation_passed": True
+}
+```
+
+### 11. **Rate Limiting for Batch Operations**
+Implement rate limiting to prevent system overload during batch processing.
+
+### 12. **Testing in Staging**
+Test merge logic thoroughly in staging before production deployment.
+
+### 13. **Rollback Strategy**
+Have a plan for incorrect merges (though profile merges are generally not reversible).
 
 ## Migration Guide
 
@@ -743,37 +907,175 @@ Request/response models are defined in `tracardi/domain/identity_resolution_payl
 
 ## Troubleshooting
 
+### Problem: "Profile not found" error after merge
+
+**Symptom**: Getting 404 or profile not found errors when tracking events after merge.
+
+**Cause**: Using old (merged) profile ID instead of the merged profile ID.
+
+**Solution**:
+```python
+# ❌ WRONG
+merge_response = merge_profiles(primary="A", additional=["B"])
+track_event(profile_id="B")  # B doesn't exist anymore!
+
+# ✅ CORRECT
+merge_response = merge_profiles(primary="A", additional=["B"])
+merged_id = merge_response["merged_profile_id"]  # Use this!
+track_event(profile_id=merged_id)
+```
+
+**Prevention**: Always validate profile IDs:
+```python
+validation = validate_profile(profile_id)
+if not validation["is_valid"]:
+    profile_id = validation["profile_id"]  # Use corrected ID
+```
+
+### Problem: Duplicate profiles being created after external merge
+
+**Symptom**: Multiple profiles with same email/phone after using external merge.
+
+**Cause**: Using invalid profile ID in tracker payload causes Tracardi to create new profile.
+
+**Solution**:
+1. Validate profile ID before every track call:
+```python
+validation = validate_profile(profile_id)
+if not validation["is_valid"]:
+    profile_id = validation.get("profile_id") or create_new_profile()
+```
+
+2. Check merge actually succeeded:
+```python
+merge_response = merge_profiles(...)
+if not merge_response["success"]:
+    raise Exception("Merge failed!")
+```
+
 ### Problem: Internal merge still running
+
+**Symptom**: Seeing duplicate merge operations in logs.
 
 **Solution**: Ensure `options.externalIdentityResolution: true` flag is present in tracker payload.
 
-### Problem: Events going to old profile after merge
+```python
+# Correct usage
+track_event(
+    profile_id=merged_id,
+    options={"externalIdentityResolution": True}  # Don't forget this!
+)
+```
 
-**Solution**: Make sure you're using the `merged_profile_id` returned from the merge response.
+### Problem: Events going to wrong profile after merge
+
+**Symptom**: Events appearing on incorrect profile after merge operation.
+
+**Root Causes**:
+1. Using old profile ID
+2. Not validating merged profile ID
+3. Race condition between merge and track
+
+**Solution**:
+```python
+# 1. Perform merge
+merge_response = merge_profiles(...)
+merged_id = merge_response["merged_profile_id"]
+
+# 2. WAIT and validate (important for eventual consistency)
+import time
+time.sleep(0.5)  # Wait for DB sync
+
+validation = validate_profile(merged_id)
+if not validation["is_valid"]:
+    raise Exception(f"Merged profile invalid: {validation['error']}")
+
+# 3. Now safe to track
+track_event(profile_id=merged_id, options={"externalIdentityResolution": True})
+```
 
 ### Problem: Duplicates not found
+
+**Symptom**: `find-duplicates` returns 0 results when duplicates should exist.
 
 **Solution**: 
 - Verify merge keys are correct
 - `.keyword` suffix is automatically added for trait fields, no need to add manually
-- Check field paths are correct
+- Check field paths are correct: use `data.contact.email.main` not `traits.email`
 - Ensure profiles exist in the database
+- Check case sensitivity (email matching is case-sensitive)
 
 ### Problem: Merge operation too slow
 
+**Symptom**: Merge taking >5 seconds, timeouts occurring.
+
 **Solution**:
-- Reduce the number of profiles being merged at once
+- Reduce the number of profiles being merged at once (max 10-20 at a time)
 - Use batch processing for large-scale merges
-- Optimize database indexes
+- Optimize database indexes on merge key fields
 - Consider async processing for non-critical merges
+- Check database performance and connection pool
 
 ### Problem: Profile data lost after merge
 
+**Symptom**: Some profile traits or data missing after merge.
+
 **Solution**:
-- Check merge strategy configuration
+- Check merge strategy configuration in `ProfileMerger`
 - Verify data models are compatible
 - Review merge conflict resolution logic
-- Enable detailed logging for merge operations
+- Enable detailed logging for merge operations:
+```python
+import logging
+logging.getLogger('tracardi.service.profile_merger').setLevel(logging.DEBUG)
+```
+
+### Problem: Validation endpoint returns wrong profile ID
+
+**Symptom**: Validation returning unexpected profile ID.
+
+**Possible Causes**:
+1. Profile was merged multiple times (chain merge)
+2. Profile IDs field not properly maintained
+
+**Solution**:
+```python
+# Always use the validation endpoint result
+validation = validate_profile(original_id)
+actual_id = validation.get("profile_id")
+
+if actual_id != original_id:
+    logger.warning(f"Profile {original_id} redirects to {actual_id}")
+    # Update your local profile ID mapping
+    update_profile_id_mapping(original_id, actual_id)
+```
+
+### Problem: Race conditions during concurrent merges
+
+**Symptom**: Multiple merge operations on same profiles causing conflicts.
+
+**Solution**:
+- Implement distributed locking for merge operations
+- Use profile ID as lock key
+- Add retry logic with exponential backoff
+```python
+import redis
+from contextlib import contextmanager
+
+@contextmanager
+def profile_merge_lock(profile_id, timeout=10):
+    lock = redis_client.lock(f"merge:{profile_id}", timeout=timeout)
+    acquired = lock.acquire(blocking=True, blocking_timeout=timeout)
+    try:
+        yield acquired
+    finally:
+        if acquired:
+            lock.release()
+
+# Usage
+with profile_merge_lock(profile_id):
+    merge_profiles(...)
+```
 
 ## Performance Considerations
 

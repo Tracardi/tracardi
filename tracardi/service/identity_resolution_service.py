@@ -5,6 +5,10 @@ This module provides external API interface for identity resolution.
 When identity resolution is performed externally via API, the internal
 automatic merging can be skipped by setting 'externalIdentityResolution': true
 in tracker payload options.
+
+IMPORTANT: After external merge, always use the returned merged_profile_id 
+in subsequent tracker payloads. Using old (merged) profile IDs will cause 
+profile not found errors or duplicate profile creation.
 """
 
 from typing import List, Optional, Tuple
@@ -24,6 +28,84 @@ class IdentityResolutionService:
     This service allows external systems to perform identity resolution
     without triggering internal automatic merging.
     """
+
+    @staticmethod
+    async def validate_profile_id(profile_id: str) -> Tuple[bool, Optional[str], Optional[str]]:
+        """
+        Validate if a profile ID exists and check if it was merged.
+        
+        This is critical when using external identity resolution to ensure
+        you're using the correct (merged) profile ID in tracker payloads.
+        
+        Args:
+            profile_id: Profile ID to validate
+            
+        Returns:
+            Tuple of (is_valid, actual_profile_id, error_message):
+            - is_valid: True if profile exists and is usable
+            - actual_profile_id: The current valid profile ID (may differ if merged)
+            - error_message: Error description if not valid
+            
+        Examples:
+            >>> is_valid, actual_id, error = await validate_profile_id("profile-456")
+            >>> if not is_valid:
+            >>>     print(f"Error: {error}")
+            >>>     print(f"Use this ID instead: {actual_id}")
+        """
+        try:
+            # Try to load the profile
+            profile = await profile_db.load(profile_id)
+            
+            if profile is None:
+                # Profile doesn't exist - check if it was merged
+                # Try to find if this ID exists in any profile's ids list
+                similar_profiles = await profile_db.load_profiles_to_merge(
+                    merge_by=[("ids", profile_id)],
+                    condition='must',
+                    limit=1
+                )
+                
+                if similar_profiles and len(similar_profiles) > 0:
+                    # Found! This profile was merged into another
+                    merged_into = similar_profiles[0]
+                    logger.warning(
+                        f"Profile {profile_id} was merged into {merged_into.id}. "
+                        f"Use {merged_into.id} instead."
+                    )
+                    return False, merged_into.id, f"Profile {profile_id} was merged into {merged_into.id}"
+                else:
+                    # Profile truly doesn't exist
+                    return False, None, f"Profile {profile_id} not found"
+            
+            # Profile exists and is valid
+            return True, profile.id, None
+            
+        except Exception as e:
+            logger.error(f"Error validating profile ID {profile_id}: {str(e)}")
+            return False, None, f"Validation error: {str(e)}"
+
+    @staticmethod
+    async def get_active_profile_id(profile_id: str) -> Optional[str]:
+        """
+        Get the active (non-merged) profile ID for a given profile ID.
+        
+        If the profile was merged, returns the merged profile ID.
+        If the profile is active, returns the same ID.
+        If the profile doesn't exist, returns None.
+        
+        Args:
+            profile_id: Profile ID to check
+            
+        Returns:
+            Active profile ID or None
+            
+        Usage:
+            >>> active_id = await get_active_profile_id("profile-456")
+            >>> if active_id and active_id != "profile-456":
+            >>>     print(f"Profile was merged, use {active_id}")
+        """
+        is_valid, actual_id, _ = await IdentityResolutionService.validate_profile_id(profile_id)
+        return actual_id if actual_id else None
 
     @staticmethod
     async def resolve_by_profile_ids(
