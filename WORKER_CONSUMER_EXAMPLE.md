@@ -1,10 +1,29 @@
-# Message Broker Consumer Worker Examples
+# Message Broker Consumer Worker
 
-## ⚠️ IMPORTANT
+## ✅ Production-Ready Worker Included!
 
-The message broker implementation in this PR **requires a separate consumer worker** to process queued events.
+The message broker implementation now includes a **production-ready event worker**:
 
-This document provides production-ready worker implementations for each broker.
+📁 **`tracardi/worker/event_worker.py`** - Ready-to-deploy consumer
+
+**Quick Start:**
+```bash
+# Configure broker
+export TRACARDI_MESSAGE_BROKER=rabbitmq  # or kafka
+export TRACARDI_BROKER_URL=amqp://localhost:5672//
+export TRACARDI_BROKER_TOPIC=tracardi-events
+
+# Run worker
+python -m tracardi.worker.event_worker
+```
+
+See **`tracardi/worker/EVENT_WORKER_README.md`** for full deployment guide.
+
+---
+
+## Alternative: Custom Worker Examples
+
+Below are alternative implementations if you need custom modifications:
 
 ---
 
