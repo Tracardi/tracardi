@@ -240,13 +240,28 @@ class LokiConfig:
                     self.labels_dict[key.strip()] = value.strip()
         
         # Validate configuration if enabled
-        if self.enabled and not self.url:
-            logger.warning(
-                'LOKI_ENABLED is set to "yes" but LOKI_URL is not configured. '
-                'Loki logging will be disabled.',
-                extra=ExtraInfo.build(object=self, origin="configuration", error_number="L0001")
-            )
-            self.enabled = False
+        if self.enabled:
+            if not self.url:
+                logger.warning(
+                    'LOKI_ENABLED is set to "yes" but LOKI_URL is not configured. '
+                    'Loki logging will be disabled.',
+                    extra=ExtraInfo.build(object=self, origin="configuration", error_number="L0001")
+                )
+                self.enabled = False
+            elif not self.url.startswith(('http://', 'https://')):
+                logger.warning(
+                    f'LOKI_URL must start with http:// or https://, got: {self.url}. '
+                    'Loki logging will be disabled.',
+                    extra=ExtraInfo.build(object=self, origin="configuration", error_number="L0002")
+                )
+                self.enabled = False
+            elif not self.labels_dict:
+                logger.warning(
+                    'LOKI_LABELS is empty or invalid. At least one label is required. '
+                    'Loki logging will be disabled.',
+                    extra=ExtraInfo.build(object=self, origin="configuration", error_number="L0003")
+                )
+                self.enabled = False
 
 
 redis_config = RedisConfig(os.environ)
