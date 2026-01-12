@@ -18,10 +18,17 @@ Usage:
 
 from .config import prometheus_config
 from .metrics_manager import metrics_manager, track_request, track_database_query
+from .advanced_metrics import advanced_metrics_manager, track_cache_operation
+from .middleware import install_prometheus_middleware
+from .endpoint import install_metrics_endpoint
 
 __all__ = [
     'prometheus_config',
     'metrics_manager',
+    'advanced_metrics_manager',
     'track_request',
-    'track_database_query'
+    'track_database_query',
+    'track_cache_operation',
+    'install_prometheus_middleware',
+    'install_metrics_endpoint'
 ]

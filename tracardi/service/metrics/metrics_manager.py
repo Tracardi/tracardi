@@ -56,6 +56,13 @@ class MetricsManager:
             
             self._registry = CollectorRegistry()
             
+            # Initialize advanced metrics with same registry
+            try:
+                from tracardi.service.metrics.advanced_metrics import advanced_metrics_manager
+                advanced_metrics_manager.initialize(self._registry)
+            except Exception as e:
+                logger.warning(f"Failed to initialize advanced metrics: {e}")
+            
             # Common labels
             common_labels = ['service', 'environment', 'instance']
             
