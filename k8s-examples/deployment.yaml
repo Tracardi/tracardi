@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tracardi
+  labels:
+    app: tracardi
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tracardi
+  template:
+    metadata:
+      labels:
+        app: tracardi
+    spec:
+      containers:
+      - name: tracardi
+        image: tracardi/tracardi-api:latest
+        ports:
+        - containerPort: 8686
+          name: http
+          protocol: TCP
+        
+        # Environment variables
+        env:
+        - name: ELASTIC_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: tracardi-config
+              key: elastic.host
+        - name: MYSQL_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: tracardi-config
+              key: mysql.host
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: tracardi-config
+              key: redis.host
+        
+        # Liveness probe - checks if container is alive
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8686
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        
+        # Readiness probe - checks if container can serve traffic
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8686
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+        
+        # Startup probe - gives app time to start
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8686
+            scheme: HTTP
+          initialDelaySeconds: 0
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 12  # 12 * 5 = 60s max startup time
+        
+        # Resource limits
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "2000m"
+            memory: "2Gi"
+        
+        # Lifecycle hooks for graceful shutdown
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]  # Give time for readiness probe to detect
+      
+      # Graceful termination
+      terminationGracePeriodSeconds: 30
+      
+      # Rolling update strategy
+      strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxSurge: 1
+          maxUnavailable: 0
