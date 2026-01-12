@@ -5,6 +5,7 @@ import logging
 import traceback
 
 import sys
+from typing import Optional
 
 from tracardi.context import get_context, ContextError
 from tracardi.logging import log_stack_trace_as, log_stack_trace_for, log_bulk_size
