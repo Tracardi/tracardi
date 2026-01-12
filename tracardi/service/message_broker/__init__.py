@@ -12,8 +12,12 @@ Broker selection via environment variable:
 
 from .broker_factory import get_message_broker
 from .broker_config import message_broker_config
+from .lifecycle import startup_broker, shutdown_broker, graceful_shutdown
 
 __all__ = [
     'get_message_broker',
-    'message_broker_config'
+    'message_broker_config',
+    'startup_broker',
+    'shutdown_broker',
+    'graceful_shutdown'
 ]

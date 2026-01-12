@@ -71,10 +71,20 @@ class KafkaBroker(MessageBroker):
     
     async def disconnect(self) -> None:
         """
-        Close Kafka connection.
+        Close Kafka connection with graceful flush.
+        
+        Ensures all pending messages are sent before disconnecting.
         """
         try:
             if self._producer:
+                # Flush any pending messages before stopping
+                try:
+                    await self._producer.flush()
+                    logger.debug("✓ Kafka messages flushed")
+                except Exception as flush_error:
+                    logger.warning(f"Error flushing Kafka messages: {flush_error}")
+                
+                # Stop producer gracefully
                 await self._producer.stop()
                 self._producer = None
                 self._client = None
@@ -84,7 +94,7 @@ class KafkaBroker(MessageBroker):
     
     async def publish(self, message: Dict[str, Any]) -> None:
         """
-        Publish message to Kafka topic.
+        Publish message to Kafka topic with timeout.
         
         Args:
             message: Dictionary containing tracker payload
@@ -97,14 +107,23 @@ class KafkaBroker(MessageBroker):
             raise RuntimeError("Not connected to Kafka. Call connect() first.")
         
         try:
-            # Send message
-            await self._producer.send_and_wait(
+            import asyncio
+            
+            # Send message with timeout to prevent indefinite hanging
+            send_task = self._producer.send_and_wait(
                 self.config.topic,
                 value=message
             )
             
+            # Apply timeout (default: config timeout + 5 seconds buffer)
+            timeout = self.config.timeout + 5
+            await asyncio.wait_for(send_task, timeout=timeout)
+            
             logger.debug(f"Published message to Kafka topic: {self.config.topic}")
             
+        except asyncio.TimeoutError:
+            logger.error(f"Kafka publish timeout after {timeout}s")
+            raise RuntimeError(f"Kafka publish timeout after {timeout}s")
         except Exception as e:
             logger.error(f"Failed to publish message to Kafka: {e}")
             raise RuntimeError(f"Kafka publish failed: {e}")
