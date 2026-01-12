@@ -16,6 +16,8 @@ if License.has_license():
     from com_tracardi.service.profiler_calculator import calculate_statistics
 else:
     from tracardi.service.tracking.tracker import os_tracker
+    # Open source message broker support (RabbitMQ, Kafka)
+    from tracardi.service.message_broker.tracker_worker import run_message_broker_tracker_worker
 
 logger = get_logger(__name__)
 _measures = []
@@ -103,18 +105,28 @@ class Tracker:
 
             context.profiler.measure('tracker-bridge')
 
-            if not License.has_license():
-                return await os_tracker(
-                    source,
-                    tracker_payload,
-                    self.tracker_config,
-                    tracking_start
-                )
-
-            # Only commercial
-
             # Split async and sync events
             should_run_on_queue = tracker_payload.queue_required() and not tracker_payload.has_sync_events()
+
+            if not License.has_license():
+                # Open source: Use message broker (RabbitMQ/Kafka) if queue required
+                if should_run_on_queue:
+                    logger.info("Running open source tracker with message broker.")
+                    return await run_message_broker_tracker_worker(
+                        self.tracker_config,
+                        tracker_payload,
+                        source
+                    )
+                else:
+                    # Process synchronously without queue
+                    return await os_tracker(
+                        source,
+                        tracker_payload,
+                        self.tracker_config,
+                        tracking_start
+                    )
+
+            # Commercial version below
 
             if not should_run_on_queue:
                 # Process without queue
@@ -122,7 +134,7 @@ class Tracker:
 
             logger.warning("Running EXPERIMENTAL tracker on queue.")
 
-            # Queue
+            # Queue (Commercial: uses Pulsar or custom broker)
             await run_com_tracker_worker(
                 self.tracker_config,
                 tracker_payload,
