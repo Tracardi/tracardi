@@ -43,8 +43,8 @@ def _auto_default_event_mapping(flat_event: FlatEvent) -> FlatEvent:
                 # Skip none existing event properties.
                 if source in flat_event:
                     flat_event[destination] = flat_event[source]
-
-            except KeyError:
+            except (KeyError, TypeError):
+                # Skip wrong paths
                 pass
 
     return flat_event

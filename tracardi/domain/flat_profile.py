@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional, List, Set, Dict
+from typing import Optional, List, Set, Dict, Tuple, Generator
 from .entity import PrimaryEntity, Entity, FlatEntity
 from .profile import Profile
 from .profile_data import FLAT_PROFILE_MAPPING, PREFIX_IDENTIFIER_ID, PREFIX_IDENTIFIER_PK
@@ -314,74 +314,100 @@ class FlatProfile(FlatEntity):
                 return True
         return False
 
-    def has_hashed_id(self) -> bool:
+    def yield_hashed_id(self, types: Tuple[str]) -> Generator[str, None, None]:
         for id in self.ids:
-            if id.startswith(PREFIX_IDENTIFIER_ID):
+            if id.startswith(types):
+                yield id
+
+    def has_hashed_id(self, prefix) -> bool:
+        for id in self.ids:
+            if id.startswith(prefix):
                 return True
         return False
 
-    def has_hashed_pk(self) -> bool:
-        for id in self.ids:
-            if id.startswith(PREFIX_IDENTIFIER_PK):
-                return True
-        return False
+    def _update_email(self, allowed_piis, new_ids, update_fields, field, prefix):
+        if field in allowed_piis and self.has_not_empty(field):
+            if self.has_hashed_email_id(prefix):
+                # Already has some hashed id from APM.
+                for existing_id in self.yield_hashed_id((prefix,)):
+                    new_ids.discard(existing_id)
+
+            new_ids.add(hash_id(self[field], prefix))
+            update_fields.add(field)
+
+        return new_ids, update_fields
+
+    def _update_phone(self, allowed_piis, new_ids, update_fields, field, prefix):
+        if field in allowed_piis and self.has_not_empty(field):
+            if self.has_hashed_phone_id(prefix):
+                # Already has some hashed id from APM.
+                for existing_id in self.yield_hashed_id((prefix,)):
+                    new_ids.discard(existing_id)
+
+            new_ids.add(hash_id(self[field], prefix))
+            update_fields.add(field)
+
+        return new_ids, update_fields
+
+    def _update_id(self, allowed_piis, new_ids, update_fields, field, prefix):
+        if field in allowed_piis:
+            # Has data
+            if self.has_not_empty(field):
+                if self.has_hashed_id(prefix):
+                    # Already has some hashed id from APM.
+                    for existing_id in self.yield_hashed_id((prefix,)):
+                        new_ids.discard(existing_id)
+
+                new_ids.add(hash_id(self[field], prefix))
+                update_fields.add(field)
+
+        return new_ids, update_fields
 
     def _create_auto_merge_hashed_ids(self, allowed: List[str] = None) -> Optional[set]:
 
         if tracardi.is_apm_on():
 
-            new_ids = set()
+            new_ids = set(self.ids)
             update_fields = set()
             allowed_piis: List[str] = get_allowed_piis_to_be_hashed_as_ids() if allowed is None else allowed
 
-            if 'data.identifier.pk' in allowed_piis and self.has_not_empty(
-                    'data.identifier.pk') and not self.has_hashed_pk():
-                new_ids.add(hash_id(self['data.identifier.pk'], PREFIX_IDENTIFIER_PK))
-                update_fields.add('data.identifier.pk')
+            new_ids, update_fields = self._update_id(allowed_piis, new_ids, update_fields,
+                                                     'data.identifier.pk',
+                                                     PREFIX_IDENTIFIER_PK)
 
-            if 'data.identifier.id' in allowed_piis and self.has_not_empty(
-                    'data.identifier.id') and not self.has_hashed_id():
-                new_ids.add(hash_id(self['data.identifier.id'], PREFIX_IDENTIFIER_ID))
-                update_fields.add('data.identifier.id')
+            new_ids, update_fields = self._update_id(allowed_piis, new_ids, update_fields,
+                                                     'data.identifier.id',
+                                                     PREFIX_IDENTIFIER_ID)
 
-            if 'data.contact.email.business' in allowed_piis and self.has_not_empty(
-                    'data.contact.email.business') and not self.has_hashed_email_id(PREFIX_EMAIL_BUSINESS):
-                new_ids.add(hash_id(self['data.contact.email.business'], PREFIX_EMAIL_BUSINESS))
-                update_fields.add('data.contact.email.business')
+            new_ids, update_fields = self._update_id(allowed_piis, new_ids, update_fields,
+                                                     'data.contact.email.business',
+                                                     PREFIX_EMAIL_BUSINESS)
+            new_ids, update_fields = self._update_id(allowed_piis, new_ids, update_fields,
+                                                     'data.contact.email.main',
+                                                     PREFIX_EMAIL_MAIN)
+            new_ids, update_fields = self._update_id(allowed_piis, new_ids, update_fields,
+                                                     'data.contact.email.private',
+                                                     PREFIX_EMAIL_PRIVATE)
 
-            if 'data.contact.email.main' in allowed_piis and self.has_not_empty(
-                    'data.contact.email.main') and not self.has_hashed_email_id(PREFIX_EMAIL_MAIN):
-                new_ids.add(hash_id(self['data.contact.email.main'], PREFIX_EMAIL_MAIN))
-                update_fields.add('data.contact.email.main')
+            new_ids, update_fields = self._update_id(allowed_piis, new_ids, update_fields,
+                                                     'data.contact.phone.business',
+                                                     PREFIX_PHONE_BUSINESS)
 
-            if 'data.contact.email.private' in allowed_piis and self.has_not_empty(
-                    'data.contact.email.private') and not self.has_hashed_email_id(PREFIX_EMAIL_PRIVATE):
-                new_ids.add(hash_id(self['data.contact.email.private'], PREFIX_EMAIL_PRIVATE))
-                update_fields.add('data.contact.email.private')
+            new_ids, update_fields = self._update_id(allowed_piis, new_ids, update_fields,
+                                                     'data.contact.phone.main',
+                                                     PREFIX_PHONE_MAIN)
 
-            if 'data.contact.phone.business' in allowed_piis and self.has_not_empty(
-                    'data.contact.phone.business') and not self.has_hashed_phone_id(PREFIX_PHONE_BUSINESS):
-                new_ids.add(hash_id(self['data.contact.phone.business'], PREFIX_PHONE_BUSINESS))
-                update_fields.add('data.contact.phone.business')
+            new_ids, update_fields = self._update_id(allowed_piis, new_ids, update_fields,
+                                                     'data.contact.phone.mobile',
+                                                     PREFIX_PHONE_MOBILE)
 
-            if 'data.contact.phone.main' in allowed_piis and self.has_not_empty(
-                    'data.contact.phone.main') and not self.has_hashed_phone_id(PREFIX_PHONE_MAIN):
-                new_ids.add(hash_id(self['data.contact.phone.main'], PREFIX_PHONE_MAIN))
-                update_fields.add('data.contact.phone.main')
-
-            if 'data.contact.phone.mobile' in allowed_piis and self.has_not_empty(
-                    'data.contact.phone.mobile') and not self.has_hashed_phone_id(PREFIX_PHONE_MOBILE):
-                new_ids.add(hash_id(self['data.contact.phone.mobile'], PREFIX_PHONE_MOBILE))
-                update_fields.add('data.contact.phone.mobile')
-
-            if 'data.contact.phone.whatsapp' in allowed_piis and self.has_not_empty(
-                    'data.contact.phone.whatsapp') and not self.has_hashed_phone_id(PREFIX_PHONE_WHATSUP):
-                new_ids.add(hash_id(self['data.contact.phone.whatsapp'], PREFIX_PHONE_WHATSUP))
-                update_fields.add('data.contact.phone.whatsapp')
+            new_ids, update_fields = self._update_id(allowed_piis, new_ids, update_fields,
+                                                     'data.contact.phone.whatsapp',
+                                                     PREFIX_PHONE_WHATSUP)
 
             # Update if new data
-            if new_ids:
-                self.override('ids', list(set(self.ids) | new_ids))
+            self.override('ids', list(new_ids))
+            if update_fields:
                 return update_fields
 
         return None
