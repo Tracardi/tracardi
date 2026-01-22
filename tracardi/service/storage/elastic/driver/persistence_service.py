@@ -587,18 +587,18 @@ class PersistenceService:
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def refresh(self, params=None, headers=None):
+    async def refresh(self, params=None, headers=None, index=None):
         try:
-            return await self.storage.refresh(params, headers)
+            return await self.storage.refresh(params, headers, index)
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args
                 raise StorageException(str(e), message=message, details=details)
             raise StorageException(str(e))
 
-    async def flush(self, params=None, headers=None):
+    async def flush(self, params=None, headers=None, index=None):
         try:
-            return await self.storage.flush(params, headers)
+            return await self.storage.flush(params, headers, index)
         except elasticsearch.exceptions.ElasticsearchException as e:
             if len(e.args) == 2:
                 message, details = e.args

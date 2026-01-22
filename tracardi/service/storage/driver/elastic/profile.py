@@ -136,7 +136,7 @@ async def load_modified_top_profiles(size):
     return await storage_manager('profile').query(query)
 
 
-async def load_by_primary_ids(profile_ids: List[str], size):
+async def load_by_profile_ids(profile_ids: List[str], size):
     query = {
         "size": size,
         "query": {
@@ -145,6 +145,19 @@ async def load_by_primary_ids(profile_ids: List[str], size):
             }
         }
     }
+    return await storage_manager('profile').query(query)
+
+
+async def load_by_profile_primary_id(profile_primary_id: str):
+    query = {
+        "size": 1,
+        "query": {
+            "term": {
+                "primary_id": profile_primary_id
+            }
+        }
+    }
+
     return await storage_manager('profile').query(query)
 
 
@@ -161,7 +174,7 @@ async def save(profile: Union[FlatProfile, Profile, List[Profile], Set[Profile]]
         profile.mark_for_update()
     result = await storage_manager('profile').upsert(profile, exclude={"operation": ...})
     if refresh_after_save:
-        await storage_manager('profile').flush()
+        await storage_manager('profile').refresh(index=result.index)
     return result
 
 

@@ -73,21 +73,45 @@ async def load_by_key_value_pairs(index, key_value_pairs: List[tuple], sort_by: 
     return await storage_manager(index).load_by_values(key_value_pairs, sort_by, limit=limit)
 
 
-async def update_profile_ids(index: str, old_profile_id: str, merged_profile_id):
-    query = {
-        "script": {
-            "source": "ctx._source.profile.id = params.merged_profile_id",
-            "lang": "painless",
-            "params": {
-                "merged_profile_id": f"{merged_profile_id}"
-            }
-        },
-        "query": {
-            "term": {
-                "profile.id": old_profile_id
+async def update_profile_ids(index: str, old_profile_id: str, merged_profile_id, profile_pid=None):
+
+    if profile_pid is not None:
+        query = {
+            "script": {
+                "source": """
+                if (ctx._source.profile != null) {
+                    ctx._source.profile.id = params.merged_profile_id; 
+                    ctx._source.profile.primary_id = params.profile_pid;
+                }
+                """,
+                "lang": "painless",
+                "params": {
+                    "merged_profile_id": str(merged_profile_id),
+                    "profile_pid": str(profile_pid)
+                }
+            },
+            "query": {
+                "term": {
+                    "profile.id": old_profile_id
+                }
             }
         }
-    }
+    else:
+        query = {
+            "script": {
+                "source": "ctx._source.profile.id = params.merged_profile_id",
+                "lang": "painless",
+                "params": {
+                    "merged_profile_id": str(merged_profile_id)
+                }
+            },
+            "query": {
+                "term": {
+                    "profile.id": old_profile_id
+                }
+            }
+        }
+
     return await storage_manager(index=index).update_by_query(query=query)
 
 
