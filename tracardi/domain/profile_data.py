@@ -169,6 +169,11 @@ class ProfileContact(BaseModel):
     address: Optional[ProfileContactAddress] = ProfileContactAddress()
     confirmations: List[str] = []
 
+    def __init__(self, **data: Any):
+        if 'confirmations' in data and isinstance(data['confirmations'], str):
+            data['confirmations'] = data['confirmations'].split(',')
+        super().__init__(**data)
+
     def has_contact(self) -> bool:
         return (self.has_email()
                 or self.has_phone()
