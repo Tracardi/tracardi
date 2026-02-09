@@ -18,7 +18,11 @@ logger = get_logger(__name__)
 async def _check_condition(query: str, dot) -> bool:
     if query:
         condition = Condition()
-        return await condition.evaluate(query, dot)
+        try:
+            return await condition.evaluate(query, dot)
+        except Exception as e:
+            logger.warning(f"Query {query} cound not be parsed and returned error: {str(e)}.")
+            return False
     # Return always true is not condition
     return True
 
