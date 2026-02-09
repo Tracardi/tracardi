@@ -1,4 +1,4 @@
-from typing import List, AsyncGenerator
+from typing import List, AsyncGenerator, Optional
 
 from tracardi.domain import ExtraInfo
 from tracardi.domain.destination import Destination
@@ -15,14 +15,14 @@ from tracardi.service.setup.setup_resources import get_resource_types
 logger = get_logger(__name__)
 
 
-async def _check_condition(query: str, dot) -> bool:
+async def _check_condition(query: str, dot) -> Optional[bool]:
     if query:
         condition = Condition()
         try:
             return await condition.evaluate(query, dot)
         except Exception as e:
             logger.warning(f"Query {query} cound not be parsed and returned error: {str(e)}.")
-            return False
+            return None
     # Return always true is not condition
     return True
 
@@ -50,7 +50,14 @@ async def get_destination_data(destinations: List[Destination], dot: DotAccessor
             if resource.enabled is False:
                 raise ConnectionError(f"Can't connect to disabled resource: {resource.name}.")
 
-            if await _check_condition(destination.condition, dot):
+            is_condition_met = await _check_condition(destination.condition, dot)
+            if is_condition_met is None:
+                # Means some error
+                logger.warning(f"Destination `{destination.name}` (id=\"{destination.id}\") not triggered. Reason: Not correct contition: {destination.condition}.")
+                continue
+
+            if is_condition_met:
+                # Yield work package
                 data = dict_traverser.reshape(reshape_template=destination.mapping)
 
                 yield DestinationWorkPackage(destination=destination, resource=resource, data=data)
