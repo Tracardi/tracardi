@@ -119,6 +119,9 @@ async def profile_destination_dispatch(flat_profile: Optional[FlatProfile],
                 changed_fields=changed_fields,
                 metadata=metadata
             )
+
+            logger.info(f"Dispatching profile to destination \"{destination_work_package.destination.name}\".")
+
         except Exception as e:
             logger.error(
                 str(e),
