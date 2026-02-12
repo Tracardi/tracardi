@@ -41,19 +41,6 @@ async def save_profile_in_db_and_cache(profile: Profile):
     # Save to database - do not defer
     await save_profiles_in_db(flat_profile, refresh_after_save=True)
 
-#
-# async def save_profile(profiles: Union[Profile, List[Profile], Set[Profile]],
-#                        context: Optional[Context] = None,
-#                        refresh: bool = False,
-#                        cache: bool = True) -> None:
-#     if context is None:
-#         context = get_context()
-#
-#     await save_profiles_in_db(profiles, refresh_after_save=refresh)
-#
-#     if cache:
-#         save_profile_cache(profiles, context)
-
 
 async def _delete_by_id(id: str, index: str):
     sm = storage_manager('profile')

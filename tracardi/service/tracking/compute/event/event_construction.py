@@ -74,6 +74,7 @@ def _get_hit(event_payload: EventPayload) -> dict:
 
     return hit
 
+
 def _update_event_from_request(request: dict, event: EventDict):
     if request:
         if 'request' not in event or not isinstance(event['request'], dict):
@@ -91,8 +92,9 @@ def event_payload_to_event(
         source: EventSource,
         session: Union[Optional[Entity], Optional[Session]],
         profile_id: Optional[str],
-        profile_less: bool) -> Tuple[EventDict, bool]:
-
+        profile_less: bool,
+        profile_primary_id=None
+) -> Tuple[EventDict, bool]:
     id = str(uuid4()) if not event_payload.id else event_payload.id
     event_type = event_payload.type.strip()
     event_name = capitalize_event_type_id(event_type)
@@ -101,6 +103,8 @@ def event_payload_to_event(
     meta_dict = meta.model_dump(mode="json")
     source_dict = {"id": source.id} if not event_payload.has_source_id() else dict(id=event_payload.get_source_id())
     profile_entity_dict = {"id": profile_id} if profile_id else None
+    if profile_primary_id is not None:
+        profile_entity_dict["primary_id"] = profile_primary_id
 
     if isinstance(session, Session):
 

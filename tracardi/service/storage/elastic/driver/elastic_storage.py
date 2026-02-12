@@ -175,8 +175,10 @@ class ElasticStorage:
     async def search(self, query) -> StorageRecords:
         return StorageRecords.build_from_elastic(await self.storage.search(self.index.get_index_alias(), query))
 
-    async def refresh(self, params=None, headers=None):
-        return await self.storage.refresh(self.index.get_index_alias(), params, headers)
+    async def refresh(self, params=None, headers=None, index=None):
+        if index is None:
+            index = self.index.get_index_alias()
+        return await self.storage.refresh(index, params, headers)
 
     async def reindex(self, source, destination, wait_for_completion=True):
         return await self.storage.reindex(source, destination, wait_for_completion=wait_for_completion)
@@ -293,8 +295,11 @@ class ElasticStorage:
         result = await self.search(query)
         return result
 
-    async def flush(self, params, headers):
-        return await self.storage.flush(self.index.get_write_index(), params, headers)
+    async def flush(self, params, headers, index=None):
+        if index is None:
+            index = self.index.get_write_index()
+
+        return await self.storage.flush(index, params, headers)
 
     async def update_by_query(self, query, conflicts: str = 'abort', wait_for_completion: bool = None):
         return await self.storage.update_by_query(

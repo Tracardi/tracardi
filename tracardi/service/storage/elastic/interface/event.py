@@ -2,8 +2,10 @@ from typing import Optional, List, Dict
 
 from tracardi.domain.event import Event
 from tracardi.domain.flat_event import FlatEvent
+from tracardi.domain.profile import Profile
 from tracardi.domain.value_object.bulk_insert_result import BulkInsertResult
 from tracardi.service.storage.driver.elastic import event as event_db
+from tracardi.service.storage.driver.elastic import profile as profile_db
 from tracardi.service.storage.driver.elastic.event import get_events_by_profile_and_event_type
 
 
@@ -98,6 +100,25 @@ async def load_events_by_profile_id(profile_id: str, limit: int) -> dict:
         profile_id,
         limit)
     return result.dict()
+
+
+async def load_events_by_profile_primary_id(profile_pid: str, limit) -> Optional[List[Event]]:
+    result = await profile_db.load_by_profile_primary_id(profile_pid)
+
+    if result is None:
+        return None
+    if result.total == 0:
+        return []
+
+    profile = result.first().to_entity(Profile)
+
+    ids = profile.ids
+    ids.append(profile.id)
+
+    result = await event_db.get_events_by_profile(profile.id, limit)
+    if result.total == 0:
+        return []
+    return result.to_domain_objects(Event)
 
 
 async def load_events_by_session(session_id: str, limit: int) -> Optional[List[Event]]:

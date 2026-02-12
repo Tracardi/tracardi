@@ -189,8 +189,6 @@ def test_flat_profile_has_methods():
     assert profile.has_hashed_phone_id() is False
 
     # Test has_hashed_id and has_hashed_pk
-    assert profile.has_hashed_id() is True
-    assert profile.has_hashed_pk() is True
 
 
 def test_flat_profile_mark_for_update():

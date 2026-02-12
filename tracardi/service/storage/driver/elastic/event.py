@@ -597,6 +597,24 @@ async def get_events_by_profile(profile_id: str, limit: int = 100) -> StorageRec
     return await storage_manager("event").query(query)
 
 
+async def get_events_by_profile_ids(profile_ids: List[str], limit: int = 100) -> StorageRecords:
+    query = {
+        "query": {
+            "terms": {
+                "profile.ids": profile_ids
+            }
+        },
+        "size": limit,
+        "sort": [
+            {
+                "metadata.time.insert": {"order": "desc"}
+            }
+        ]
+    }
+    print(1, query)
+    return await storage_manager("event").query(query)
+
+
 async def aggregate_events_by_type_and_source() -> StorageRecords:
     return await storage_manager("event").query({
         "query": {

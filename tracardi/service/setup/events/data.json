@@ -49,6 +49,7 @@
       },
       "identifier": {
         "id": "string",
+        "pk": "string",
         "token": "string",
         "passport": "string",
         "credit_card": "string",
@@ -148,6 +149,7 @@
       "data.pii.attributes.weight":       "properties.pii.attributes.weight",
       "data.pii.attributes.shoe_number":  "properties.pii.attributes.shoe_number",
       "data.identifier.id":               "properties.identifier.id",
+      "data.identifier.pk":               "properties.identifier.pk",
       "data.identifier.token":            "properties.identifier.token",
       "data.identifier.passport":         "properties.identifier.passport",
       "data.identifier.credit_card":      "properties.identifier.credit_card",
@@ -258,6 +260,7 @@
         "equal"
       ],
       "data.identifier.id":           ["data.identifier.id", "equal"],
+      "data.identifier.pk":           ["data.identifier.pk", "equal"],
       "data.identifier.token":        ["data.identifier.token", "equal"],
       "data.identifier.passport":     ["data.identifier.passport", "equal"],
       "data.identifier.credit_card":  ["data.identifier.credit_card", "equal"],

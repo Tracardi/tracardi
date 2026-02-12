@@ -13,8 +13,8 @@ async def profile_count_in_db(query: dict = None) -> dict:
     return await profile_db.count(query)
 
 
-async def load_profile_by_primary_ids(profile_id_batch, batch):
-    return await profile_db.load_by_primary_ids(profile_id_batch, size=batch)
+async def load_profile_by_profile_ids(profile_id_batch, batch):
+    return await profile_db.load_by_profile_ids(profile_id_batch, size=batch)
 
 
 async def load_modified_top_profiles(size):
