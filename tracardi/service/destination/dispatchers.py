@@ -27,12 +27,14 @@ async def yield_event_destination_work_package(flat_events: List[FlatEvent],
 
         try:
             # Reads from cache
+            source_id = flat_event.get('source.id', '')
             destinations: List[Destination] = await load_event_destinations(
                 flat_event.type,
-                flat_event.get('source.id')
+                source_id
             )
 
             if not destinations:
+                logger.debug(f"No destinations for event \"{flat_event.type}\" and source \"{source_id}\".")
                 continue
 
             dot.set_storage("event", flat_event)
