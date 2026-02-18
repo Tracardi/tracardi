@@ -180,5 +180,16 @@
     },
     "tags": ["event:operational"],
     "state": "consideration"
+  },
+  {
+    "name": "Merged",
+    "description": "Profile merging.",
+    "explain": "This is internal system event that happens when two profiles are merged",
+    "id": "merged",
+    "properties": {},
+    "copy": {},
+    "profile": {},
+    "tags": ["event:operational"],
+    "state": "retention"
   }
 ]
