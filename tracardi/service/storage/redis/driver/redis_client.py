@@ -15,8 +15,6 @@ logger = get_logger(__name__)
 
 class RedisClient(metaclass=Singleton):
     def __init__(self):
-        uri = redis_config.get_redis_with_password()
-        logger.debug(f"Connecting redis via pool at {uri}")
         self.client = redis.Redis(connection_pool=get_redis_connection_pool(redis_config))
         logger.info(f"Redis at {redis_config.redis_host} connected.")
 
@@ -117,6 +115,7 @@ def wait_for_redis_connection():
 
             _redis = RedisClient()
             if _redis.ping():
+                logger.info(f"Redis connected. Ping response: OK")
                 break
 
         except redis.exceptions.ConnectionError as e:
