@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 class RedisClient(metaclass=Singleton):
     def __init__(self):
         self.client = redis.Redis(connection_pool=get_redis_connection_pool(redis_config))
-        logger.info(f"Redis at {redis_config.redis_host} connected.")
+        logger.info(f"Redis at {redis_config.host} connected.")
 
     @staticmethod
     def get_tenant_prefix(name):

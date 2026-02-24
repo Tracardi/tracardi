@@ -1,8 +1,9 @@
 from random import uniform
-
+import redis
 import logging
 import os
 from hashlib import md5
+from urllib.parse import urlunparse, quote
 
 import yaml
 
@@ -47,6 +48,7 @@ class MemoryCacheConfig:
 
         logger.info(f"EVENT_TO_PROFILE_COPY_CACHE_TTL={self.event_to_profile_coping_ttl}")
         logger.info(f"SOURCE_CACHE_TTL={self.source_ttl}")
+
 
 class MysqlConfig:
 
@@ -154,7 +156,8 @@ class ElasticConfig:
         self.http_auth_password = self.env.get('ELASTIC_HTTP_AUTH_PASSWORD', None)
         self.scheme = self.env.get('ELASTIC_SCHEME', 'http')
         self.query_timeout = get_env_as_int('ELASTIC_QUERY_TIMEOUT', 12)
-        self.logging_level = _get_logging_level(env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env else logging.ERROR
+        self.logging_level = _get_logging_level(
+            env['ELASTIC_LOGGING_LEVEL']) if 'ELASTIC_LOGGING_LEVEL' in env else logging.ERROR
 
         if self.unset_credentials:
             self._unset_credentials()
@@ -184,36 +187,74 @@ class RedisConfig:
 
     def __init__(self, env):
         self.env = env
-        self.host = env.get('REDIS_HOST', 'localhost')
+        self.host = env.get('REDIS_HOST', 'redis://localhost')
         self.port = get_env_as_int('REDIS_PORT', 6379)
-        self.redis_host = env.get('REDIS_HOST', 'redis://localhost:6379')
-        self.redis_password = env.get('REDIS_PASSWORD', None)
+        self.database = get_env_as_int('REDIS_DATABASE', 0)
+        self.password = env.get('REDIS_PASSWORD', None)
+        self.user = env.get('REDIS_USERNAME', None)
 
-        if self.host.startswith("redis://"):
-            self.host = self.host[8:]
+        connection = redis.from_url(self.host)
+        c = connection.connection_pool.connection_kwargs
 
-        if self.host.startswith("rediss://"):
-            self.host = self.host[9:]
+        self.redis_protocol = 'rediss' if self.host.startswith('rediss') else 'redis'
+        self.redis_user = c['username'] if 'username' in c else self.user
+        self.redis_password = c['password'] if 'password' in c else self.password
+        self.redis_host = c['host'] if 'host' in c else 'localhost:6379'
+        self.redis_port = c['port'] if 'port' in c else self.port
+        self.redis_db = c['db'] if 'db' in c else self.database
 
-        if ":" in self.host:
-            self.host = self.host.split(":")[0]
+    def recreate_redis_uri(self, database=None):
+        if self.redis_user and self.redis_password:
+            host = f"{self.redis_protocol}://{self.redis_user}:{self.redis_password}@{self.redis_host}"
+        elif self.redis_password:
+            host = f"{self.redis_protocol}://:{self.redis_password}@{self.redis_host}"
+        else:
+            host = f"{self.redis_protocol}://{self.redis_host}"
 
-    def get_redis_with_password(self):
-        if self.redis_password:
-            return self.get_redis_uri(self.redis_host, password=self.redis_password)
-        return self.get_redis_uri(self.redis_host)
-
-    @staticmethod
-    def get_redis_uri(host, user=None, password=None, protocol="redis", database="0"):
-        if not host.startswith('redis://'):
-            host = f"{protocol}://{host}"
-
-        if user and password:
-            host = f"{protocol}://{user}:{password}@{host[8:]}/{database}"
-        elif password:
-            host = f"{protocol}://:{password}@{host[8:]}/{database}"
+        if database:
+            host = f"{host}/{database}"
 
         return host
+
+    @staticmethod
+    def get_redis_uri(
+            host: str,
+            user: str | None = None,
+            password: str | None = None,
+            protocol: str = "redis",
+            database: str = "0",
+            port: int = 6379,
+    ):
+        # Remove scheme if already provided
+        if "://" in host:
+            host = host.split("://", 1)[1]
+
+        # Remove path if present
+        host = host.split("/", 1)[0]
+
+        # Build auth part
+        auth = ""
+        if user:
+            auth = quote(user)
+        if password:
+            auth = f"{auth}:{quote(password)}" if user else f":{quote(password)}"
+        if auth:
+            auth += "@"
+
+        netloc = f"{auth}{host}"
+
+        # Only add port if not already present
+        if ":" not in host:
+            netloc = f"{netloc}:{port}"
+
+        return urlunparse((
+            protocol,
+            netloc,
+            f"/{database}",
+            "",
+            "",
+            "",
+        ))
 
 
 redis_config = RedisConfig(os.environ)

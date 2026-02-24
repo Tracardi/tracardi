@@ -7,7 +7,7 @@ logger = get_logger(__name__)
 
 
 def get_redis_connection_pool(redis_config: RedisConfig) -> ConnectionPool:
-    uri = redis_config.get_redis_with_password()
+    uri = redis_config.recreate_redis_uri()
     logger.info(f"Connecting redis via pool at {uri}")
     return ConnectionPool.from_url(
         uri,
