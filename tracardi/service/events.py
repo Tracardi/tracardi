@@ -222,10 +222,8 @@ def copy_default_event_to_profile(copy_schema: dict,
                                     f"at profile@{profile_path}")
                     elif operation == 'update':
                         # Updates checking if there are ot conflicts
-
-                        profile_data_as_dict = dict(flat_profile[profile_path]) if flat_profile[
-                                                                                       profile_path] is not None else {}
-                        event_data_as_dict = dict(flat_event[event_path]) if flat_event[event_path] is not None else {}
+                        profile_data_as_dict = dict(flat_profile[profile_path]) if flat_profile.get(profile_path, None) is not None else {}
+                        event_data_as_dict = dict(flat_event[event_path]) if flat_event.get(event_path, None) is not None else {}
 
                         updated_dict, conflicts = update_dict_with_conflicts(profile_data_as_dict, event_data_as_dict,
                                                                              append_lists=False)
