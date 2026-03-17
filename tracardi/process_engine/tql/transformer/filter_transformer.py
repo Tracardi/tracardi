@@ -205,8 +205,8 @@ class FilterTransformer(TransformerNamespace):
     def op_empty(self, args):
         field = args[0]  # type: ElasticFieldCondition
         return {
-            "term": {
-                field.field: ""
+            "regexp": {
+                field.field: "\\s*"
             }
         }
 
