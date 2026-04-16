@@ -115,7 +115,7 @@ class TableService(metaclass=Singleton):
 
         context = get_context()
 
-        where = where_with_context(table, server_context=context.production, *and_clauses)
+        where = where_with_context(table, context.production, *and_clauses)
         result = await self._count(table, where=where)
 
         return result.one_or_none()[0]
