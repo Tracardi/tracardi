@@ -23,8 +23,14 @@ class FieldMergingStrategy(BaseModel):
 
 
 def validate_list_values(values):
+    # `None` is a legitimate value inside Tracardi's own `metadata.fields`
+    # tracker, which stores `[timestamp, value]` tuples. A versioned field
+    # that was cleared (e.g. `traits.lastFcmToken` on logout, or a pre-KYC
+    # `traits.kycProvider`) is represented as `[ts, None]`. Rejecting it
+    # here bricks profile merging for every profile that ever had a
+    # null-valued versioned field.
     for value in values:
-        if not isinstance(value, (str, int, float, bool)):
+        if value is not None and not isinstance(value, (str, int, float, bool)):
             raise ValueError("Invalid value in list `{}`".format(values))
 
 
