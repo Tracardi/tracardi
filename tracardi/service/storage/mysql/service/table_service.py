@@ -120,6 +120,29 @@ class TableService(metaclass=Singleton):
 
         return result.one_or_none()[0]
 
+    async def _load_exact_name_match_in_deployment_mode(self, table,
+                                                        search: Optional[str] = None,
+                                                        limit: int = None,
+                                                        offset: int = None,
+                                                        columns=None,
+                                                        order_by=None
+                                                        ) -> SelectResult:
+        and_clauses = []
+        if search:
+            and_clauses.append(table.name == search)
+
+        where = where_tenant_and_mode_context(table, *and_clauses)
+
+        if order_by is None:
+            order_by = table.name
+
+        return await self._select_in_deployment_mode(table,
+                                                     where=where,
+                                                     order_by=order_by,
+                                                     columns=columns,
+                                                     limit=limit,
+                                                     offset=offset)
+
     async def _load_all_in_deployment_mode(self, table,
                                            search: Optional[str] = None,
                                            limit: int = None,
