@@ -75,6 +75,7 @@ async def load_by_key_value_pairs(index, key_value_pairs: List[tuple], sort_by: 
 
 async def update_profile_ids(index: str, old_profile_id: str, merged_profile_id, profile_pid=None):
 
+    # If PID is set always update
     if profile_pid is not None:
         query = {
             "script": {
@@ -96,7 +97,8 @@ async def update_profile_ids(index: str, old_profile_id: str, merged_profile_id,
                 }
             }
         }
-    else:
+    # Update only if id changed
+    elif old_profile_id != merged_profile_id:
         query = {
             "script": {
                 "source": "ctx._source.profile.id = params.merged_profile_id",
