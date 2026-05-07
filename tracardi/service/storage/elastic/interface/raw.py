@@ -97,6 +97,8 @@ async def update_profile_ids(index: str, old_profile_id: str, merged_profile_id,
                 }
             }
         }
+
+        return await storage_manager(index=index).update_by_query(query=query)
     # Update only if id changed
     elif old_profile_id != merged_profile_id:
         query = {
@@ -114,7 +116,7 @@ async def update_profile_ids(index: str, old_profile_id: str, merged_profile_id,
             }
         }
 
-    return await storage_manager(index=index).update_by_query(query=query)
+        return await storage_manager(index=index).update_by_query(query=query)
 
 
 async def count_by_query(index: str, query: str, time_span: int) -> StorageRecords:
