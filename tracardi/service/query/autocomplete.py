@@ -48,7 +48,13 @@ class Values:
 
     @staticmethod
     def _filter(current_value, fields):
-        return [field for field in fields if current_value in field and current_value != field]
+        if len(fields) > 0:
+            if isinstance(fields[0], (int, float)):
+                return [field for field in fields if current_value != field]
+            else:
+                # Filters fields
+                return [field for field in fields if current_value != field and current_value in field]
+        return []
 
     @staticmethod
     async def _quote_description(value):
