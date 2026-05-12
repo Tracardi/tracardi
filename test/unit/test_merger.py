@@ -1,8 +1,11 @@
 from datetime import datetime, timedelta
 
+import pytest
+
 from tracardi.domain.consent_revoke import ConsentRevoke
 from tracardi.service.merging.merger import (merge as dict_merge, list_merge, get_conflicted_values,
-                                             get_added_values, get_changed_values, MergingStrategy)
+                                             get_added_values, get_changed_values, MergingStrategy,
+                                             validate_list_values)
 
 
 def test_merger():
@@ -268,3 +271,37 @@ def test_override_strings():
                                         no_single_value_list=True,
                                         default_string_strategy="override"))
     assert result == {"d": "a"}
+
+
+def test_validate_list_values_accepts_scalars():
+    # Plain scalars are accepted and the function returns None on success.
+    assert validate_list_values(["a", 1, 2.5, True]) is None
+
+
+def test_validate_list_values_accepts_none():
+    # `None` is a legitimate value inside `metadata.fields` `[ts, value]`
+    # tuples when a versioned field was cleared (e.g. `traits.lastFcmToken`
+    # on logout). Rejecting it here breaks profile merging for every
+    # profile that ever had a null-valued versioned field.
+    assert validate_list_values([1776420649.007557, None]) is None
+    assert validate_list_values([None, None]) is None
+
+
+def test_validate_list_values_rejects_non_scalars():
+    # Dicts and nested lists still raise.
+    with pytest.raises(ValueError):
+        validate_list_values([1, {"a": 1}])
+    with pytest.raises(ValueError):
+        validate_list_values([1, ["nested"]])
+
+
+def test_merge_handles_metadata_fields_null_tuple():
+    # End-to-end: a `metadata.fields`-shaped `[timestamp, None]` tuple must
+    # survive dict_merge without raising. Before the fix, this path reached
+    # `validate_list_values` and raised ValueError, which bricked profile
+    # merging on any previously-cleared versioned field.
+    dict_1 = {"metadata": {"fields": {"traits.lastFcmToken": [1776420649.007557, None]}}}
+    dict_2 = {"metadata": {"fields": {"traits.lastFcmToken": [1776420700.0, "new-token"]}}}
+    # Should not raise.
+    result = dict_merge(dict_1, [dict_2], MergingStrategy())
+    assert "traits.lastFcmToken" in result["metadata"]["fields"]
