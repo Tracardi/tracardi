@@ -257,9 +257,58 @@ class RedisConfig:
         ))
 
 
+class LokiConfig:
+    """Configuration for Grafana Loki logging integration"""
+    
+    def __init__(self, env):
+        self.env = env
+        self.enabled = get_env_as_bool('LOKI_ENABLED', 'no')
+        self.url = env.get('LOKI_URL', None)
+        self.username = env.get('LOKI_USERNAME', None)
+        self.password = env.get('LOKI_PASSWORD', None)
+        self.labels = env.get('LOKI_LABELS', 'service=tracardi,environment=production')
+        self.version = env.get('LOKI_VERSION', '1')  # Loki API version
+        self.timeout = get_env_as_int('LOKI_TIMEOUT', 10)
+        self.batch_size = get_env_as_int('LOKI_BATCH_SIZE', 100)
+        self.batch_interval = get_env_as_int('LOKI_BATCH_INTERVAL', 5)
+        
+        # Parse labels into dict
+        self.labels_dict = {}
+        if self.labels:
+            for label in self.labels.split(','):
+                if '=' in label:
+                    key, value = label.split('=', 1)
+                    self.labels_dict[key.strip()] = value.strip()
+        
+        # Validate configuration if enabled
+        if self.enabled:
+            if not self.url:
+                logger.warning(
+                    'LOKI_ENABLED is set to "yes" but LOKI_URL is not configured. '
+                    'Loki logging will be disabled.',
+                    extra=ExtraInfo.build(object=self, origin="configuration", error_number="L0001")
+                )
+                self.enabled = False
+            elif not self.url.startswith(('http://', 'https://')):
+                logger.warning(
+                    f'LOKI_URL must start with http:// or https://, got: {self.url}. '
+                    'Loki logging will be disabled.',
+                    extra=ExtraInfo.build(object=self, origin="configuration", error_number="L0002")
+                )
+                self.enabled = False
+            elif not self.labels_dict:
+                logger.warning(
+                    'LOKI_LABELS is empty or invalid. At least one label is required. '
+                    'Loki logging will be disabled.',
+                    extra=ExtraInfo.build(object=self, origin="configuration", error_number="L0003")
+                )
+                self.enabled = False
+
+
 redis_config = RedisConfig(os.environ)
 elastic = ElasticConfig(os.environ)
 memory_cache = MemoryCacheConfig()
+loki = LokiConfig(os.environ)
 
 
 class TracardiConfig(metaclass=Singleton):

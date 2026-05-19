@@ -65,6 +65,9 @@ geopy
 mysql-connector-python==8.0.29
 requests
 
+# Grafana Loki integration (optional)
+# Used when LOKI_ENABLED=yes environment variable is set
+
 # Com requirements
 huey
 tabulate
