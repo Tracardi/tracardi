@@ -119,6 +119,10 @@ There are other methods of installation available as well. These are described i
 * Api documentation is always available after installation at http://127.0.0.1:8686/docs.
 * Tracardi also has a built-in documentation into the system.
 
+### 📊 Monitoring & Observability
+
+* **[Prometheus Metrics](PROMETHEUS_METRICS.md)** - Optional metrics collection for monitoring Tracardi in production
+
 ## 👇 Call for Contributors
 
 Have you found a bug :bug: ? Or maybe you have a nice feature :sparkles: to contribute? The

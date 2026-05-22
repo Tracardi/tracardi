@@ -1,0 +1,51 @@
+# Prometheus configuration for scraping Tracardi metrics
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Load rules once and periodically evaluate them
+rule_files:
+  # - "alerts.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Tracardi API metrics
+  - job_name: 'tracardi'
+    static_configs:
+      - targets: ['tracardi:8686']
+    metrics_path: /metrics
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Docker deployment
+  - job_name: 'tracardi-docker'
+    static_configs:
+      - targets: ['localhost:8686']
+    metrics_path: /metrics
+
+  # Kubernetes deployment
+  - job_name: 'kubernetes-tracardi'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        action: keep
+        regex: tracardi
+      - source_labels: [__meta_kubernetes_pod_ip]
+        action: replace
+        target_label: __address__
+        regex: (.+)
+        replacement: ${1}:8686
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: instance
