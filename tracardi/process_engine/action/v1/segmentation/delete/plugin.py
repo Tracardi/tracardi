@@ -1,8 +1,12 @@
+from tracardi.process_engine.action.v1.segmentation.service.profile_segmentation_services import remove_segment_from_profile
 from tracardi.service.utils.date import now_in_utc
+
+from typing import List, Union
 
 from pydantic import field_validator
 
 from tracardi.domain.profile import Profile
+from tracardi.service.notation.dict_traverser import DictTraverser
 from tracardi.service.plugin.domain.config import PluginConfig
 
 from tracardi.service.plugin.domain.register import Plugin, Spec, MetaData, Documentation, PortDoc, Form, FormGroup, \
@@ -12,12 +16,12 @@ from tracardi.service.plugin.domain.result import Result
 
 
 class Configuration(PluginConfig):
-    segment: str
+    segment: Union[str, List[str]]
 
     @field_validator("segment")
     @classmethod
     def is_not_empty(cls, value):
-        if value == "":
+        if not value:
             raise ValueError("Segment cannot be empty")
         return value
 
@@ -36,11 +40,22 @@ class DeleteSegmentAction(ActionRunner):
         if isinstance(self.profile, Profile):
             dot = self._get_dot_accessor(payload)
             profile = Profile(**dot.profile)
-            if self.config.segment in self.profile.segments:
-                profile.metadata.time.segmentation = now_in_utc()
+            
+            profile.metadata.time.segmentation = now_in_utc()
 
-                profile.segments = list(set(profile.segments))
-                profile.segments.remove(self.config.segment)
+            try:
+                if isinstance(self.config.segment, (list, str)):
+                    converter = DictTraverser(dot, include_none=False)
+                    segments = converter.reshape(self.config.segment)
+                    remove_segment_from_profile(profile, segments)
+                else:
+                    return Result(value={
+                        "message": "Not acceptable segmentation type. "
+                                    "Allowed type: string or list of strings"},
+                        port="error")
+            except KeyError as e:
+                return Result(value={"message": str(e)}, port="error")
+
             self.profile.replace(profile)
         else:
             if self.event.metadata.profile_less is True:
@@ -58,8 +73,8 @@ def register() -> Plugin:
             module=__name__,
             className='DeleteSegmentAction',
             inputs=["payload"],
-            outputs=["payload"],
-            version="0.8.1",
+            outputs=["payload", "error"],
+            version="0.9.0",
             author="Risto Kowaczewski",
             manual="segmentation/delete_segment_action",
             init={
@@ -73,7 +88,7 @@ def register() -> Plugin:
                             id="segment",
                             name="Segment name",
                             description="Please type segment name.",
-                            component=FormComponent(type="text", props={"label": "Segment name"})
+                            component=FormComponent(type="dotPath", props={"label": "Segment name"})
                         )
                     ]
                 )]
