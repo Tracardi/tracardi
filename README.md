@@ -118,6 +118,7 @@ There are other methods of installation available as well. These are described i
 * System documentation is available at: [http://manual.tracardi.com](http://manual.tracardi.com).
 * Api documentation is always available after installation at http://127.0.0.1:8686/docs.
 * Tracardi also has a built-in documentation into the system.
+* **NEW**: [Kubernetes Health Probes & Graceful Shutdown](K8S_HEALTH_PROBES.md) - Production-ready health checks
 
 ## 👇 Call for Contributors
 
