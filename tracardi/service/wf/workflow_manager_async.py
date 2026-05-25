@@ -199,7 +199,10 @@ class WorkflowManagerAsync:
                 # TODO Does profile need rules to merge?
                 # Profile merge
                 try:
-                    if self.profile is not None and self.profile.needs_merging():
+                    # Skip internal identity resolution if external resolution was performed
+                    skip_internal_merge = self.tracker_payload.options.get('externalIdentityResolution', False)
+                    
+                    if self.profile is not None and self.profile.needs_merging() and not skip_internal_merge:
                         # Profile can be None if profile_less event is processed
                         self.profile = await self.merge_profile(self.profile)
 
