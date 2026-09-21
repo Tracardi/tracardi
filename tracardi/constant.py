@@ -1,0 +1,1 @@
+PRODUCTION_INDEX_PREFIX = 'prod-'
