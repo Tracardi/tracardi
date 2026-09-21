@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Generator, Any, Tuple
 
 from tracardi.config import tracardi, elastic
+from tracardi.constant import PRODUCTION_INDEX_PREFIX
 from tracardi.context import get_context
 from tracardi.service.singleton import Singleton
 
@@ -77,7 +78,9 @@ class Index:
 
     @staticmethod
     def _prefix_with_production(index):
-        return f"prod-{index}"
+        if PRODUCTION_INDEX_PREFIX:
+            return f"{PRODUCTION_INDEX_PREFIX}{index}"
+        return index
 
     def _prod_or_static(self, index):
         if self.static:

@@ -1,3 +1,4 @@
+from tracardi.constant import PRODUCTION_INDEX_PREFIX
 from tracardi.context import Context, ServerContext, get_context
 from tracardi.config import tracardi
 
@@ -142,8 +143,8 @@ with ServerContext(Context(production=False, tenant=namespace)):
                 write_index = index.get_write_index()
                 alias = index.get_index_alias()
 
-                assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}"
-                assert alias == f"prod-{tracardi.version.db_version}.{tenant}.index-name"
+                assert write_index == f"{PRODUCTION_INDEX_PREFIX}{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}"
+                assert alias == f"{PRODUCTION_INDEX_PREFIX}{tracardi.version.db_version}.{tenant}.index-name"
 
 
     def test_static_index():
@@ -169,8 +170,8 @@ with ServerContext(Context(production=False, tenant=namespace)):
                 write_index = index.get_write_index()
                 alias = index.get_index_alias()
 
-                assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tenant}.index-name"
-                assert alias == f"prod-{tracardi.version.db_version}.{tenant}.index-name"
+                assert write_index == f"{PRODUCTION_INDEX_PREFIX}{tracardi.version.get_version_prefix()}.{tenant}.index-name"
+                assert alias == f"{PRODUCTION_INDEX_PREFIX}{tracardi.version.db_version}.{tenant}.index-name"
 
 
     def test_single_storage_index():
@@ -191,7 +192,7 @@ with ServerContext(Context(production=False, tenant=namespace)):
                 index.static = False
                 write_index = index.get_current_multi_storage_index()
                 date = datetime.now()
-                assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}"
+                assert write_index == f"{PRODUCTION_INDEX_PREFIX}{tracardi.version.get_version_prefix()}.{tenant}.index-name-{date.year}-{date.month}"
 
 
     def test_multi_storage_alias():
@@ -202,7 +203,7 @@ with ServerContext(Context(production=False, tenant=namespace)):
 
             with ServerContext(Context(production=True, user=admin, tenant=namespace)):
                 write_index = index.get_multi_storage_alias()
-                assert write_index == f"prod-{tracardi.version.db_version}.{tenant}.index-name"
+                assert write_index == f"{PRODUCTION_INDEX_PREFIX}{tracardi.version.db_version}.{tenant}.index-name"
 
 
     def test_template():
@@ -219,7 +220,7 @@ with ServerContext(Context(production=False, tenant=namespace)):
             with ServerContext(Context(production=True, user=admin, tenant=namespace)):
                 index = Index(multi_index=True, static=False, index="index-name", mapping=mapping_mock)
                 template = index.get_prefixed_template_name()
-                assert template == f"prod-template.{tracardi.version.get_version_prefix()}.{tenant}.index-name"
+                assert template == f"{PRODUCTION_INDEX_PREFIX}template.{tracardi.version.get_version_prefix()}.{tenant}.index-name"
 
             with pytest.raises(AssertionError):
                 index = Index(multi_index=False, static=False, index="index-name", mapping=mapping_mock)
@@ -242,7 +243,7 @@ with ServerContext(Context(production=False, tenant=namespace)):
                 index = Index(multi_index=True, static=False, index="index-name", mapping=mapping_mock)
                 pattern = index.get_templated_index_pattern()
 
-        assert pattern == f"prod-{version}.{tenant}.index-name-*-*"
+        assert pattern == f"{PRODUCTION_INDEX_PREFIX}{version}.{tenant}.index-name-*-*"
 
 
     def test_prod_static():
@@ -256,7 +257,7 @@ with ServerContext(Context(production=False, tenant=namespace)):
 
                 index.static = False
                 write_index = index.get_write_index()
-                assert write_index == f"prod-{tracardi.version.get_version_prefix()}.{tenant}.index-name"
+                assert write_index == f"{PRODUCTION_INDEX_PREFIX}{tracardi.version.get_version_prefix()}.{tenant}.index-name"
 
     def test_templated_index_partitioning():
 

@@ -1,4 +1,5 @@
 from tracardi.config import tracardi
+from tracardi.constant import PRODUCTION_INDEX_PREFIX
 from tracardi.context import get_context, Context
 from tracardi.domain import ExtraInfo
 from tracardi.domain.migration_schema import MigrationSchema, CopyIndex
@@ -86,15 +87,15 @@ class MigrationManager:
     @staticmethod
     def _get_single_indices(version: str, tenant: str, index: str, production: bool) -> str:
         index = f"{version}.{tenant}.{index}"
-        if production:
-            index = f"prod-{index}"
+        if production and PRODUCTION_INDEX_PREFIX:
+            index = f"{PRODUCTION_INDEX_PREFIX}{index}"
         return index
 
     async def _get_partitioned_indices(self, template_name, production: bool):
         template = fr"{self.from_version}.{self.from_tenant}.{template_name}-[0-9]{{4}}-([0-9]{{1,2}}|q[1-4]|year)"
 
-        if production:
-            template = f"prod-{template}"
+        if production and PRODUCTION_INDEX_PREFIX:
+            template = f"{PRODUCTION_INDEX_PREFIX}{template}"
 
         es = ElasticClient.instance()
         return [index for index in await es.list_indices() if re.fullmatch(template, index)]
@@ -176,8 +177,9 @@ class MigrationManager:
                                                         to_index,
                                                         production=schema.copy_index.production)
 
-                    if context.production:
-                        to_index = f"prod-{to_index}"
+                    if context.production and PRODUCTION_INDEX_PREFIX:
+                            to_index = f"{PRODUCTION_INDEX_PREFIX}{to_index}"
+
 
                     set_of_schemas_to_migrate.append(MigrationSchema(
                         id=sha1(f"{from_index}{to_index}".encode("utf-8")).hexdigest(),
