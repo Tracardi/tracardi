@@ -223,11 +223,6 @@ class Resource(metaclass=Singleton):
                             partitioning=tracardi.entity_partitioning,
                             index="tracardi-entity",
                             mapping="mappings/entity-index.json"),
-            "log": Index(staging=False,
-                         multi_index=True,
-                         partitioning=tracardi.log_partitioning,
-                         index='tracardi-log',
-                         mapping="mappings/log-index.json"),
             "session": Index(staging=False,
                              multi_index=True,
                              partitioning=tracardi.session_partitioning,
@@ -247,6 +242,14 @@ class Resource(metaclass=Singleton):
                 partitioning=tracardi.field_change_log_partitioning,
                 index="tracardi-field-update-log",
                 mapping="mappings/field-update-log-index.json")
+
+        if tracardi.save_logs:
+            self.resources["log"] = Index(
+                staging=False,
+                multi_index=True,
+                partitioning=tracardi.log_partitioning,
+                index='tracardi-log',
+                mapping="mappings/log-index.json")
 
     def list_aliases(self) -> set:
         return {index.get_index_alias() for name, index in self.resources.items()}
