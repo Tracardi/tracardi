@@ -238,12 +238,15 @@ class Resource(metaclass=Singleton):
                              partitioning=tracardi.profile_partitioning,
                              index="tracardi-profile",
                              mapping="mappings/profile-index.json"),
-            "field-update-log": Index(staging=False,
-                                      multi_index=True,
-                                      partitioning=tracardi.field_change_log_partitioning,
-                                      index="tracardi-field-update-log",
-                                      mapping="mappings/field-update-log-index.json"),
         }
+
+        if tracardi.enable_field_update_log:
+            self.resources["field-update-log"] = Index(
+                staging=False,
+                multi_index=True,
+                partitioning=tracardi.field_change_log_partitioning,
+                index="tracardi-field-update-log",
+                mapping="mappings/field-update-log-index.json")
 
     def list_aliases(self) -> set:
         return {index.get_index_alias() for name, index in self.resources.items()}
