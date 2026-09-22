@@ -134,6 +134,8 @@ class InstallationStatus(metaclass=Singleton):
 
     async def has_logs_index(self, context: Context):
         indices = Resource()
+        if 'log' not in indices:
+            return False
         template = indices.get_template_name('log')
 
         tenant = context.tenant
