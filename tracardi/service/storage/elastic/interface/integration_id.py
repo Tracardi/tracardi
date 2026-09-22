@@ -1,5 +1,6 @@
 from typing import Optional, List
 
+from tracardi.config import tracardi
 from tracardi.domain.entity import Entity
 from tracardi.domain.entity_record import EntityRecord, EntityRecordMetadata, EntityRecordTime
 from tracardi.domain.remote_system_integration_id import RemoteSystemIntegrationId
@@ -14,16 +15,22 @@ async def _load_by_values(field_value_pairs: List[tuple]) -> StorageRecords:
 
 
 async def commit_integration_ids():
+    if not tracardi.enable_entities:
+        return
     await entity_db.refresh()
 
 
 async def load_integration_id(profile_id, system_name) -> List[RemoteSystemIntegrationId]:
+    if not tracardi.enable_entities:
+        return []
     field_value_pairs = [('type', system_name), ('profile.id', profile_id)]
     result = await _load_by_values(field_value_pairs)
     return result.to_domain_objects(RemoteSystemIntegrationId)
 
 
 async def save_integration_id(profile_id, system_name, remote_id, data: Optional[dict] = None):
+    if not tracardi.enable_entities:
+        return None
     if data is None:
         data = {}
 

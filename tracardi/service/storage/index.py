@@ -223,11 +223,6 @@ class Resource(metaclass=Singleton):
                            partitioning=tracardi.event_partitioning,
                            index="tracardi-event",
                            mapping="mappings/event-index.json"),
-            "entity": Index(staging=False,
-                            multi_index=True,
-                            partitioning=tracardi.entity_partitioning,
-                            index="tracardi-entity",
-                            mapping="mappings/entity-index.json"),
             "session": Index(staging=False,
                              multi_index=True,
                              partitioning=tracardi.session_partitioning,
@@ -239,6 +234,14 @@ class Resource(metaclass=Singleton):
                              index="tracardi-profile",
                              mapping="mappings/profile-index.json"),
         }
+
+        if tracardi.enable_entities:
+            self.resources["entity"] = Index(
+                staging=False,
+                multi_index=True,
+                partitioning=tracardi.entity_partitioning,
+                index="tracardi-entity",
+                mapping="mappings/entity-index.json")
 
         if tracardi.enable_field_update_log:
             self.resources["field-update-log"] = Index(

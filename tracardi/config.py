@@ -271,6 +271,7 @@ class TracardiConfig(metaclass=Singleton):
         self.enable_prometheus = get_env_as_bool('ENABLE_PROMETHEUS', 'yes')
         self.track_debug = get_env_as_bool('TRACK_DEBUG', 'no')
         self.save_logs = get_env_as_bool('SAVE_LOGS', 'no')
+        self.enable_entities = get_env_as_bool('ENABLE_ENTITIES', 'yes')
         self.destinations_on_separate_queue = get_env_as_bool('DESTINATIONS_ON_SEPARATE_QUEUE', 'no')
         self.activations_on_separate_queue = get_env_as_bool('ACTIVATIONS_ON_SEPARATE_QUEUE', 'no')
         self.destinations_without_queue = get_env_as_bool('DESTINATIONS_WITHOUT_QUEUE', 'no')
