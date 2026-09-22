@@ -35,7 +35,7 @@
               "ignore_above": 32
             },
             "data": {
-              "type": "flattened"
+              "type": "%%FLATTENED%%"
             }
           }
         },

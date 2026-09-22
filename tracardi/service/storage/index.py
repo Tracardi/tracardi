@@ -111,7 +111,9 @@ class Index:
 
     def prepare_mappings(self, mapping, index) -> dict:
 
+
         json_map = mapping.replace("%%PREFIX%%", tracardi.version.name)
+        json_map = json_map.replace("%%FLATTENED%%", elastic.flattened_type)
         json_map = json_map.replace("%%ALIAS%%", self.get_index_alias())
         json_map = json_map.replace("%%VERSION%%", self._version_prefix)
         json_map = json_map.replace("%%REPLICAS%%", elastic.replicas)

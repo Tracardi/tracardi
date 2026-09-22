@@ -63,7 +63,7 @@
           "type": "keyword"
         },
         "properties": {
-          "type": "flattened"
+          "type": "%%FLATTENED%%"
         },
         "traits": {
           "type": "object",

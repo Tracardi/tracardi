@@ -138,6 +138,7 @@ class ElasticConfig:
         self.env = env
         self.unset_credentials = get_env_as_bool('UNSET_CREDENTIALS', "off")
         self.replicas = env.get('ELASTIC_INDEX_REPLICAS', "1")
+        self.flattened_type = env.get('ELASTIC_FLATTEN_FIELD_TYPE', "flattened")
         self.shards = env.get('ELASTIC_INDEX_SHARDS', "3")
         self.conf_shards = env.get('ELASTIC_CONF_INDEX_SHARDS', "1")
         self.sniff_on_start = env.get('ELASTIC_SNIFF_ON_START', None)

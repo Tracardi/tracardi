@@ -59,7 +59,7 @@
               "type": "keyword"
             },
             "aux": {
-              "type": "flattened"
+              "type": "%%FLATTENED%%"
             }
           }
         },
@@ -210,17 +210,17 @@
         },
 
         "context": {
-          "type": "flattened"
+          "type": "%%FLATTENED%%"
         },
         "properties": {
-          "type": "flattened"
+          "type": "%%FLATTENED%%"
         },
         "traits": {
            "dynamic": "true",
            "type": "object"
         },
         "aux": {
-          "type": "flattened"
+          "type": "%%FLATTENED%%"
         }
       }
     },

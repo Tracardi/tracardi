@@ -26,7 +26,7 @@
         "metadata": {
           "properties": {
             "aux": {
-              "type": "flattened"
+              "type": "%%FLATTENED%%"
             },
             "time": {
               "properties": {
@@ -342,10 +342,10 @@
           }
         },
         "aux": {
-          "type": "flattened"
+          "type": "%%FLATTENED%%"
         },
         "trash": {
-          "type": "flattened"
+          "type": "%%FLATTENED%%"
         },
         "config": {
           "dynamic": "true",
@@ -353,10 +353,10 @@
           "enabled": false
         },
         "context": {
-          "type": "flattened"
+          "type": "%%FLATTENED%%"
         },
         "properties": {
-          "type": "flattened"
+          "type": "%%FLATTENED%%"
         },
         "traits": {
           "dynamic": "true",
@@ -396,7 +396,7 @@
                       "type": "keyword"
                     },
                     "other": {
-                      "type": "flattened"
+                      "type": "%%FLATTENED%%"
                     }
                   }
                 }
@@ -556,7 +556,7 @@
                       "type": "keyword"
                     },
                     "other": {
-                      "type": "flattened"
+                      "type": "%%FLATTENED%%"
                     }
                   }
                 },
@@ -712,7 +712,7 @@
                   }
                 },
                 "aux": {
-                  "type": "flattened"
+                  "type": "%%FLATTENED%%"
                 }
               }
             },
