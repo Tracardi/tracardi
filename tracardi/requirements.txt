@@ -63,7 +63,7 @@ geopy
 
 # Worker requirements
 mysql-connector-python==8.0.29
-requests
+requests==2.33.0
 
 # Com requirements
 huey
