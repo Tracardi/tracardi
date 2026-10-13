@@ -65,6 +65,10 @@ geopy
 mysql-connector-python==8.0.29
 requests
 
+# Prometheus metrics (optional)
+# Used when PROMETHEUS_ENABLED=yes environment variable is set
+prometheus-client==0.19.0
+
 # Com requirements
 huey
 tabulate
